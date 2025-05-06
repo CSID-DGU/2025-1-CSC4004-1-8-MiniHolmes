@@ -1,0 +1,387 @@
+{
+  "_id": {
+    "$oid": "6819d246077c3a8ceb7fdc1a"
+  },
+  "id": "desk001",
+  "name": "LINNMON 린몬 / ADILS 아딜스,테이블,화이트",
+  "category": "desk",
+  "style": "modern",
+  "dimensions": {
+    "width": 100,
+    "depth": 60,
+    "height": 74
+  },
+  "colortone": "white",
+  "price": 39900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/linnmon-adils-table-white-s09246408/"
+},
+{
+  "_id": {
+    "$oid": "6819d24b077c3a8ceb7fdc1b"
+  },
+  "id": "desk002",
+  "name": "LAGKAPTEN 락캅텐 / ADILS 아딜스,책상,화이트",
+  "category": "desk",
+  "style": "modern",
+  "dimensions": {
+    "width": 120,
+    "depth": 60,
+    "height": 73
+  },
+  "colortone": "white",
+  "price": 49900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/lagkapten-adils-desk-white-s09416759/"
+},
+{
+  "_id": {
+    "$oid": "6819d258077c3a8ceb7fdc1c"
+  },
+  "id": "desk003",
+  "name": "MICKE 미케,책상,화이트",
+  "category": "desk",
+  "style": "modern",
+  "dimensions": {
+    "width": 105,
+    "depth": 50,
+    "height": 75
+  },
+  "colortone": "white",
+  "price": 49900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/micke-desk-white-80354276/#content"
+},
+{
+  "_id": {
+    "$oid": "6819d25d077c3a8ceb7fdc1d"
+  },
+  "id": "desk004",
+  "name": "LINNMON 린몬 / OLOV 올로브.책상,화이트",
+  "category": "desk",
+  "style": "modern",
+  "dimensions": {
+    "width": 100,
+    "depth": 60,
+    "height": 93
+  },
+  "colortone": "white",
+  "price": 59900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/linnmon-olov-desk-white-s99416199/"
+},
+{
+  "_id": {
+    "$oid": "6819d264077c3a8ceb7fdc1e"
+  },
+  "id": "desk005",
+  "name": "PÅHL 폴,책상,화이트",
+  "category": "desk",
+  "style": "modern",
+  "dimensions": {
+    "width": 96,
+    "depth": 58,
+    "height": 72
+  },
+  "colortone": "white",
+  "price": 69900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/pahl-desk-white-s19245106/"
+},
+{
+  "_id": {
+    "$oid": "6819d268077c3a8ceb7fdc1f"
+  },
+  "id": "desk006",
+  "name": "BRUSALI 브루살리,책상,화이트",
+  "category": "desk",
+  "style": "modern",
+  "dimensions": {
+    "width": 90,
+    "depth": 52,
+    "height": 73
+  },
+  "colortone": "white",
+  "price": 79900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/brusali-desk-white-20439764//"
+},
+{
+  "_id": {
+    "$oid": "6819d26b077c3a8ceb7fdc20"
+  },
+  "id": "desk007",
+  "name": "TORALD 토랄드,책상,화이트",
+  "category": "desk",
+  "style": "modern",
+  "dimensions": {
+    "width": 65,
+    "depth": 40,
+    "height": 75
+  },
+  "colortone": "white",
+  "price": 35000,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/torald-desk-white-70493956/"
+},
+{
+  "_id": {
+    "$oid": "6819d26f077c3a8ceb7fdc21"
+  },
+  "id": "desk008",
+  "name": "LINNMON 린몬 / ADILS 아딜스,책상,다크그레이/블랙",
+  "category": "desk",
+  "style": "modern",
+  "dimensions": {
+    "width": 100,
+    "depth": 60,
+    "height": 74
+  },
+  "colortone": "darkgray/black",
+  "price": 39900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/linnmon-adils-desk-dark-grey-black-s99416095/#content"
+},
+{
+  "_id": {
+    "$oid": "6819d272077c3a8ceb7fdc22"
+  },
+  "id": "desk009",
+  "name": "MICKE 미케,책상,블랙브라운",
+  "category": "desk",
+  "style": "modern",
+  "dimensions": {
+    "width": 73,
+    "depth": 50,
+    "height": 75
+  },
+  "colortone": "blackbrown",
+  "price": 69900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/micke-desk-black-brown-20354279/#content"
+},
+{
+  "_id": {
+    "$oid": "6819d276077c3a8ceb7fdc23"
+  },
+  "id": "desk010",
+  "name": "LINNMON 린몬 / KRILLE 크릴레,책상,다크그레이/화이트",
+  "category": "desk",
+  "style": "modern",
+  "dimensions": {
+    "width": 100,
+    "depth": 60,
+    "height": 73
+  },
+  "colortone": "darkgray/white",
+  "price": 79900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/linnmon-krille-desk-dark-grey-white-s39416121/#content"
+}]
+
+
+  // 여기까지 modern desk
+
+
+  {
+  "_id": {
+    "$oid": "6819d280077c3a8ceb7fdc25"
+  },
+  "id": "desk011",
+  "name": "LINNMON 린몬 / ADILS 아딜스,책싱,화이트스테인 참나무무늬",
+  "category": "desk",
+  "style": "natural",
+  "dimensions": {
+    "width": 100,
+    "depth": 60,
+    "height": 74
+  },
+  "colortone": "white",
+  "price": 39900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/linnmon-adils-desk-white-stained-oak-effect-white-s59416337/"
+},
+{
+  "_id": {
+    "$oid": "6819d285077c3a8ceb7fdc26"
+  },
+  "id": "desk012",
+  "name": "LAGKAPTEN 락캅텐 / ADILS 아딜스,책싱,화이트스테인 참나무무늬",
+  "category": "desk",
+  "style": "natural",
+  "dimensions": {
+    "width": 140,
+    "depth": 60,
+    "height": 73
+  },
+  "colortone": "white",
+  "price": 59900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/lagkapten-adils-desk-white-stained-oak-effect-white-s59417209/#content"
+},
+{
+  "_id": {
+    "$oid": "6819d289077c3a8ceb7fdc27"
+  },
+  "id": "desk013",
+  "name": "LAGKAPTEN 락캅텐 / ADILS 아딜스,책싱,화이트스테인 참나무무늬",
+  "category": "desk",
+  "style": "natural",
+  "dimensions": {
+    "width": 140,
+    "depth": 60,
+    "height": 73
+  },
+  "colortone": "darkgrey",
+  "price": 59900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/lagkapten-adils-desk-white-stained-oak-effect-dark-grey-s69417256/#content"
+},
+{
+  "_id": {
+    "$oid": "6819d28c077c3a8ceb7fdc28"
+  },
+  "id": "desk014",
+  "name": "MÅLSKYTT 몰쉬트 / ADILS 아딜스,책상,자작나무/화이트",
+  "category": "desk",
+  "style": "natural",
+  "dimensions": {
+    "width": 140,
+    "depth": 60,
+    "height": 73
+  },
+  "colortone": "white",
+  "price": 99900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/malskytt-adils-desk-birch-white-s09417749/#content"
+},
+{
+  "_id": {
+    "$oid": "6819d292077c3a8ceb7fdc29"
+  },
+  "id": "desk015",
+  "name": "LAGKAPTEN 락캅텐 / TILLSLAG 틸슬라그,책상,화이트스테인 참나무무늬 화이트",
+  "category": "desk",
+  "style": "natural",
+  "dimensions": {
+    "width": 140,
+    "depth": 60,
+    "height": 73
+  },
+  "colortone": "white",
+  "price": 99900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/lagkapten-tillslag-desk-white-stained-oak-effect-white-s59417313/#content"
+},
+{
+  "_id": {
+    "$oid": "6819d295077c3a8ceb7fdc2a"
+  },
+  "id": "desk016",
+  "name": "LAGKAPTEN 락캅텐 / KRILLE 크릴레,책상,화이트스테인 참나무무늬 화이트",
+  "category": "desk",
+  "style": "natural",
+  "dimensions": {
+    "width": 120,
+    "depth": 60,
+    "height": 73
+  },
+  "colortone": "white",
+  "price": 89900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/lagkapten-krille-desk-white-stained-oak-effect-white-s99416910/#content"
+},
+{
+  "_id": {
+    "$oid": "6819d298077c3a8ceb7fdc2b"
+  },
+  "id": "desk017",
+  "name": "LAGKAPTEN 락캅텐 / ADILS 아딜스,책상,화이트스테인 참나무무늬/블랙",
+  "category": "desk",
+  "style": "natural",
+  "dimensions": {
+    "width": 120,
+    "depth": 60,
+    "height": 73
+  },
+  "colortone": "black",
+  "price": 49900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/lagkapten-adils-desk-white-stained-oak-effect-black-s39416885/#content"
+},
+{
+  "_id": {
+    "$oid": "6819d29c077c3a8ceb7fdc2c"
+  },
+  "id": "desk018",
+  "name": "LAGKAPTEN 락캅텐 / ADILS 아딜스,책상,화이트스테인 참나무무늬/화이트",
+  "category": "desk",
+  "style": "natural",
+  "dimensions": {
+    "width": 100,
+    "depth": 60,
+    "height": 93
+  },
+  "colortone": "white",
+  "price": 59900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/linnmon-olov-desk-white-stained-oak-effect-white-s49416347/#content"
+},
+{
+  "_id": {
+    "$oid": "6819d29f077c3a8ceb7fdc2d"
+  },
+  "id": "desk019",
+  "name": "LAGKAPTEN 락캅텐 / ADILS 아딜스,책상,화이트스테인 참나무무늬/블랙",
+  "category": "desk",
+  "style": "natural",
+  "dimensions": {
+    "width": 100,
+    "depth": 60,
+    "height": 93
+  },
+  "colortone": "black",
+  "price": 59900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/linnmon-olov-desk-white-stained-oak-effect-black-s59416356/#content"
+},
+{
+  "_id": {
+    "$oid": "6819d2a2077c3a8ceb7fdc2e"
+  },
+  "id": "desk020",
+  "name": "FJÄLLBO 피엘보,노트북책상,블랙",
+  "category": "desk",
+  "style": "natural",
+  "dimensions": {
+    "width": 100,
+    "depth": 36,
+    "height": 75
+  },
+  "colortone": "black",
+  "price": 69900,
+  "brand": "IKEA",
+  "glb_file": "일단 비어둬보자",
+  "url": "https://www.ikea.com/kr/ko/p/fjaellbo-laptop-table-black-10339736/"
+}]
+
+  // 중간부터 이건 modern desk models
