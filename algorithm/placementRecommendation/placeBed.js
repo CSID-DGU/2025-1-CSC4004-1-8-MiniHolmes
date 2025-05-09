@@ -220,6 +220,7 @@ function placeBed(elements,design)
     } 
     else 
     {
+      // 여기 추가 랜덤 알고리즘 배치해야할듯
       console.log("침대 배치 실패: 모든 벽 탐색에서도 불가능");
     }
         }
