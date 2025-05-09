@@ -220,7 +220,7 @@ function placeBed(elements,design)
     } 
     else 
     {
-      console.log("❌ 침대 배치 실패: 모든 벽 탐색에서도 불가능");
+      console.log("침대 배치 실패: 모든 벽 탐색에서도 불가능");
     }
         }
         else if (design === "natural") // 내츄럴 배치 추천
