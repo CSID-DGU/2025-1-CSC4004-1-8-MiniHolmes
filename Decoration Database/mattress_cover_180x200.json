@@ -1,0 +1,77 @@
+[
+    {
+        "name": "RÖNNVECKMAL 뢴베크말 매트리스커버",
+        "category": "mattresscover",
+        "style": "modern",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "white",
+        "material": "cotton",
+        "price": 38600,
+        "brand": "IKEA",
+        "jpg_file": "roennveckmal-fitted-sheet-white__1086540_pe860498_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/roennveckmal-fitted-sheet-white-00532635/"
+    },
+    {
+        "name": "RÖNNVECKMAL 뢴베크말 매트리스커버",
+        "category": "mattresscover",
+        "style": "modern",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "white",
+        "material": "cotton",
+        "price": 38600,
+        "brand": "IKEA",
+        "jpg_file": "roennveckmal-fitted-sheet-white__1086540_pe860498_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/roennveckmal-fitted-sheet-white-00532635/"
+    },
+    {
+        "name": "NATTJASMIN 나티아스민 매트리스커버",
+        "category": "mattresscover",
+        "style": "modern",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "white",
+        "material": "cotton/lyocell",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "nattjasmin-fitted-sheet-white__0604092_pe681032_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/nattjasmin-fitted-sheet-white-90343664/"
+    },
+    {
+        "name": "NATTJASMIN 나티아스민 매트리스커버",
+        "category": "mattresscover",
+        "style": "cozy",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "lightbeige",
+        "material": "cotton/lyocell",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "nattjasmin-fitted-sheet-light-beige__0661402_pe711747_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/nattjasmin-fitted-sheet-light-beige-10442738/#content"
+    },
+    {
+        "name": "NATTJASMIN 나티아스민 매트리스커버",
+        "category": "mattresscover",
+        "style": "modern",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "darkgrey",
+        "material": "cotton/lyocell",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "nattjasmin-fitted-sheet-dark-grey__0668967_pe714788_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/nattjasmin-fitted-sheet-dark-grey-90442678/#content"
+    }
+]
