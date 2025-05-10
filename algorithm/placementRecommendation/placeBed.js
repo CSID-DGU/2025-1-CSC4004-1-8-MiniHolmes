@@ -1,3 +1,5 @@
+// ✅ 공통 유틸 함수들
+
 function isOverlapping(a, b) {
   return !(
     a.x + a.width <= b.x ||
@@ -102,10 +104,23 @@ function generateWallBeltPositions(furniture, room, step = 10, belt = 30) {
   return positions;
 }
 
-function selectRandomPosition(validPositions) {
-  if (validPositions.length === 0) return null;
-  const index = Math.floor(Math.random() * validPositions.length);
-  return validPositions[index];
+function getWallTightnessScore(p, room) {
+  let score = 0;
+  if (p.x === 0 || p.x + p.width === room.x) score++;
+  if (p.y === 0 || p.y + p.height === room.y) score++;
+  return score;
+}
+
+function selectRandomFromBestScored(positions, room) {
+  if (positions.length === 0) return null;
+
+  const scored = positions.map(p => ({ ...p, score: getWallTightnessScore(p, room) }));
+  const maxScore = Math.max(...scored.map(p => p.score));
+  const topCandidates = scored.filter(p => p.score === maxScore);
+  const index = Math.floor(Math.random() * topCandidates.length);
+
+  const { score, ...cleaned } = topCandidates[index];
+  return cleaned;
 }
 
 function addToElements(elements, furniture) {
@@ -118,124 +133,76 @@ function addToElements(elements, furniture) {
   });
 }
 
-
-function placeBed(elements,design)
-{
-    // func restPlace여분공간 계산 함수
-    let rest = 0; // 침대를 배치하기 위해 필요한 공간 최소예측치
-    let reasons = [];
-    const room = elements.find(el => el.type === "room");
-    const bed = {
+// ✅ 침대 배치 (모던 스타일 기준, 벽 우선 + 점수 기반)
+function placeBed(elements, design) {
+  let reasons = [];
+  const room = elements.find(el => el.type === "room");
+  const bed = {
     type: "bed",
     width: 150,
-    height: 200,
-    };
+    height: 200
+  };
+  const step = 10;
+  let positions = [];
 
-    const step = 10; // 예: 후보 위치 계산 시 간격
+  if (restPlace(elements) < bed.width * bed.height) {
+    reasons.push({ type: "bed", reason: "배치공간 부족" });
+    return { elements, reasons };
+  }
 
-    let positions = []; // 추천 position 후보들 저장하는 배열
+  if (design === "modern") {
+    const availableWalls = findAvailableWalls(elements, room);
 
-    if (restPlace(elements) < bed.width * bed.height) 
-      {
-         reasons.push({ type: "bed", reason: "배치공간 부족" }); 
-         return { elements, reasons }
+    for (const wall of availableWalls) {
+      for (const isHorizon of [false, true]) {
+        const width = isHorizon ? bed.height : bed.width;
+        const height = isHorizon ? bed.width : bed.height;
 
-      };
-  
-        // 추천 시작
-        if(design === "modern") // 모던 배치 추천
-      {
-            // 충돌하지 않는 추천 모던 배치 선정 - 모던 스타일은 창문이 없는 벽면에 침대 우선 배치
-           
-            // 1. 창문이 없는 벽면 찾기
-            const availableWalls = findAvailableWalls(elements, room);
-
-    // 2. 후보위치 계산
-    for (const wall of availableWalls) 
-        {
-        // 두 방향 모두 시도 (회전 여부)
-        for (const isHorizon of [false, true]) 
-            {
-          // 현재 방향에서 가구의 크기
-          const width = isHorizon ? bed.height : bed.width;
-          const height = isHorizon ? bed.width : bed.height;
-      
-          if (wall === "bottom") 
-            {
-            const y = room.y - height;
-            for (let x = 0; x <= room.x - width; x += step) 
-                {
-              positions.push({ x, y, isHorizon });
-            }
-      
-          } 
-          else if (wall === "top") 
-            {
-            const y = 0;
-            for (let x = 0; x <= room.x - width; x += step) 
-                {
-              positions.push({ x, y, isHorizon });
-            }
-      
-          } 
-          else if (wall === "left") 
-            {
-            const x = 0;
-            for (let y = 0; y <= room.y - height; y += step) 
-                {
-              positions.push({ x, y, isHorizon });
-            }
-      
-          } 
-          else if (wall === "right") 
-            {
-            const x = room.x - width;
-            for (let y = 0; y <= room.y - height; y += step) 
-                {
-              positions.push({ x, y, isHorizon });
-            }
+        if (wall === "bottom") {
+          const y = room.y - height;
+          for (let x = 0; x <= room.x - width; x += step) {
+            positions.push({ x, y, isHorizon });
+          }
+        } else if (wall === "top") {
+          const y = 0;
+          for (let x = 0; x <= room.x - width; x += step) {
+            positions.push({ x, y, isHorizon });
+          }
+        } else if (wall === "left") {
+          const x = 0;
+          for (let y = 0; y <= room.y - height; y += step) {
+            positions.push({ x, y, isHorizon });
+          }
+        } else if (wall === "right") {
+          const x = room.x - width;
+          for (let y = 0; y <= room.y - height; y += step) {
+            positions.push({ x, y, isHorizon });
           }
         }
       }
+    }
 
-    // 3. 후보위치들 중 충돌 안하는 위치 선정 -- 2까지 완료
     let valid = filterValidPositions(positions, elements, bed);
-    let chosen = selectRandomPosition(valid);        
-    if (!chosen) {
+    let chosen = selectRandomFromBestScored(valid, room);
+
+    if (chosen) {
+      addToElements(elements, chosen);
+      reasons.push({ type: "bed", reason: "모던 스타일: 벽에 밀착된 위치 우선 배치" });
+    } else {
       const fallbackPositions = generateWallBeltPositions(bed, room, step, 30);
       valid = filterValidPositions(fallbackPositions, elements, bed);
-      chosen = selectRandomPosition(valid);
+      chosen = selectRandomFromBestScored(valid, room);
 
       if (chosen) {
-        reasons.push({ type: "bed", reason: "벽 띠 영역에서 fallback 배치됨" });
+        addToElements(elements, chosen);
+        reasons.push({ type: "bed", reason: "벽 띠 fallback 위치에 배치됨" });
+      } else {
+        reasons.push({ type: "bed", reason: "실패: 모든 벽 영역에도 배치 불가" });
       }
-    } 
-    else 
-    {
-      reasons.push({ type: "bed", reason: "모던 스타일: 창문 없는 벽에 배치됨" });
     }
-    if (chosen) 
-      {
-      addToElements(elements, chosen);
-    } 
-    else 
-    {
-      // 여기 추가 랜덤 알고리즘 배치해야할듯
-      console.log("침대 배치 실패: 모든 벽 탐색에서도 불가능");
-    }
-        }
-        else if (design === "natural") // 내츄럴 배치 추천
-        {
-            
-        }
-    
-    else
-    {
-        // 추천 X
-    }
+  }
 
-    return { elements, reasons };
+  return { elements, reasons };
 }
-
 
 module.exports = { placeBed };
