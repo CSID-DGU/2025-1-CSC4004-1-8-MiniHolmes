@@ -1,0 +1,287 @@
+[
+    {
+        "name": "EKTANDVINGE 엑탄드빙에 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "natural",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "green",
+        "material": "cotton",
+        "price": 59900,
+        "brand": "IKEA",
+        "jpg_file": "ektandvinge-duvet-cover-and-2-pillowcases-pale-grey-green-white-check__1315725_pe940554_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/ektandvinge-duvet-cover-and-2-pillowcases-pale-grey-green-white-check-30585415/#content"
+    },
+    {
+        "name": "BJÖRKGRÅMAL 비에르크그로말 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "cozy",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "white/black",
+        "material": "cotton/viscose",
+        "price": 49900,
+        "brand": "IKEA",
+        "jpg_file": "bjoerkgramal-duvet-cover-and-2-pillowcases-black-white-dotted__1362337_pe955191_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/bjoerkgramal-duvet-cover-and-2-pillowcases-black-white-dotted-50591175/"
+    },
+    {
+        "name": "PILDVÄRGMAL 필드베리말 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "natural",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "floral",
+        "material": "cotton/viscose",
+        "price": 69900,
+        "brand": "IKEA",
+        "jpg_file": "pildvaergmal-duvet-cover-and-2-pillowcases-white-floral-pattern__1385328_pe963277_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/pildvaergmal-duvet-cover-and-2-pillowcases-white-floral-pattern-80599844/"
+    },
+    {
+        "name": "SCHERSMIN 셰르스민 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "cozy",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "palepink",
+        "material": "cotton",
+        "price": 79900,
+        "brand": "IKEA",
+        "jpg_file": "schersmin-duvet-cover-and-2-pillowcases-pale-pink__1385836_pe963462_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/schersmin-duvet-cover-and-2-pillowcases-pale-pink-50599765/"
+    },
+    {
+        "name": "SCHERSMIN 셰르스민 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "modern",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "white",
+        "material": "cotton",
+        "price": 79900,
+        "brand": "IKEA",
+        "jpg_file": "schersmin-duvet-cover-and-2-pillowcases-white__1385816_pe963442_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/schersmin-duvet-cover-and-2-pillowcases-white-40599737/#content"
+    },
+    {
+        "name": "PILTANDVINGE 필탄드빙에 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "cozy",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "pink",
+        "material": "polyester/viscose",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "piltandvinge-duvet-cover-and-2-pillowcases-pink__1279130_pe931340_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/piltandvinge-duvet-cover-and-2-pillowcases-pink-30579141/"
+    },
+    {
+        "name": "PILTANDVINGE 필탄드빙에 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "modern",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "white",
+        "material": "polyester/viscose",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "piltandvinge-duvet-cover-and-2-pillowcases-white__1279151_pe931361_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/piltandvinge-duvet-cover-and-2-pillowcases-white-50579197/#content"
+    },
+    {
+        "name": "PILTANDVINGE 필탄드빙에 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "modern",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "blue",
+        "material": "polyester/viscos",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "piltandvinge-duvet-cover-and-2-pillowcases-blue__1279106_pe931316_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/piltandvinge-duvet-cover-and-2-pillowcases-blue-80582396/#content"
+    },
+    {
+        "name": "PILTANDVINGE 필탄드빙에 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "natural",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "lightgreen",
+        "material": "polyester/viscos",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "piltandvinge-duvet-cover-and-2-pillowcases-light-green__1279088_pe931286_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/piltandvinge-duvet-cover-and-2-pillowcases-light-green-50579116/#content"
+    },
+    {
+        "name": "PILTANDVINGE 필탄드빙에 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "modern",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "grey",
+        "material": "polyester/viscos",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "piltandvinge-duvet-cover-and-2-pillowcases-grey__1279123_pe931333_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/piltandvinge-duvet-cover-and-2-pillowcases-grey-80579092/#content"
+    },
+    {
+        "name": "TÅTELSMYGARE 토텔스뮈가레 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "modern",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "white",
+        "material": "cotton",
+        "price": 69900,
+        "brand": "IKEA",
+        "jpg_file": "tatelsmygare-duvet-cover-and-2-pillowcases-white-blue__1166685_pe891397_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/tatelsmygare-duvet-cover-and-2-pillowcases-white-blue-90554779/"
+    },
+    {
+        "name": "SORGMANTEL 소리만텔 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "natural",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "green",
+        "material": "cotton/polyester",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "sorgmantel-duvet-cover-and-2-pillowcases-white-green__1149547_pe884083_s5.jpg.avif.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/sorgmantel-duvet-cover-and-2-pillowcases-white-green-40549484/"
+    },
+    {
+        "name": "MYGGLASVINGE 뮈글라스빙에 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "modern",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "grey/blue",
+        "material": "cotton/viscose",
+        "price": 59900,
+        "brand": "IKEA",
+        "jpg_file": "mygglasvinge-duvet-cover-and-2-pillowcases-multicolour__1359694_pe955171_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/mygglasvinge-duvet-cover-and-2-pillowcases-multicolour-30591223/"
+    },
+    {
+        "name": "SLÅNHÖSTMAL 슬론회스트말 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "modern",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "white/black",
+        "material": "cotton/viscose",
+        "price": 59900,
+        "brand": "IKEA",
+        "jpg_file": "slanhoestmal-duvet-cover-and-2-pillowcases-black-white-striped__1241172_pe920850_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/slanhoestmal-duvet-cover-and-2-pillowcases-black-white-striped-50575260/"
+    },
+    {
+        "name": "SLÅNHÖSTMAL 슬론회스트말 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "cozy",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "orange/pink",
+        "material": "cotton/viscose",
+        "price": 59900,
+        "brand": "IKEA",
+        "jpg_file": "slanhoestmal-duvet-cover-and-2-pillowcases-orange-pink-striped__1241201_pe920867_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/slanhoestmal-duvet-cover-and-2-pillowcases-orange-pink-striped-70575283/#content"
+    },
+    {
+        "name": "SUMPGRÖE 숨프그뢰에 이불커버+베개커버2,",
+        "category": "bedding",
+        "style": "natural",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "green",
+        "material": "polyester/viscose",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "sumpgroee-duvet-cover-and-2-pillowcases-multicolour-striped__1359649_pe955155_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/sumpgroee-duvet-cover-and-2-pillowcases-multicolour-striped-90587218/"
+    },
+    {
+        "name": "ÄNGSNEJLIKA 엥스네일리카 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "modern",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "darkblue",
+        "material": "cotton/viscose",
+        "price": 59900,
+        "brand": "IKEA",
+        "jpg_file": "aengsnejlika-duvet-cover-and-2-pillowcases-dark-blue-light-blue__1317984_pe940785_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/aengsnejlika-duvet-cover-and-2-pillowcases-dark-blue-light-blue-50585339/"
+    },
+    {
+        "name": "BREDVECKLARE 브레드베클라레 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "modern",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "white",
+        "material": "cotton/viscose",
+        "price": 49900,
+        "brand": "IKEA",
+        "jpg_file": "bredvecklare-duvet-cover-and-2-pillowcases-white-blue-check__1279020_pe931231_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/bredvecklare-duvet-cover-and-2-pillowcases-white-blue-check-90579336/"
+    },
+    {
+        "name": "EKTANDVINGE 엑탄드빙에 이불커버+베개커버2",
+        "category": "bedding",
+        "style": "modern",
+        "dimensions": {
+            "length": 240,
+            "width": 220
+        },
+        "colortone": "white/black",
+        "material": "cotton",
+        "price": 59900,
+        "brand": "IKEA",
+        "jpg_file": "ektandvinge-duvet-cover-and-2-pillowcases-anthracite-white-check__1315699_pe940532_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/ektandvinge-duvet-cover-and-2-pillowcases-anthracite-white-check-80585390/"
+    }
+]

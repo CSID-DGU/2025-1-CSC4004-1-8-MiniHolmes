@@ -1,0 +1,32 @@
+[
+    {
+        "name": "BRUMMIG 브룸미그 매트리스커버",
+        "category": "mattresscover",
+        "style": "cozy",
+        "dimensions": {
+            "length": 90,
+            "width": 200
+        },
+        "colortone": "pattern",
+        "material": "cotton",
+        "price": 12900,
+        "brand": "IKEA",
+        "jpg_file": "brummig-fitted-sheet-acorn-pattern-multicolour__1056523_pe848371_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/brummig-fitted-sheet-acorn-pattern-multicolour-00521175/"
+    },
+    {
+        "name": "SKOGSDUVA 스콕스두바 매트리스커버",
+        "category": "mattresscover",
+        "style": "natural",
+        "dimensions": {
+            "length": 90,
+            "width": 200
+        },
+        "colortone": "floral",
+        "material": "cotton/viscos",
+        "price": 12900,
+        "brand": "IKEA",
+        "jpg_file": "skogsduva-fitted-sheet-white-yellow-flower-pattern__1294227_pe935368_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/skogsduva-fitted-sheet-white-yellow-flower-pattern-90576795/"
+    }
+]
