@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/2025-1-CSC4004-1-8-MiniHolmes/static/css/main.3e7e29ad.css",
+    "main.js": "/2025-1-CSC4004-1-8-MiniHolmes/static/js/main.d69d6fab.js",
+    "static/js/453.ed3810f9.chunk.js": "/2025-1-CSC4004-1-8-MiniHolmes/static/js/453.ed3810f9.chunk.js",
+    "index.html": "/2025-1-CSC4004-1-8-MiniHolmes/index.html",
+    "main.3e7e29ad.css.map": "/2025-1-CSC4004-1-8-MiniHolmes/static/css/main.3e7e29ad.css.map",
+    "main.d69d6fab.js.map": "/2025-1-CSC4004-1-8-MiniHolmes/static/js/main.d69d6fab.js.map",
+    "453.ed3810f9.chunk.js.map": "/2025-1-CSC4004-1-8-MiniHolmes/static/js/453.ed3810f9.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3e7e29ad.css",
+    "static/js/main.d69d6fab.js"
+  ]
+}
