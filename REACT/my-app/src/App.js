@@ -51,7 +51,7 @@ function App() {
       {/* 라우팅 영역 */}
       <main className="px-6 py-6">
         <Routes>
-          <Route path="/" element={<Home />} />
+          {/* <Route path="/" element={<Home />} /> */}
           <Route path="/about" element={<About />} />
           {/* <Route path="/counter" element={<Counter />} /> */}
           <Route path="/input" element={<RoomSizeInput />} />
