@@ -1,0 +1,56 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+const FurnitureSelect = () => {
+    const navigate = useNavigate();
+    const [selectedFurniture, setSelectedFurniture] = useState([]);
+
+    useEffect(() => {
+        document.title = "MiniHolmes | 필수 가구 선택";
+    }, []);
+
+    const furnitureOptions = ["침대", "옷장", "책상", "책장"];
+
+    const toggleFurniture = (item) => {
+        setSelectedFurniture((prev) =>
+            prev.includes(item)
+                ? prev.filter((f) => f !== item)
+                : [...prev, item]
+        );
+    };
+
+    const handleNext = () => {
+        if (selectedFurniture.length === 0) {
+            alert("최소 하나 이상의 가구를 선택해주세요");
+            return;
+        }
+        localStorage.setItem("essentialFurniture", JSON.stringify(selectedFurniture));
+        navigate("/optionselect");
+    };
+
+    return (
+        <div className="p-4 space-y-4">
+            <h1 className="text-xl font-bold">필요한 가구를 선택해주세요</h1>
+            <p>(1개 이상 선택)</p>
+            <div className="flex flex-col gap-2">
+                {furnitureOptions.map((item) => (
+                    <button
+                        key={item}
+                        onClick={() => toggleFurniture(item)}
+                        className={`border p-2 rounded w-full ${selectedFurniture.includes(item) ? "bg-blue-600 text-white" : ""}`}
+                    >
+                        {item}
+                    </button>
+                ))}
+            </div>
+            <button
+                onClick={handleNext}
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
+                다음
+            </button>
+        </div>
+    );
+};
+
+export default FurnitureSelect;
