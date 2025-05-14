@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/2025-1-CSC4004-1-8-MiniHolmes/static/css/main.3e7e29ad.css",
-    "main.js": "/2025-1-CSC4004-1-8-MiniHolmes/static/js/main.751289b0.js",
+    "main.js": "/2025-1-CSC4004-1-8-MiniHolmes/static/js/main.a23d18f1.js",
     "static/js/453.ed3810f9.chunk.js": "/2025-1-CSC4004-1-8-MiniHolmes/static/js/453.ed3810f9.chunk.js",
     "index.html": "/2025-1-CSC4004-1-8-MiniHolmes/index.html",
     "main.3e7e29ad.css.map": "/2025-1-CSC4004-1-8-MiniHolmes/static/css/main.3e7e29ad.css.map",
-    "main.751289b0.js.map": "/2025-1-CSC4004-1-8-MiniHolmes/static/js/main.751289b0.js.map",
+    "main.a23d18f1.js.map": "/2025-1-CSC4004-1-8-MiniHolmes/static/js/main.a23d18f1.js.map",
     "453.ed3810f9.chunk.js.map": "/2025-1-CSC4004-1-8-MiniHolmes/static/js/453.ed3810f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.3e7e29ad.css",
-    "static/js/main.751289b0.js"
+    "static/js/main.a23d18f1.js"
   ]
 }
