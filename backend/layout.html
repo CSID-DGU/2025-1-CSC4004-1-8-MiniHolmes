@@ -1,0 +1,78 @@
+
+  <html>
+  <body>
+    <canvas id="roomCanvas" width="1000" height="800" style="border:1px solid black;"></canvas>
+    <script>
+      const ctx = document.getElementById("roomCanvas").getContext("2d");
+      const elements = [
+  {
+    "type": "room",
+    "x": 400,
+    "y": 500
+  },
+  {
+    "type": "bed",
+    "x": 0,
+    "y": 300,
+    "width": 150,
+    "height": 200
+  },
+  {
+    "type": "wardrobe",
+    "x": 0,
+    "y": 0,
+    "width": 50,
+    "height": 80
+  },
+  {
+    "type": "desk",
+    "x": 150,
+    "y": 440,
+    "width": 120,
+    "height": 60,
+    "isHorizontal": false
+  },
+  {
+    "type": "bookshelf",
+    "x": 50,
+    "y": 0,
+    "width": 80,
+    "height": 30
+  }
+];
+
+      const room = elements.find(el => el.type === "room");
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, room.x, room.y);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0, 0, room.x, room.y);
+
+      for (const el of elements) {
+        if (el.type === "room") continue;
+
+        ctx.fillStyle = getColor(el.type);
+        ctx.fillRect(el.x, el.y, el.width || 5, el.height || 5);
+
+        ctx.fillStyle = "black";
+        ctx.font = "12px sans-serif";
+        ctx.fillText(el.type, el.x + 2, el.y + 12);
+      }
+
+      function getColor(type) {
+        switch(type) {
+          case "window": return "skyblue";
+          case "door": return "orange";
+          case "toilet": return "gray";
+          case "built-in": return "darkgray";
+          case "bed": return "lightgreen";
+          case "wardrobe": return "saddlebrown";
+          case "desk": return "lightblue";
+          case "bookshelf": return "gold"; // ✅ bookshelf 색상 추가
+          default: return "pink";
+        }
+      }
+    </script>
+  </body>
+  </html>
+  

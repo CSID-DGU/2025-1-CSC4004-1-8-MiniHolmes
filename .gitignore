@@ -1,0 +1,21 @@
+# node/python
+node_modules/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.DS_Store
+.env*
+build/
+dist/
+*.sqlite
+*.db
+.idea/
+.vscode/
+
+# react
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/
