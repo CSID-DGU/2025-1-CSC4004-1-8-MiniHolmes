@@ -27,6 +27,14 @@ const StyleSelect = () => {
     return (
         <div className="p-4 space-y-4">
             <h1 className="text-xl font-bold">원하는 방 분위기를 선택해주세요</h1>
+             
+            {/* [수정] 선택된 스타일을 실시간으로 출력하는 부분 추가 */}
+             {selectedStyle && (
+                 <div className="text-blue-600 font-semibold">
+                     현재 선택: {selectedStyle}
+                 </div>
+             )}
+        
             <div className="flex flex-col gap-2">
                 {styles.map((style) => (
                     <button
