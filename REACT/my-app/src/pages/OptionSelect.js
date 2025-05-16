@@ -31,6 +31,14 @@ const OptionSelect = () => {
     return (
         <div className="p-4 space-y-4">
             <h1 className="text-xl font-bold">특별히 컸으면 하는 가구를 선택해주세요</h1>
+
+            {/* [수정] 선택한 가구 목록을 실시간으로 화면에 출력하는 부분 추가 */}
+            {selectedFurniture.length > 0 && (
+                <div className="text-blue-600 font-semibold">
+                    현재 선택: {selectedFurniture.join(", ")}
+                </div>
+            )}
+        
             <div className="flex flex-col gap-2">
                 {furnitureOptions.map((item) => (
                     <button
