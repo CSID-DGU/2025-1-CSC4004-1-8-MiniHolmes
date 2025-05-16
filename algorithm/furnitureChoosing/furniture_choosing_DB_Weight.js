@@ -1,5 +1,12 @@
 console.log("=== Script Started ===");
 
+//파이썬 코드와 달라진 부분 : 
+// 1. 가구 DB 입력, _id 필드가 없을 경우 UUID를 생성하도록 수정
+// 2. 가구의 크기와 가격을 확인하는 알고리즘 변경(무한루프 문제 방지)
+//     2-1. 무한루프 방지를 위해 가장 작은/저렴한 가구를 대체 선택하는 방식으로 변경됨
+//     2-2. 크기와 가격을 파악하는 부분을 하나의 while문으로 엮어 순차적으로 조건 확인하는 것이 아닌 동시만족하도록 수정
+
+
 // 가구 클래스 정의(데이터 구조 설계)
 class FurnitureItem {
     constructor(data) {
@@ -123,45 +130,49 @@ function selectItems(furnitureDb, weights, budget, perimeter) {
 
     selectedItems.push(candidates[0]);
   }
-  //크기 조건 검사, 전체적인 가구들의 크기가 너무 클 경우 가장 큰 가구를 다음 우선순위 가구로 교체해가며 조건 만족할 때까지 반복
-  let count = 0;
-while (totalWidth(selectedItems) > perimeter * 0.75 && count < 50) {
-  let largest = selectedItems.reduce((a, b) => (a.sizeGrade() > b.sizeGrade() ? a : b));
-  let category = largest.category;
-  let alternatives = furnitureDb
-    .filter(f => f.category === category && f !== largest)
-    .sort((a, b) => a.sizeGrade() - b.sizeGrade());
 
-  if (alternatives.length === 0) break;
+  //크기 조건 및 가격 조건 검사
+let adjustCount = 0;
+const MAX_ITER = 100;
 
-  let beforeWidth = totalWidth(selectedItems);
-  selectedItems[selectedItems.indexOf(largest)] = alternatives[0];
-  let afterWidth = totalWidth(selectedItems);
-  if (afterWidth >= beforeWidth) break; // 개선되지 않으면 탈출
+while (
+  (totalWidth(selectedItems) > perimeter * 0.75 || totalPrice(selectedItems) > budget) &&
+  adjustCount < MAX_ITER
+) {
+  // 크기 초과 시 가장 큰 가구를 더 작은 대안으로 교체
+  if (totalWidth(selectedItems) > perimeter * 0.75) {
+    let largest = selectedItems.reduce((a, b) => (a.sizeGrade() > b.sizeGrade() ? a : b));
+    let category = largest.category;
+    let alternatives = furnitureDb
+      .filter(f => f.category === category && f !== largest)
+      .sort((a, b) => a.sizeGrade() - b.sizeGrade());
 
-  count++;
+    if (alternatives.length > 0) {
+      let beforeWidth = totalWidth(selectedItems);
+      selectedItems[selectedItems.indexOf(largest)] = alternatives[0];
+      let afterWidth = totalWidth(selectedItems);
+      if (afterWidth >= beforeWidth) break;
+    }
+  }
+
+  // 가격 초과 시 가장 비싼 가구를 더 저렴한 대안으로 교체
+  if (totalPrice(selectedItems) > budget) {
+    let expensive = selectedItems.reduce((a, b) => (a.priceGrade() > b.priceGrade() ? a : b));
+    let category = expensive.category;
+    let alternatives = furnitureDb
+      .filter(f => f.category === category && f !== expensive)
+      .sort((a, b) => a.priceGrade() - b.priceGrade());
+
+    if (alternatives.length > 0) {
+      let beforePrice = totalPrice(selectedItems);
+      selectedItems[selectedItems.indexOf(expensive)] = alternatives[0];
+      let afterPrice = totalPrice(selectedItems);
+      if (afterPrice >= beforePrice) break;
+    }
+  }
+
+  adjustCount++;
 }
-
-//가격 조건 검사, 전체 가격이 예산을 초과할 경우 가장 비싼 가구를 다음 우선순위 가구로 교체해가며 조건 만족할 때까지 반복
-  let priceAdjustCount = 0;
-while (totalPrice(selectedItems) > budget && priceAdjustCount < 50) {
-  let expensive = selectedItems.reduce((a, b) => (a.priceGrade() > b.priceGrade() ? a : b));
-  let category = expensive.category;
-  let alternatives = furnitureDb
-    .filter(f => f.category === category && f !== expensive)
-    .sort((a, b) => a.priceGrade() - b.priceGrade()); // 더 저렴한 가구 먼저
-
-  if (alternatives.length === 0) break;
-
-  let beforePrice = totalPrice(selectedItems);
-  selectedItems[selectedItems.indexOf(expensive)] = alternatives[0];
-  let afterPrice = totalPrice(selectedItems);
-
-  if (afterPrice >= beforePrice) break;
-
-  priceAdjustCount++;
-}
-
   return selectedItems;
 }
 
@@ -170,7 +181,7 @@ function recommendSets(furnitureDb, userWeights, maxBudget, perimeter) {
   const recommendedSets = [];
   let availableItems = [...furnitureDb];
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 3; i++) { //3세트 추천
     const selected = selectItems(availableItems, userWeights, maxBudget, perimeter);
     recommendedSets.push(selected);
     selected.forEach(item => {
@@ -1518,6 +1529,7 @@ const rawFurnitureDb = [{
   "url": "https://www.ikea.com/kr/ko/p/fjaellbo-laptop-table-black-10339736/"
 }];
 
+// --- 가구 아이템 클래스 정의 ---
 const furnitureDb = rawFurnitureDb.map(item => new FurnitureItem(item));
 
 // --- 사용자 입력 값 정의 ---
@@ -1526,12 +1538,12 @@ const userWeights = {
   colortone: 0.3,
   size: 0.2,
   price: 0.2,
-  target_style: "modern",
-  target_colortone: "white"
+  target_style: "modern", //mordern, natural
+  target_colortone: "light" //light, medium, dark
 };
 
-const budget = 1000000;       // 예산 80만 원
-const perimeter = 600;       // 배치 가능 폭 400cm
+const budget = 1000000;       // 예산 100만 원
+const perimeter = 600;       // 배치 가능 폭 600cm
 
 // --- 추천 실행 ---
 const recommended = recommendSets(furnitureDb, userWeights, budget, perimeter);
