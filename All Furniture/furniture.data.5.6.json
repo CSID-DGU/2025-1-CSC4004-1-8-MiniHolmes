@@ -955,7 +955,7 @@
     "glb_file": "fjallbo_shelving.glb",
     "url": "https://www.ikea.com/kr/ko/p/fjaellbo-shelving-unit-black-10339294/"
   },
-  {
+ {
     "_id": {
       "$oid": "6819e7df8c0d5764d052d50a"
     },
@@ -968,10 +968,10 @@
       "depth": 60,
       "height": 74
     },
-    "colortone": "white",
+    "colortone": "light",
     "price": 39900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/linnmon-adils-table-white-s09246408/"
   },
   {
@@ -987,10 +987,10 @@
       "depth": 60,
       "height": 73
     },
-    "colortone": "white",
-    "price": 49900,
+    "colortone": "light",
+    "price": 49900
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/lagkapten-adils-desk-white-s09416759/"
   },
   {
@@ -1006,10 +1006,10 @@
       "depth": 50,
       "height": 75
     },
-    "colortone": "white",
+    "colortone": "light",
     "price": 49900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/micke-desk-white-80354276/#content"
   },
   {
@@ -1025,10 +1025,10 @@
       "depth": 60,
       "height": 93
     },
-    "colortone": "white",
+    "colortone": "light",
     "price": 59900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/linnmon-olov-desk-white-s99416199/"
   },
   {
@@ -1044,10 +1044,10 @@
       "depth": 58,
       "height": 72
     },
-    "colortone": "white",
+    "colortone": "light",
     "price": 69900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/pahl-desk-white-s19245106/"
   },
   {
@@ -1063,10 +1063,10 @@
       "depth": 52,
       "height": 73
     },
-    "colortone": "white",
+    "colortone": "light",
     "price": 79900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/brusali-desk-white-20439764//"
   },
   {
@@ -1082,10 +1082,10 @@
       "depth": 40,
       "height": 75
     },
-    "colortone": "white",
+    "colortone": "light",
     "price": 35000,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/torald-desk-white-70493956/"
   },
   {
@@ -1101,10 +1101,10 @@
       "depth": 60,
       "height": 74
     },
-    "colortone": "darkgray/black",
+    "colortone": "dark",
     "price": 39900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/linnmon-adils-desk-dark-grey-black-s99416095/#content"
   },
   {
@@ -1120,10 +1120,10 @@
       "depth": 50,
       "height": 75
     },
-    "colortone": "blackbrown",
+    "colortone": "dark",
     "price": 69900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/micke-desk-black-brown-20354279/#content"
   },
   {
@@ -1139,10 +1139,10 @@
       "depth": 60,
       "height": 73
     },
-    "colortone": "darkgray/white",
+    "colortone": "medium",
     "price": 79900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/linnmon-krille-desk-dark-grey-white-s39416121/#content"
   },
   {
@@ -1158,10 +1158,10 @@
       "depth": 60,
       "height": 74
     },
-    "colortone": "white",
+    "colortone": "light",
     "price": 39900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/linnmon-adils-desk-white-stained-oak-effect-white-s59416337/"
   },
   {
@@ -1177,10 +1177,10 @@
       "depth": 60,
       "height": 73
     },
-    "colortone": "white",
+    "colortone": "light",
     "price": 59900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/lagkapten-adils-desk-white-stained-oak-effect-white-s59417209/#content"
   },
   {
@@ -1196,10 +1196,10 @@
       "depth": 60,
       "height": 73
     },
-    "colortone": "darkgrey",
+    "colortone": "medium",
     "price": 59900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/lagkapten-adils-desk-white-stained-oak-effect-dark-grey-s69417256/#content"
   },
   {
@@ -1215,10 +1215,10 @@
       "depth": 60,
       "height": 73
     },
-    "colortone": "white",
+    "colortone": "light",
     "price": 99900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/malskytt-adils-desk-birch-white-s09417749/#content"
   },
   {
@@ -1234,10 +1234,10 @@
       "depth": 60,
       "height": 73
     },
-    "colortone": "white",
+    "colortone": "light",
     "price": 89900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/lagkapten-krille-desk-white-stained-oak-effect-white-s99416910/#content"
   },
   {
@@ -1253,10 +1253,10 @@
       "depth": 60,
       "height": 73
     },
-    "colortone": "black",
+    "colortone": "dark",
     "price": 49900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/lagkapten-adils-desk-white-stained-oak-effect-black-s39416885/#content"
   },
   {
@@ -1272,10 +1272,10 @@
       "depth": 60,
       "height": 73
     },
-    "colortone": "black",
+    "colortone": "dark",
     "price": 49900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/lagkapten-adils-desk-white-stained-oak-effect-black-s39416885/#content"
   },
   {
@@ -1291,10 +1291,10 @@
       "depth": 60,
       "height": 93
     },
-    "colortone": "white",
+    "colortone": "light",
     "price": 59900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/linnmon-olov-desk-white-stained-oak-effect-white-s49416347/#content"
   },
   {
@@ -1310,10 +1310,10 @@
       "depth": 60,
       "height": 93
     },
-    "colortone": "black",
+    "colortone": "dark",
     "price": 59900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/linnmon-olov-desk-white-stained-oak-effect-black-s59416356/#content"
   },
   {
@@ -1329,10 +1329,10 @@
       "depth": 36,
       "height": 75
     },
-    "colortone": "black",
+    "colortone": "dark",
     "price": 69900,
     "brand": "IKEA",
-    "glb_file": "일단 비어둬보자",
+    "glb_file": "비워둘게요",
     "url": "https://www.ikea.com/kr/ko/p/fjaellbo-laptop-table-black-10339736/"
   }
 ]
