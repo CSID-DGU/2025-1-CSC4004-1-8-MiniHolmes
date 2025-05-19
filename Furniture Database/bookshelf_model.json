@@ -1,0 +1,153 @@
+[
+    {
+      "name": "KALLAX 선반유닛 with underframe",
+      "category": "bookshelf",
+      "style": "modern",
+      "dimensions": {
+        "width": 147,
+        "depth": 39,
+        "height": 94
+      },
+      "colortone": "dark",
+      "price": 129900,
+      "brand": "IKEA",
+      "glb_file": "kallax_underframe.glb",
+      "url": "https://www.ikea.com/kr/ko/p/kallax-shelving-unit-with-underframe-black-brown-black-s79471667/"
+    },
+    {
+      "name": "BILLY 책장 with drawer",
+      "category": "bookshelf",
+      "style": "modern",
+      "dimensions": {
+        "width": 80,
+        "depth": 30,
+        "height": 106
+      },
+      "colortone": "light",
+      "price": 104900,
+      "brand": "IKEA",
+      "glb_file": "billy_drawer.glb",
+      "url": "https://www.ikea.com/kr/ko/p/billy-bookcase-with-drawer-white-s59545297/"
+    },
+    {
+      "name": "SKRUVBY 책장",
+      "category": "bookshelf",
+      "style": "modern",
+      "dimensions": {
+        "width": 60,
+        "depth": 37.5,
+        "height": 140
+      },
+      "colortone": "light",
+      "price": 89900,
+      "brand": "IKEA",
+      "glb_file": "skruvby_bookcase.glb",
+      "url": "https://www.ikea.com/kr/ko/p/skruvby-bookcase-white-40508855/"
+    },
+    {
+      "name": "DALRIPA 책장",
+      "category": "bookshelf",
+      "style": "modern",
+      "dimensions": {
+        "width": 60,
+        "depth": 32,
+        "height": 150
+      },
+      "colortone": "light",
+      "price": 79900,
+      "brand": "IKEA",
+      "glb_file": "dalripa_bookcase.glb",
+      "url": "https://www.ikea.com/kr/ko/p/dalripa-bookcase-white-90528506/"
+    },
+    {
+      "name": "BILLY 책장 80x202",
+      "category": "bookshelf",
+      "style": "modern",
+      "dimensions": {
+        "width": 80,
+        "depth": 28,
+        "height": 202
+      },
+      "colortone": "light",
+      "price": 114900,
+      "brand": "IKEA",
+      "glb_file": "billy_80x202.glb",
+      "url": "https://www.ikea.com/kr/ko/p/billy-bookcase-white-s89545291/"
+    },
+    {
+      "name": "VITTSJÖ 선반유닛",
+      "category": "bookshelf",
+      "style": "modern",
+      "dimensions": {
+        "width": 51,
+        "depth": 36,
+        "height": 175
+      },
+      "colortone": "dark",
+      "price": 69900,
+      "brand": "IKEA",
+      "glb_file": "vittsjo_shelving.glb",
+      "url": "https://www.ikea.com/kr/ko/p/vittsjoe-shelving-unit-black-brown-glass-30214679/"
+    },
+    {
+      "name": "BILLY 책장 40x202",
+      "category": "bookshelf",
+      "style": "modern",
+      "dimensions": {
+        "width": 80,
+        "depth": 28,
+        "height": 106
+      },
+      "colortone": "light",
+      "price": 59900,
+      "brand": "IKEA",
+      "glb_file": "billy_40x202.glb",
+      "url": "https://www.ikea.com/kr/ko/p/billy-bookcase-white-70522044/"
+    },
+    {
+      "name": "LAIVA 책장",
+      "category": "bookshelf",
+      "style": "modern",
+      "dimensions": {
+        "width": 62,
+        "depth": 24,
+        "height": 165
+      },
+      "colortone": "dark",
+      "price": 30000,
+      "brand": "IKEA",
+      "glb_file": "laiva_bookcase.glb",
+      "url": "https://www.ikea.com/kr/ko/p/laiva-bookcase-black-brown-20178592/"
+    },
+    {
+      "name": "KALLAX 선반유닛",
+      "category": "bookshelf",
+      "style": "natural",
+      "dimensions": {
+        "width": 76.5,
+        "depth": 39,
+        "height": 146.5
+      },
+      "colortone": "white-stained oak effect",
+      "price": 99900,
+      "brand": "IKEA",
+      "glb_file": "kallax_oak.glb",
+      "url": "https://www.ikea.com/kr/ko/p/kallax-shelving-unit-white-stained-oak-effect-70362917/"
+    },
+    {
+      "name": "FJÄLLBO 선반유닛",
+      "category": "bookshelf",
+      "style": "modern",
+      "dimensions": {
+        "width": 100,
+        "depth": 36,
+        "height": 136
+      },
+      "colortone": "black",
+      "price": 139000,
+      "brand": "IKEA",
+      "glb_file": "fjallbo_shelving.glb",
+      "url": "https://www.ikea.com/kr/ko/p/fjaellbo-shelving-unit-black-10339294/"
+    }
+  ]
+  
