@@ -1,4 +1,106 @@
-// ✅ 공통 유틸 함수들
+function hasFullySurroundedElement(elements, room) {
+  function isBlocked(el) {
+    const margin = 1;
+
+    const directions = [
+      { dx: -margin, dy: 0, width: margin, height: el.height }, // left
+      { dx: el.width, dy: 0, width: margin, height: el.height }, // right
+      { dx: 0, dy: -margin, width: el.width, height: margin }, // top
+      { dx: 0, dy: el.height, width: el.width, height: margin } // bottom
+    ];
+
+    let blocked = 0;
+
+    for (const dir of directions) {
+      const testBox = {
+        x: el.x + dir.dx,
+        y: el.y + dir.dy,
+        width: dir.width,
+        height: dir.height
+      };
+
+      const outOfRoom =
+        testBox.x < 0 || testBox.y < 0 ||
+        testBox.x + testBox.width > room.x ||
+        testBox.y + testBox.height > room.y;
+
+      const blockedByOther = elements.some(other =>
+        other !== el &&
+        other.type !== "room" &&
+        isOverlapping(other, testBox)
+      );
+
+      if (outOfRoom || blockedByOther) {
+        blocked++;
+      }
+    }
+
+    return blocked === 4;
+  }
+
+  return elements.some(el => el.type !== "room" && isBlocked(el));
+}
+
+function isEmptySpaceConnected(elements, room, cellSize = 10) {
+  const rows = Math.ceil(room.y / cellSize);
+  const cols = Math.ceil(room.x / cellSize);
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+  for (const el of elements) {
+    if (el.type === "room") continue;
+    const x0 = Math.floor(el.x / cellSize);
+    const y0 = Math.floor(el.y / cellSize);
+    const x1 = Math.floor((el.x + el.width) / cellSize);
+    const y1 = Math.floor((el.y + el.height) / cellSize);
+    for (let y = y0; y < y1; y++) {
+      for (let x = x0; x < x1; x++) {
+        if (y >= 0 && y < rows && x >= 0 && x < cols) {
+          grid[y][x] = 1; // 1은 장애물(가구)
+        }
+      }
+    }
+  }
+
+  const key = (x, y) => `${x},${y}`;
+  const visited = new Set();
+  let totalEmpty = 0;
+  let start = null;
+
+  // 0 (빈 공간) 위치 탐색
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (grid[y][x] === 0) {
+        totalEmpty++;
+        if (!start) start = [x, y];
+      }
+    }
+  }
+
+  if (!start) return true; // 빈 공간 자체가 없음
+
+  // BFS
+  const queue = [start];
+  visited.add(key(...start));
+  let reachable = 1;
+
+  while (queue.length > 0) {
+    const [x, y] = queue.shift();
+    for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (
+        nx >= 0 && nx < cols && ny >= 0 && ny < rows &&
+        grid[ny][nx] === 0 && !visited.has(key(nx, ny))
+      ) {
+        visited.add(key(nx, ny));
+        queue.push([nx, ny]);
+        reachable++;
+      }
+    }
+  }
+
+  return reachable === totalEmpty;
+}
 
 function isOverlapping(a, b) {
   return !(
@@ -42,11 +144,23 @@ function filterValidPositions(positions, elements, furniture) {
       return isOverlapping(trial, el);
     });
 
-    if (!overlaps) valid.push(trial);
+    if (!overlaps) {
+      const trialElements = [...elements, trial];
+      const room = elements.find(el => el.type === "room");
+
+      const connected = isEmptySpaceConnected(trialElements, room);
+      const notTrapped = !hasFullySurroundedElement(trialElements, room);
+
+      if (connected && notTrapped) {
+        valid.push(trial);
+      }
+    }
   }
 
   return valid;
 }
+
+
 
 function findAvailableWalls(elements, room) {
   const windowWalls = [];
@@ -104,17 +218,46 @@ function generateWallBeltPositions(furniture, room, step = 10, belt = 30) {
   return positions;
 }
 
-function getWallTightnessScore(p, room) {
+function getWallAndFurnitureTightnessScore(p, elements, room) {
   let score = 0;
-  if (p.x === 0 || p.x + p.width === room.x) score++;
-  if (p.y === 0 || p.y + p.height === room.y) score++;
+
+  if (p.x === 0 || p.x + p.width === room.x) score = score + 2;
+  if (p.y === 0 || p.y + p.height === room.y) score = score + 2;
+
+  for (const el of elements) {
+    if (el.type === "room") continue;
+
+    if (el.type === "door") {
+      const dx = Math.max(el.x - (p.x + p.width), p.x - (el.x + el.width), 0);
+      const dy = Math.max(el.y - (p.y + p.height), p.y - (el.y + el.height), 0);
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < 100) score -= 100;
+      else score += 2;
+      continue;
+    }
+
+    const touching =
+      ((p.x === el.x + el.width || p.x + p.width === el.x) &&
+        !(p.y + p.height <= el.y || p.y >= el.y + el.height)) ||
+      ((p.y === el.y + el.height || p.y + p.height === el.y) &&
+        !(p.x + p.width <= el.x || p.x >= el.x + el.width));
+
+    if (touching) score++;
+  }
+
+
   return score;
 }
 
-function selectRandomFromBestScored(positions, room) {
+function selectRandomFromBestScored(positions, elements, room) {
   if (positions.length === 0) return null;
 
-  const scored = positions.map(p => ({ ...p, score: getWallTightnessScore(p, room) }));
+  const scored = positions.map(p => ({
+    ...p,
+    score: getWallAndFurnitureTightnessScore(p, elements, room)
+  }));
+
   const maxScore = Math.max(...scored.map(p => p.score));
   const topCandidates = scored.filter(p => p.score === maxScore);
   const index = Math.floor(Math.random() * topCandidates.length);
@@ -133,7 +276,6 @@ function addToElements(elements, furniture) {
   });
 }
 
-// ✅ 침대 배치 (모던 스타일 기준, 벽 우선 + 점수 기반)
 function placeBed(elements, design) {
   let reasons = [];
   const room = elements.find(el => el.type === "room");
@@ -143,17 +285,75 @@ function placeBed(elements, design) {
     height: 200
   };
   const step = 10;
-  let positions = [];
 
+  // 공간이 부족할 경우 배치 불가 처리
   if (restPlace(elements) < bed.width * bed.height) {
     reasons.push({ type: "bed", reason: "배치공간 부족" });
     return { elements, reasons };
   }
 
-  if (design === "modern") {
-    const availableWalls = findAvailableWalls(elements, room);
+  const allWalls = ["top", "bottom", "left", "right"];
+  const nonWindowWalls = findAvailableWalls(elements, room);
+  const windowWalls = allWalls.filter(w => !nonWindowWalls.includes(w));
 
-    for (const wall of availableWalls) {
+  if (design === "natural") {
+    // 자연 스타일: 창문 벽 우선 배치, 실패 시 일반 벽으로 시도
+    const tryWallsList = [windowWalls, nonWindowWalls];
+
+    for (const wallGroup of tryWallsList) {
+      let positions = [];
+
+      for (const wall of wallGroup) {
+        for (const isHorizon of [false, true]) {
+          const width = isHorizon ? bed.height : bed.width;
+          const height = isHorizon ? bed.width : bed.height;
+
+          if (wall === "bottom") {
+            const y = room.y - height;
+            for (let x = 0; x <= room.x - width; x += step) {
+              positions.push({ x, y, isHorizon });
+            }
+          } else if (wall === "top") {
+            const y = 0;
+            for (let x = 0; x <= room.x - width; x += step) {
+              positions.push({ x, y, isHorizon });
+            }
+          } else if (wall === "left") {
+            const x = 0;
+            for (let y = 0; y <= room.y - height; y += step) {
+              positions.push({ x, y, isHorizon });
+            }
+          } else if (wall === "right") {
+            const x = room.x - width;
+            for (let y = 0; y <= room.y - height; y += step) {
+              positions.push({ x, y, isHorizon });
+            }
+          }
+        }
+      }
+
+      const valid = filterValidPositions(positions, elements, bed);
+      const chosen = selectRandomFromBestScored(valid, elements, room);
+
+      if (chosen) {
+        addToElements(elements, chosen);
+        reasons.push({
+          type: "bed",
+          reason: wallGroup === windowWalls
+            ? "자연 스타일: 창문 벽에 배치"
+            : "자연 스타일: 일반 벽에 배치"
+        });
+        return { elements, reasons };
+      }
+    }
+  }
+
+  if (design === "modern") {
+    // 모던 스타일: 창문 없는 벽에만 배치
+    const tryWalls = nonWindowWalls;
+    let positions = [];
+
+    for (const wall of tryWalls) {
       for (const isHorizon of [false, true]) {
         const width = isHorizon ? bed.height : bed.width;
         const height = isHorizon ? bed.width : bed.height;
@@ -182,24 +382,26 @@ function placeBed(elements, design) {
       }
     }
 
-    let valid = filterValidPositions(positions, elements, bed);
-    let chosen = selectRandomFromBestScored(valid, room);
+    const valid = filterValidPositions(positions, elements, bed);
+    const chosen = selectRandomFromBestScored(valid, elements, room);
 
     if (chosen) {
       addToElements(elements, chosen);
-      reasons.push({ type: "bed", reason: "모던 스타일: 벽에 밀착된 위치 우선 배치" });
-    } else {
-      const fallbackPositions = generateWallBeltPositions(bed, room, step, 30);
-      valid = filterValidPositions(fallbackPositions, elements, bed);
-      chosen = selectRandomFromBestScored(valid, room);
-
-      if (chosen) {
-        addToElements(elements, chosen);
-        reasons.push({ type: "bed", reason: "벽 띠 fallback 위치에 배치됨" });
-      } else {
-        reasons.push({ type: "bed", reason: "실패: 모든 벽 영역에도 배치 불가" });
-      }
+      reasons.push({ type: "bed", reason: "모던 스타일: 창문 없는 벽에 배치" });
+      return { elements, reasons };
     }
+  }
+
+  // 벽 띠 영역 fallback 배치
+  const fallbackPositions = generateWallBeltPositions(bed, room, step, 30);
+  const valid = filterValidPositions(fallbackPositions, elements, bed);
+  const chosen = selectRandomFromBestScored(valid, elements, room);
+
+  if (chosen) {
+    addToElements(elements, chosen);
+    reasons.push({ type: "bed", reason: "벽 띠 fallback 위치에 배치됨" });
+  } else {
+    reasons.push({ type: "bed", reason: "실패: 모든 벽 영역에도 배치 불가" });
   }
 
   return { elements, reasons };

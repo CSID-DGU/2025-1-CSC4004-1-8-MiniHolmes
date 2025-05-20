@@ -1,3 +1,127 @@
+function isEmptySpaceConnected(elements, room, cellSize = 20) {
+  const rows = Math.ceil(room.y / cellSize);
+  const cols = Math.ceil(room.x / cellSize);
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+  for (const el of elements) {
+    if (el.type === "room") continue;
+    const x0 = Math.floor(el.x / cellSize);
+    const y0 = Math.floor(el.y / cellSize);
+    const x1 = Math.floor((el.x + el.width) / cellSize);
+    const y1 = Math.floor((el.y + el.height) / cellSize);
+    for (let y = y0; y < y1; y++) {
+      for (let x = x0; x < x1; x++) {
+        if (y >= 0 && y < rows && x >= 0 && x < cols) {
+          grid[y][x] = 1; // 1 = 가구
+        }
+      }
+    }
+  }
+
+  const key = (x, y) => `${x},${y}`;
+  const visited = new Set();
+  let totalEmpty = 0;
+  let start = null;
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (grid[y][x] === 0) {
+        totalEmpty++;
+        if (!start) start = [x, y];
+      }
+    }
+  }
+
+  if (!start) return true;
+
+  const queue = [start];
+  visited.add(key(...start));
+  let reachable = 1;
+
+  while (queue.length > 0) {
+    const [x, y] = queue.shift();
+    for (const [dx, dy] of [[1,0], [-1,0], [0,1], [0,-1]]) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (
+        nx >= 0 && nx < cols &&
+        ny >= 0 && ny < rows &&
+        grid[ny][nx] === 0 &&
+        !visited.has(key(nx, ny))
+      ) {
+        visited.add(key(nx, ny));
+        queue.push([nx, ny]);
+        reachable++;
+      }
+    }
+  }
+
+  return reachable === totalEmpty;
+}
+
+const getBlockedWallsFromWindows = (elements, room) => {
+  const blockedWalls = new Set();
+
+  for (const el of elements) {
+    if (el.type !== "window") continue;
+
+    if (el.width >= el.height) {
+      if (el.y === 0) blockedWalls.add("top");
+      else if (el.y + el.height === room.y) blockedWalls.add("bottom");
+    }
+
+    if (el.height > el.width) {
+      if (el.x === 0) blockedWalls.add("left");
+      else if (el.x + el.width === room.x) blockedWalls.add("right");
+    }
+  }
+
+  return blockedWalls;
+};
+
+const hasFullySurroundedElement = (elements, room) => {
+  function isBlocked(el) {
+    const margin = 1;
+    const directions = [
+      { dx: -margin, dy: 0, width: margin, height: el.height },
+      { dx: el.width, dy: 0, width: margin, height: el.height },
+      { dx: 0, dy: -margin, width: el.width, height: margin },
+      { dx: 0, dy: el.height, width: el.width, height: margin }
+    ];
+
+    let blocked = 0;
+
+    for (const dir of directions) {
+      const testBox = {
+        x: el.x + dir.dx,
+        y: el.y + dir.dy,
+        width: dir.width,
+        height: dir.height
+      };
+
+      const outOfRoom =
+        testBox.x < 0 || testBox.y < 0 ||
+        testBox.x + testBox.width > room.x ||
+        testBox.y + testBox.height > room.y;
+
+      const blockedByOther = elements.some(other =>
+        other !== el &&
+        other.type !== "room" &&
+        isOverlapping(other, testBox)
+      );
+
+      if (outOfRoom || blockedByOther) {
+        blocked++;
+      }
+    }
+
+    return blocked === 4;
+  }
+
+  return elements.some(el => el.type !== "room" && isBlocked(el));
+};
+
+
 const isOverlapping = (a, b) => {
   return !(
     a.x + a.width <= b.x ||
@@ -123,10 +247,30 @@ const getBookshelfScore = (pos, elements, room) => {
   });
   if (nearFurniture) score += 1;
 
+
+  const blockedWalls = getBlockedWallsFromWindows(elements, room);
+
+    // 책장이 어느 벽에 붙었는지 판단
+    const wallTouches = [];
+    if (Math.abs(trial.x - 0) <= EPS) wallTouches.push("left");
+    if (Math.abs(trial.x + width - room.x) <= EPS) wallTouches.push("right");
+    if (Math.abs(trial.y - 0) <= EPS) wallTouches.push("top");
+    if (Math.abs(trial.y + height - room.y) <= EPS) wallTouches.push("bottom");
+
+    // 가중치 적용
+    for (const wall of wallTouches) {
+      if (blockedWalls.has(wall)) {
+        score -= 5;
+      } else {
+        score += 5;
+      }
+    }
+
   return score;
 };
 
-const placeBookshelf = (elements, reason = []) => {
+const placeBookshelf = (elements) => {
+  const reason = [];
   const room = elements.find(el => el.type === "room");
   const shelf = { type: "bookshelf", width: 80, height: 30 };
   const step = 10;
@@ -154,7 +298,9 @@ const placeBookshelf = (elements, reason = []) => {
     if (elements.some(el => el.type !== "room" && isOverlapping(el, trial))) continue;
     if (isTooCloseToDoor(trial, elements)) continue;
     if (isBehindDesk(trial, elements)) continue;
-
+    const trialElements = [...elements, trial];
+    if (!isEmptySpaceConnected(trialElements, room)) continue;
+    if (hasFullySurroundedElement(trialElements, room)) continue;
     const score = getBookshelfScore(pos, elements, room);
     valid.push({ ...trial, score });
   }

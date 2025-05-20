@@ -1,3 +1,65 @@
+
+function isEmptySpaceConnected(elements, room, cellSize = 20) {
+  const rows = Math.ceil(room.y / cellSize);
+  const cols = Math.ceil(room.x / cellSize);
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+  for (const el of elements) {
+    if (el.type === "room") continue;
+    const x0 = Math.floor(el.x / cellSize);
+    const y0 = Math.floor(el.y / cellSize);
+    const x1 = Math.floor((el.x + el.width) / cellSize);
+    const y1 = Math.floor((el.y + el.height) / cellSize);
+    for (let y = y0; y < y1; y++) {
+      for (let x = x0; x < x1; x++) {
+        if (y >= 0 && y < rows && x >= 0 && x < cols) {
+          grid[y][x] = 1; // 1 = 가구
+        }
+      }
+    }
+  }
+
+  const key = (x, y) => `${x},${y}`;
+  const visited = new Set();
+  let totalEmpty = 0;
+  let start = null;
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (grid[y][x] === 0) {
+        totalEmpty++;
+        if (!start) start = [x, y];
+      }
+    }
+  }
+
+  if (!start) return true;
+
+  const queue = [start];
+  visited.add(key(...start));
+  let reachable = 1;
+
+  while (queue.length > 0) {
+    const [x, y] = queue.shift();
+    for (const [dx, dy] of [[1,0], [-1,0], [0,1], [0,-1]]) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (
+        nx >= 0 && nx < cols &&
+        ny >= 0 && ny < rows &&
+        grid[ny][nx] === 0 &&
+        !visited.has(key(nx, ny))
+      ) {
+        visited.add(key(nx, ny));
+        queue.push([nx, ny]);
+        reachable++;
+      }
+    }
+  }
+
+  return reachable === totalEmpty;
+}
+
 function isOverlapping(a, b) {
   return !(
     a.x + a.width <= b.x ||
@@ -6,7 +68,48 @@ function isOverlapping(a, b) {
     b.y + b.height <= a.y
   );
 }
+function hasFullySurroundedElement(elements, room) {
+  function isBlocked(el) {
+    const margin = 1;
 
+    const directions = [
+      { dx: -margin, dy: 0, width: margin, height: el.height }, // left
+      { dx: el.width, dy: 0, width: margin, height: el.height }, // right
+      { dx: 0, dy: -margin, width: el.width, height: margin }, // top
+      { dx: 0, dy: el.height, width: el.width, height: margin } // bottom
+    ];
+
+    let blocked = 0;
+
+    for (const dir of directions) {
+      const testBox = {
+        x: el.x + dir.dx,
+        y: el.y + dir.dy,
+        width: dir.width,
+        height: dir.height
+      };
+
+      const outOfRoom =
+        testBox.x < 0 || testBox.y < 0 ||
+        testBox.x + testBox.width > room.x ||
+        testBox.y + testBox.height > room.y;
+
+      const blockedByOther = elements.some(other =>
+        other !== el &&
+        other.type !== "room" &&
+        isOverlapping(other, testBox)
+      );
+
+      if (outOfRoom || blockedByOther) {
+        blocked++;
+      }
+    }
+
+    return blocked === 4;
+  }
+
+  return elements.some(el => el.type !== "room" && isBlocked(el));
+}
 function restPlace(elements) {
   const room = elements.find(el => el.type === "room");
   if (!room) return 0;
@@ -40,7 +143,22 @@ function filterValidPositions(positions, elements, furniture) {
       return isOverlapping(trial, el);
     });
 
-    if (!overlaps) valid.push(trial);
+    const nearSensitive = elements.some(el => {
+      if (el.type !== "door" && el.type !== "window") return false;
+      const dx = Math.max(el.x - (trial.x + trial.width), trial.x - (el.x + el.width), 0);
+      const dy = Math.max(el.y - (trial.y + trial.height), trial.y - (el.y + el.height), 0);
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      return dist < 100;
+    });
+
+    const trialElements = [...elements, trial];
+    const room = elements.find(el => el.type === "room");
+
+    const keepsEmptyConnected = isEmptySpaceConnected(trialElements, room);
+
+    if (!overlaps && !nearSensitive && keepsEmptyConnected && !hasFullySurroundedElement(trialElements, room)) {
+      valid.push(trial);
+    }
   }
 
   return valid;
@@ -112,21 +230,12 @@ function getPlacementScore(pos, elements, room) {
     };
 
     const wallTouch = (
-    sideBox.x === 0 || sideBox.y === 0 ||
-    sideBox.x + sideBox.width === room.x ||
-    sideBox.y + sideBox.height === room.y
+      sideBox.x === 0 || sideBox.y === 0 ||
+      sideBox.x + sideBox.width === room.x ||
+      sideBox.y + sideBox.height === room.y
     );
     if (wallTouch) {
       score += 4;
-      continue;
-    }
-
-    const touchingFurniture = elements.some(el => {
-      if (el.type === "room") return false;
-      return isOverlapping(sideBox, el);
-    });
-    if (touchingFurniture) {
-      score += 2;
       continue;
     }
 
@@ -142,14 +251,23 @@ function getPlacementScore(pos, elements, room) {
     }
   }
 
-  const nearSensitive = elements.filter(el => el.type === "door" || el.type === "window").filter(el => {
-    const dx = Math.max(el.x - (trial.x + trial.width), trial.x - (el.x + el.width), 0);
-    const dy = Math.max(el.y - (trial.y + trial.height), trial.y - (el.y + el.height), 0);
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    return dist < 40;
+  const isTouchingFurniture = elements.some(el => {
+    if (el.type === "room") return false;
+
+    const horizontallyTouching =
+      (trial.x === el.x + el.width || trial.x + trial.width === el.x) &&
+      !(trial.y + trial.height <= el.y || trial.y >= el.y + el.height);
+
+    const verticallyTouching =
+      (trial.y === el.y + el.height || trial.y + trial.height === el.y) &&
+      !(trial.x + trial.width <= el.x || trial.x >= el.x + el.width);
+
+    return horizontallyTouching || verticallyTouching;
   });
 
-  score -= nearSensitive.length * 3;
+  if (isTouchingFurniture) {
+    score += 4;
+  }
 
   return score;
 }
@@ -200,8 +318,3 @@ function placeWardrobe(elements) {
 }
 
 module.exports = { placeWardrobe };
-
-
-
-  // 문이랑 창문 주변 아니게 해야됨
-  // 침대도 주변 그렇게 해야되나? 일단 그냥 진행해

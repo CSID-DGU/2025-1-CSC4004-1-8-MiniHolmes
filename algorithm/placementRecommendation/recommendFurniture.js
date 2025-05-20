@@ -2,79 +2,153 @@ const fs = require('fs');
 const { placeBed } = require('./placeBed');
 const { placeWardrobe } = require('./placeWardrobe');
 const { placeDesk } = require('./placeDesk');
-const { placeBookshelf } = require('./placeBookshelf'); // ✅ 추가
+const { placeBookshelf } = require('./placeBookshelf');
+const { getRecommendedSets } = require('./recommendFurnitureWhat');
+
+const userWeights = {
+  style: 0.5,
+  colortone: 0.1,
+  size: 0.2,
+  price: 0.2,
+  target_style: "natural",
+  target_colortone: "light"
+};
+const budget = 1000000;
+const perimeter = 600;
+
 
 function recommendFurniture() {
-  let design = "modern";
-  let room1 = [
-    { type: "room", x: 400, y: 500 },
-    { type: "window", x: 200, y: 0, width: 100, height: 10 },
-    { type: "toilet", x: 300, y: 400, width: 100, height: 100 },
-    { type: "built-in", x: 0, y: 400, width: 80, height: 100 },
-    { type: "door", x: 180, y: 0, width: 40, height: 10 }
-  ];
+  const recommendedSets = getRecommendedSets(userWeights, budget, perimeter);
+  const results = [];
+  const MAX_TRIALS = 50;
 
-  room2 =  [
-    { type: "room", x: 400, y: 500 }
-  ];
+  recommendedSets.forEach((furnitureSet, setIdx) => {
+    const seenLayouts = new Set();
+    let successfulTrials = 0;
+    let trialCount = 0;
 
-  let reason = [];
+    while (successfulTrials < 3 && trialCount < MAX_TRIALS) {
+      let elements = [
+        { type: "room", x: 600, y: 500 },
+        { type: "window", x: 200, y: 0, width: 100, height: 10 },
+        { type: "door", x: 0, y: 0, width: 70, height: 50 },
+        { type: "built-in", x: 0, y: 400, width: 80, height: 100 },
+        { type: "toilet", x: 500, y: 400, width: 100, height: 100 }
+      ];
+      let reason = [];
 
-  ({ elements, reason } = placeBed(room2, design));
-  ({ elements, reason } = placeWardrobe(room2, reason));
-  ({ elements, reason } = placeDesk(elements, reason));
-  ({ elements, reason } = placeBookshelf(elements, reason)); // ✅ bookshelf 배치
+      const bed = furnitureSet.find(f => f.category === 'bed');
+      const closet = furnitureSet.find(f => f.category === 'closet');
+      const desk = furnitureSet.find(f => f.category === 'desk');
+      const bookshelf = furnitureSet.find(f => f.category === 'bookshelf');
 
-  const elementsJson = JSON.stringify(elements, null, 2);
+      let result = placeBed(elements, userWeights.target_style, bed);
+      elements = result.elements;
+      reason = [...reason, ...(result.reason ?? [])];
+
+      result = placeWardrobe(elements, closet);
+      elements = result.elements;
+      reason = [...reason, ...(result.reason ?? [])];
+
+      result = placeDesk(elements, userWeights.target_style, desk);
+      elements = result.elements;
+      reason = [...reason, ...(result.reason ?? [])];
+
+      result = placeBookshelf(elements, bookshelf);
+      elements = result.elements;
+      reason = [...reason, ...(result.reason ?? [])];
+
+      const layoutKey = JSON.stringify(
+        elements
+          .filter(e => !["room", "window", "door", "toilet", "built-in"].includes(e.type))
+          .map(e => `${e.type}:${e.x},${e.y},${e.width},${e.height}`)
+          .sort()
+      );
+
+      if (!seenLayouts.has(layoutKey)) {
+        seenLayouts.add(layoutKey);
+        results.push({ setIdx, trial: successfulTrials, elements });
+        successfulTrials++;
+      }
+
+      trialCount++;
+    }
+  });
+
+  generateHTML(results);
+  console.log("multi_layout_preview.html 파일이 생성되었습니다.");
+}
+
+function generateHTML(resultSets) {
+  const canvasDivs = resultSets.map(({ setIdx, trial }, idx) => {
+    return `
+      <div style="display:inline-block; margin:20px;">
+        <h3>추천 세트 ${setIdx + 1} - 시도 ${trial + 1}</h3>
+        <canvas id="canvas${idx}" style="border:1px solid #999;"></canvas>
+      </div>`;
+  });
+
+  const elementData = resultSets.map(({ elements }, idx) => {
+    return `{ id: "canvas${idx}", elements: ${JSON.stringify(elements)} }`;
+  });
 
   const html = `
-  <html>
-  <body>
-    <canvas id="roomCanvas" width="1000" height="800" style="border:1px solid black;"></canvas>
-    <script>
-      const ctx = document.getElementById("roomCanvas").getContext("2d");
-      const elements = ${elementsJson};
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>추천 가구 배치 결과</title>
+    </head>
+    <body>
+      <h1>추천 가구 배치 결과 (${resultSets.length}개 시도)</h1>
+      ${canvasDivs.join('\n')}
 
-      const room = elements.find(el => el.type === "room");
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, room.x, room.y);
-      ctx.strokeStyle = "black";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(0, 0, room.x, room.y);
+      <script>
+        window.onload = function() {
+          const allElements = [${elementData.join(',\n')}];
 
-      for (const el of elements) {
-        if (el.type === "room") continue;
+          allElements.forEach(({ id, elements }) => {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext("2d");
+            const room = elements.find(e => e.type === "room");
+            canvas.width = room.x;
+            canvas.height = room.y;
 
-        ctx.fillStyle = getColor(el.type);
-        ctx.fillRect(el.x, el.y, el.width || 5, el.height || 5);
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, room.x, room.y);
+            ctx.strokeStyle = "black";
+            ctx.strokeRect(0, 0, room.x, room.y);
 
-        ctx.fillStyle = "black";
-        ctx.font = "12px sans-serif";
-        ctx.fillText(el.type, el.x + 2, el.y + 12);
-      }
+            for (const el of elements) {
+              if (el.type === "room") continue;
+              ctx.fillStyle = getColor(el.type);
+              ctx.fillRect(el.x, el.y, el.width || 5, el.height || 5);
+              ctx.fillStyle = "black";
+              ctx.font = "12px sans-serif";
+              ctx.fillText(el.type, el.x + 2, el.y + 12);
+            }
+          });
 
-      function getColor(type) {
-        switch(type) {
-          case "window": return "skyblue";
-          case "door": return "orange";
-          case "toilet": return "gray";
-          case "built-in": return "darkgray";
-          case "bed": return "lightgreen";
-          case "wardrobe": return "saddlebrown";
-          case "desk": return "lightblue";
-          case "bookshelf": return "gold"; // ✅ bookshelf 색상 추가
-          default: return "pink";
-        }
-      }
-    </script>
-  </body>
-  </html>
+          function getColor(type) {
+            switch(type) {
+              case "window": return "skyblue";
+              case "door": return "orange";
+              case "toilet": return "gray";
+              case "built-in": return "darkgray";
+              case "bed": return "lightgreen";
+              case "wardrobe": return "saddlebrown";
+              case "desk": return "lightblue";
+              case "bookshelf": return "gold";
+              default: return "pink";
+            }
+          }
+        };
+      </script>
+    </body>
+    </html>
   `;
 
-  console.log("배치 결과:", elements, "\n");
-  console.log(reason);
-  fs.writeFileSync("layout.html", html);
-  console.log("✅ layout.html 파일이 생성되었습니다. 브라우저에서 확인하세요.");
+  fs.writeFileSync('multi_layout_preview.html', html);
 }
+
 
 recommendFurniture();
