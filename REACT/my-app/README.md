@@ -68,12 +68,3 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-
-# 미니홈즈
-### 원룸 자취생에게 최적화된 방 꾸미기 솔루션
-
-
-
-팀장: 전혜원
-
-팀원: 김예원, 박세진, 박태선, 하지연

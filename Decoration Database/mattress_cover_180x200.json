@@ -1,0 +1,242 @@
+[
+    {
+        "name": "RÖNNVECKMAL 뢴베크말 매트리스커버",
+        "category": "mattresscover",
+        "style": "modern",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "white",
+        "material": "cotton",
+        "price": 38600,
+        "brand": "IKEA",
+        "jpg_file": "roennveckmal-fitted-sheet-white__1086540_pe860498_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/roennveckmal-fitted-sheet-white-00532635/"
+    },
+    {
+        "name": "NATTJASMIN 나티아스민 매트리스커버",
+        "category": "mattresscover",
+        "style": "modern",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "white",
+        "material": "cotton/lyocell",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "nattjasmin-fitted-sheet-white__0604092_pe681032_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/nattjasmin-fitted-sheet-white-90343664/"
+    },
+    {
+        "name": "NATTJASMIN 나티아스민 매트리스커버",
+        "category": "mattresscover",
+        "style": "cozy",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "lightbeige",
+        "material": "cotton/lyocell",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "nattjasmin-fitted-sheet-light-beige__0661402_pe711747_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/nattjasmin-fitted-sheet-light-beige-10442738/#content"
+    },
+    {
+        "name": "NATTJASMIN 나티아스민 매트리스커버",
+        "category": "mattresscover",
+        "style": "modern",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "darkgrey",
+        "material": "cotton/lyocell",
+        "price": 39900,
+        "brand": "IKEA",
+        "jpg_file": "nattjasmin-fitted-sheet-dark-grey__0668967_pe714788_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/nattjasmin-fitted-sheet-dark-grey-90442678/#content"
+    },
+    {
+        "name": "DVALA 드발라 매트리스커버",
+        "category": "mattresscover",
+        "style": "modern",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "white",
+        "material": "cotton",
+        "price": 28900,
+        "brand": "IKEA",
+        "jpg_file": "dvala-fitted-sheet-white__0604085_pe681026_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/dvala-fitted-sheet-white-20356565/"
+    },
+    {
+        "name": "DVALA 드발라 매트리스커버",
+        "category": "mattresscover",
+        "style": "natural",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "blue",
+        "material": "cotton",
+        "price": 28900,
+        "brand": "IKEA",
+        "jpg_file": "dvala-fitted-sheet-blue__1243791_pe920940_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/dvala-fitted-sheet-blue-50575707/#content"
+    },
+    {
+        "name": "DVALA 드발라 매트리스커버",
+        "category": "mattresscover",
+        "style": "cozy",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "beige",
+        "material": "cotton",
+        "price": 28900,
+        "brand": "IKEA",
+        "jpg_file": "dvala-fitted-sheet-beige__0683329_pe720997_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/dvala-fitted-sheet-beige-50357224/#content"
+    },
+    {
+        "name": "DVALA 드발라 매트리스커버",
+        "category": "mattresscover",
+        "style": "cozy",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "lightpink",
+        "material": "cotton",
+        "price": 28900,
+        "brand": "IKEA",
+        "jpg_file": "dvala-fitted-sheet-light-pink__0683341_pe721009_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/dvala-fitted-sheet-light-pink-70357666/#content"
+    },
+    {
+        "name": "DVALA 드발라 매트리스커버",
+        "category": "mattresscover",
+        "style": "modern",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "grey",
+        "material": "cotton",
+        "price": 28900,
+        "brand": "IKEA",
+        "jpg_file": "dvala-fitted-sheet-light-grey__0811765_pe771834_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/dvala-fitted-sheet-light-grey-60482454/#content"
+    },
+    {
+        "name": "DVALA 드발라 매트리스커버",
+        "category": "mattresscover",
+        "style": "natural",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "greygreen",
+        "material": "cotton",
+        "price": 28900,
+        "brand": "IKEA",
+        "jpg_file": "dvala-fitted-sheet-grey-green__1138546_pe879990_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/dvala-fitted-sheet-grey-green-70549637/#content"
+    },
+    {
+        "name": "FÄRGMÅRA 페리모라 매트리스커버",
+        "category": "mattresscover",
+        "style": "natural",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "white",
+        "material": "cotton",
+        "price": 16900,
+        "brand": "IKEA",
+        "jpg_file": "faergmara-fitted-sheet-white__0604089_pe681028_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/faergmara-fitted-sheet-white-60347729/"
+    },
+    {
+        "name": "ULLVIDE 울비데 매트리스커버",
+        "category": "mattresscover",
+        "style": "modern",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "white",
+        "material": "cotton/lyocell",
+        "price": 32900,
+        "brand": "IKEA",
+        "jpg_file": "ullvide-fitted-sheet-white__0604096_pe681036_s5.jpg-2.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/ullvide-fitted-sheet-white-30335544/"
+    },
+    {
+        "name": "ULLVIDE 울비데 매트리스커버",
+        "category": "mattresscover",
+        "style": "natural",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "darkblue",
+        "material": "cotton/lyocell",
+        "price": 32900,
+        "brand": "IKEA",
+        "jpg_file": "ullvide-fitted-sheet-dark-blue__0604098_pe681037_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/ullvide-fitted-sheet-dark-blue-90342773/#content"
+    },
+    {
+        "name": "ULLVIDE 울비데 매트리스커버",
+        "category": "mattresscover",
+        "style": "natural",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "greybeige",
+        "material": "cotton/lyocell",
+        "price": 32900,
+        "brand": "IKEA",
+        "jpg_file": "ullvide-fitted-sheet-grey-beige__1304564_pe938839_s5.jpg-2.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/ullvide-fitted-sheet-grey-beige-70590207/#content"
+    },
+    {
+        "name": "ULLVIDE 울비데 매트리스커버",
+        "category": "mattresscover",
+        "style": "modern",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "grey",
+        "material": "cotton/lyocell",
+        "price": 32900,
+        "brand": "IKEA",
+        "jpg_file": "ullvide-fitted-sheet-grey__0604097_pe681038_s5.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/ullvide-fitted-sheet-grey-50342727/#content"
+    },
+    {
+        "name": "BALSAMPOPPEL 발삼포펠 매트리스커버",
+        "category": "mattresscover",
+        "style": "cozy",
+        "dimensions": {
+            "length": 180,
+            "width": 200
+        },
+        "colortone": "white",
+        "material": "cotton",
+        "price": 34900,
+        "brand": "IKEA",
+        "jpg_file": "balsampoppel-fitted-sheet-white__1158966_pe888245_s5.jpg-2.jpg",
+        "url": "https://www.ikea.com/kr/ko/p/balsampoppel-fitted-sheet-white-70557547/"
+    }
+]
