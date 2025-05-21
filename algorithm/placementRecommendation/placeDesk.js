@@ -272,12 +272,13 @@ function getPlacementScoreWithReason(pos, elements, room, design) {
     y === 0 || y + height === room.y;
 
   if (touchesWall) {
-    score += 4;
+    score += 6;
     reasons.push("벽에 인접하여 공간 활용이 좋음");
   }
 
   const touchingFurniture = elements.some(el => {
     if (el.type === "room") return false;
+    if (el.type === "window") return false;
     const box = {
       x: x - 1,
       y: y - 1,
@@ -293,6 +294,7 @@ function getPlacementScoreWithReason(pos, elements, room, design) {
 
   const nearFurniture = elements.some(el => {
     if (el.type === "room") return false;
+    if (el.type === "window") return false;
     const dx = Math.max(el.x - (x + width), x - (el.x + el.width), 0);
     const dy = Math.max(el.y - (y + height), y - (el.y + el.height), 0);
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -308,7 +310,7 @@ function getPlacementScoreWithReason(pos, elements, room, design) {
     const dx = Math.max(el.x - (x + width), x - (el.x + el.width), 0);
     const dy = Math.max(el.y - (y + height), y - (el.y + el.height), 0);
     const dist = Math.sqrt(dx * dx + dy * dy);
-    return dist >= 100;
+    return dist >= 50;
   });
   if (farFromWardrobe) {
     score += 5;
@@ -342,11 +344,11 @@ function getPlacementScoreWithReason(pos, elements, room, design) {
     const dx = bedCenterX - deskCenterX;
     const dy = bedCenterY - deskCenterY;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    return dist > 350;
+    return dist > 100;
   });
 
 if (farFromBed) {
-  score += 20;
+  score += 5;
   reasons.push("침대와 충분한 거리 확보 (모던 스타일 선호)");
 }
   const nearDoor = elements
@@ -362,12 +364,13 @@ if (farFromBed) {
       return dist <= 100;
     });
 
-  if (nearDoor) {
-    score += 20;
+  if (nearDoor && Math.random() < 0.3) {
+    score += 5;
     reasons.push("문 근처에 배치되어 출입 동선에 유리 (모던 스타일 선호)");
   }
 
 }
+
 
   return { score, reasons };
 }
