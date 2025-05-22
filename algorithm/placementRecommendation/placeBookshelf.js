@@ -270,14 +270,14 @@ const getBookshelfScore = (pos, elements, room) => {
 };
 
 const placeBookshelf = (elements) => {
-  const reason = [];
+  const reasons = { bookshelf: [] };
   const room = elements.find(el => el.type === "room");
   const shelf = { type: "bookshelf", width: 80, height: 30 };
   const step = 10;
 
   if (restPlace(elements) < shelf.width * shelf.height) {
-    reason.push({ type: "bookshelf", reason: "공간 부족" });
-    return { elements, reason };
+    reasons.bookshelf.push("공간 부족");
+    return { elements, reasons };
   }
 
   const positions = generateWallBeltPositions(shelf, room, step, 30);
@@ -306,8 +306,8 @@ const placeBookshelf = (elements) => {
   }
 
   if (valid.length === 0) {
-    reason.push({ type: "bookshelf", reason: "조건에 맞는 위치 없음" });
-    return { elements, reason };
+    reasons.bookshelf.push("조건에 맞는 위치 없음");
+    return { elements, reasons };
   }
 
   const maxScore = Math.max(...valid.map(v => v.score));
@@ -322,8 +322,10 @@ const placeBookshelf = (elements) => {
     height: chosen.height
   });
 
-  reason.push({ type: "bookshelf", reason: "벽 또는 침대에 인접한 최적 위치에 배치됨" });
-  return { elements, reason };
+  reasons.bookshelf.push("벽 또는 침대에 인접한 최적 위치에 배치됨");
+
+  return { elements, reasons };
 };
+
 
 module.exports = { placeBookshelf };
