@@ -293,13 +293,13 @@ function addToElements(elements, furniture) {
 }
 
 function placeWardrobe(elements) {
-  const reasons = [];
+  const reasons = { wardrobe: [] };
   const room = elements.find(el => el.type === "room");
   const wardrobe = { type: "wardrobe", width: 80, height: 50 };
   const step = 10;
 
   if (restPlace(elements) < wardrobe.width * wardrobe.height) {
-    reasons.push({ type: "wardrobe", reason: "배치공간 부족" });
+    reasons.wardrobe.push("배치공간 부족");
     return { elements, reasons };
   }
 
@@ -309,9 +309,9 @@ function placeWardrobe(elements) {
 
   if (chosen) {
     addToElements(elements, chosen);
-    reasons.push({ type: "wardrobe", reason: "벽 및 가구에 밀착된 최적 위치에 배치됨" });
+    reasons.wardrobe.push("벽 및 가구에 밀착된 최적 위치에 배치됨");
   } else {
-    reasons.push({ type: "wardrobe", reason: "조건에 맞는 위치 없음" });
+    reasons.wardrobe.push("조건에 맞는 위치 없음");
   }
 
   return { elements, reasons };
