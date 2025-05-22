@@ -277,7 +277,7 @@ function addToElements(elements, furniture) {
 }
 
 function placeBed(elements, design) {
-  let reasons = [];
+  const reasons = { bed: [] };
   const room = elements.find(el => el.type === "room");
   const bed = {
     type: "bed",
@@ -286,9 +286,8 @@ function placeBed(elements, design) {
   };
   const step = 10;
 
-  // 공간이 부족할 경우 배치 불가 처리
   if (restPlace(elements) < bed.width * bed.height) {
-    reasons.push({ type: "bed", reason: "배치공간 부족" });
+    reasons.bed.push("배치공간 부족");
     return { elements, reasons };
   }
 
@@ -297,7 +296,6 @@ function placeBed(elements, design) {
   const windowWalls = allWalls.filter(w => !nonWindowWalls.includes(w));
 
   if (design === "natural") {
-    // 자연 스타일: 창문 벽 우선 배치, 실패 시 일반 벽으로 시도
     const tryWallsList = [windowWalls, nonWindowWalls];
 
     for (const wallGroup of tryWallsList) {
@@ -337,19 +335,17 @@ function placeBed(elements, design) {
 
       if (chosen) {
         addToElements(elements, chosen);
-        reasons.push({
-          type: "bed",
-          reason: wallGroup === windowWalls
+        reasons.bed.push(
+          wallGroup === windowWalls
             ? "자연 스타일: 창문 벽에 배치"
             : "자연 스타일: 일반 벽에 배치"
-        });
+        );
         return { elements, reasons };
       }
     }
   }
 
   if (design === "modern") {
-    // 모던 스타일: 창문 없는 벽에만 배치
     const tryWalls = nonWindowWalls;
     let positions = [];
 
@@ -387,24 +383,24 @@ function placeBed(elements, design) {
 
     if (chosen) {
       addToElements(elements, chosen);
-      reasons.push({ type: "bed", reason: "모던 스타일: 창문 없는 벽에 배치" });
+      reasons.bed.push("모던 스타일: 창문 없는 벽에 배치");
       return { elements, reasons };
     }
   }
 
-  // 벽 띠 영역 fallback 배치
   const fallbackPositions = generateWallBeltPositions(bed, room, step, 30);
   const valid = filterValidPositions(fallbackPositions, elements, bed);
   const chosen = selectRandomFromBestScored(valid, elements, room);
 
   if (chosen) {
     addToElements(elements, chosen);
-    reasons.push({ type: "bed", reason: "벽 띠 fallback 위치에 배치됨" });
+    reasons.bed.push("벽 띠 fallback 위치에 배치됨");
   } else {
-    reasons.push({ type: "bed", reason: "실패: 모든 벽 영역에도 배치 불가" });
+    reasons.bed.push("실패: 모든 벽 영역에도 배치 불가");
   }
 
   return { elements, reasons };
 }
+
 
 module.exports = { placeBed };
