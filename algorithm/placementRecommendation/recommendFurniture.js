@@ -44,19 +44,27 @@ function recommendFurniture() {
 
       let result = placeBed(elements, userWeights.target_style, bed);
       elements = result.elements;
-      reason = [...reason, ...(result.reason ?? [])];
+      Object.entries(result.reasons ?? {}).forEach(([type, r]) => {
+        reason.push({ type, reason: r.join(", ") });
+      });
 
       result = placeWardrobe(elements, closet);
       elements = result.elements;
-      reason = [...reason, ...(result.reason ?? [])];
+      Object.entries(result.reasons ?? {}).forEach(([type, r]) => {
+        reason.push({ type, reason: r.join(", ") });
+      });
 
       result = placeDesk(elements, userWeights.target_style, desk);
       elements = result.elements;
-      reason = [...reason, ...(result.reason ?? [])];
+      Object.entries(result.reasons ?? {}).forEach(([type, r]) => {
+        reason.push({ type, reason: r.join(", ") });
+      });
 
       result = placeBookshelf(elements, bookshelf);
       elements = result.elements;
-      reason = [...reason, ...(result.reason ?? [])];
+      Object.entries(result.reasons ?? {}).forEach(([type, r]) => {
+        reason.push({ type, reason: r.join(", ") });
+      });
 
       const layoutKey = JSON.stringify(
         elements
@@ -67,7 +75,7 @@ function recommendFurniture() {
 
       if (!seenLayouts.has(layoutKey)) {
         seenLayouts.add(layoutKey);
-        results.push({ setIdx, trial: successfulTrials, elements });
+        results.push({ setIdx, trial: successfulTrials, elements, reason });
         successfulTrials++;
       }
 
@@ -76,15 +84,22 @@ function recommendFurniture() {
   });
 
   generateHTML(results);
+  exportResultsToJson(results);
   console.log("multi_layout_preview.html 파일이 생성되었습니다.");
+  console.log("result.json 파일이 생성되었습니다.");
 }
 
 function generateHTML(resultSets) {
-  const canvasDivs = resultSets.map(({ setIdx, trial }, idx) => {
+  const canvasDivs = resultSets.map(({ setIdx, trial, reason }, idx) => {
+    const reasonText = reason
+      .map(r => `<li><b>${r.type}</b>: ${r.reason}</li>`)
+      .join("");
+
     return `
-      <div style="display:inline-block; margin:20px;">
+      <div style="display:inline-block; margin:20px; vertical-align:top;">
         <h3>추천 세트 ${setIdx + 1} - 시도 ${trial + 1}</h3>
         <canvas id="canvas${idx}" style="border:1px solid #999;"></canvas>
+        <ul style="max-width: ${600}px; padding-left: 20px;">${reasonText}</ul>
       </div>`;
   });
 
@@ -148,6 +163,18 @@ function generateHTML(resultSets) {
   `;
 
   fs.writeFileSync('multi_layout_preview.html', html);
+}
+
+
+function exportResultsToJson(resultSets) {
+  const exportData = resultSets.map(({ setIdx, trial, elements, reason }) => ({
+    setIndex: setIdx,
+    trialIndex: trial,
+    elements: elements,
+    reasons: reason
+  }));
+
+  fs.writeFileSync("result.json", JSON.stringify(exportData, null, 2), "utf-8");
 }
 
 
