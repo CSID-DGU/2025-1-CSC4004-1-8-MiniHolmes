@@ -371,19 +371,53 @@ if (farFromBed) {
 
 }
 
+if (design === "natural") {
+
+  const nearWindow = elements.some(el => {
+    if (el.type !== "window") return false;
+    const windowCenterX = el.x + el.width / 2;
+    const windowCenterY = el.y + el.height / 2;
+    const deskCenterX = x + width / 2;
+    const deskCenterY = y + height / 2;
+    const dx = deskCenterX - windowCenterX;
+    const dy = deskCenterY - windowCenterY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    return dist <= 100;
+  });
+
+  if (nearWindow && Math.random() < 0.4) {
+    score += 5;
+    reasons.push("창문 근처로 자연광 활용 가능 (내추럴 스타일 선호, 확률 적용)");
+  }
+
+  const nearBed = elements
+    .filter(el => el.type === "bed")
+    .some(el => {
+      const dx = Math.max(el.x - (x + width), x - (el.x + el.width), 0);
+      const dy = Math.max(el.y - (y + height), y - (el.y + el.height), 0);
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      return dist <= 20;
+    });
+
+  if (nearBed && Math.random() < 0.4) {
+    score += 5;
+    reasons.push("침대 옆에 배치되어 아늑한 분위기 조성 (내추럴 스타일 선호, 확률 적용)");
+  }
+}
+
 
   return { score, reasons };
 }
 
 function placeDesk(elements, design) {
-  const reason = [];
+  const reasons = { desk: [] };
   const room = elements.find(el => el.type === "room");
   const desk = { type: "desk", width: 120, height: 60 };
   const chairGap = 100;
 
   if (restPlace(elements) < desk.width * desk.height) {
-    reason.push({ type: "desk", reason: "공간이 부족합니다." });
-    return { elements, reason };
+    reasons.desk.push("공간이 부족합니다.");
+    return { elements, reasons };
   }
 
   const positions = generateWallBeltPositions(desk, room, 10, 30);
@@ -406,19 +440,16 @@ function placeDesk(elements, design) {
     if (overlap) continue;
 
     if (!isBackSpaceClear(pos, elements, desk, chairGap)) continue;
-    // 이 문장 제거해서 문옆에도 배치 가능하게 if (isTooCloseToDoor(pos, elements, desk)) continue;
-    // 추가 조건: 연결성 유지
     if (!isEmptySpaceConnected([...elements, trial], room)) continue;
-    // 추가 조건: 갇힌 가구 방지
     if (hasFullySurroundedElement([...elements, trial], room)) continue;
+
     const { score, reasons: scoreReasons } = getPlacementScoreWithReason(trial, elements, room, design);
     valid.push({ ...trial, score, reasons: scoreReasons });
-    
   }
 
   if (valid.length === 0) {
-    reason.push({ type: "desk", reason: "적절한 위치를 찾을 수 없습니다." });
-    return { elements, reason };
+    reasons.desk.push("적절한 위치를 찾을 수 없습니다.");
+    return { elements, reasons };
   }
 
   const maxScore = Math.max(...valid.map(p => p.score));
@@ -434,12 +465,10 @@ function placeDesk(elements, design) {
     isHorizontal: selected.isHorizontal
   });
 
-  reason.push({
-    type: "desk",
-    reason: selected.reasons.join(", ")
-  });
+  reasons.desk = selected.reasons;
 
-  return { elements, reason };
+  return { elements, reasons };
 }
+
 
 module.exports = { placeDesk };
