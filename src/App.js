@@ -2,13 +2,21 @@ import React from "react";
 import { Routes, Route, Link } from "react-router-dom";
 
 import Home from "./pages/Home";
+import Step1 from "./pages/Step1";
 import About from "./pages/About";
 import RoomSizeInput from "./pages/RoomSizeInput";
+// import DoorWindowSizeInput from "./pages/DoorWindowSizeInput";
 import DoorSizeInput from "./pages/DoorSizeInput";
 import WindowSizeInput from "./pages/WindowSizeInput";
-import StyleSelect from "./pages/StyleSelect";
+import ToiletInput from "./pages/ToiletInput";
+import BuiltinInput from "./pages/BuiltinInput";
+import Step2 from "./pages/Step2";
 import FurnitureSelect from "./pages/FurnitureSelect";
 import ImportanceOrder from "./pages/ImportanceOrder";
+import ColortoneSelect from "./pages/StyleSelect";
+import StyleSelect from "./pages/ColortoneSelect";
+import PointcolorSelect from "./pages/PointcolorSelect";
+import Step3 from "./pages/Step3";
 import Community from "./pages/Community";
 
 import logo from "./assets/logo.png";
@@ -31,7 +39,7 @@ function App() {
             <nav id="topMenu">
               <ul>
                 <li><Link to="/about" className="menuLink">미니홈즈 소개</Link></li>
-                <li><Link to="/input" className="menuLink">서비스 경험해보기</Link></li>
+                <li><Link to="/step1" className="menuLink">서비스 경험해보기</Link></li>
                 <li><Link to="/community" className="menuLink">커뮤니티</Link></li>
                 <li><Link to="/mypage" className="menuLink">마이페이지</Link></li>
               </ul>
@@ -44,13 +52,21 @@ function App() {
         <main className="px-6 py-6">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/step1" element={<Step1 />} />
             <Route path="/about" element={<About />} />
-            <Route path="/input" element={<RoomSizeInput />} />
+            <Route path="/room" element={<RoomSizeInput />} />
+            {/* <Route path="/doorWindow" element={<DoorWindowSizeInput />} /> */}
             <Route path="/door" element={<DoorSizeInput />} />
             <Route path="/window" element={<WindowSizeInput />} />
-            <Route path="/style" element={<StyleSelect />} />
+            <Route path="/toilet" element={<ToiletInput />} />
+            <Route path="/builtin" element={<BuiltinInput />} />
+            <Route path="/step2" element={<Step2 />} />
             <Route path="/furniture" element={<FurnitureSelect />} />
             <Route path="/order" element={<ImportanceOrder />} />
+            <Route path="/colortone" element={<ColortoneSelect />} />
+            <Route path="/style" element={<StyleSelect />} />
+            <Route path="/pointcolor" element={<PointcolorSelect />} />
+            <Route path="/step3" element={<Step3 />} />
             <Route path="/community" element={<Community />} />
           </Routes>
         </main>

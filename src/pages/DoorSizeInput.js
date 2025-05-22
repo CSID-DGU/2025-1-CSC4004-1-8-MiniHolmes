@@ -2,20 +2,36 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./style/DoorSizeInput.css";
 
+const ProgressBar = ({ currentStep, totalSteps }) => {
+    const steps = [];
+    for (let i = 1; i <= totalSteps; i++) {
+        let className = "step";
+        if (i < currentStep) className += " done";
+        else if (i === currentStep) className += " current";
+
+        steps.push(
+            <div key={i} className={className}>
+                {i}
+            </div>
+        );
+    }
+    return <div className="progress-bar">{steps}</div>;
+};
+
 const DoorInput = () => {
     useEffect(() => {
         document.title = "가구배치 무료견적 | 미니홈즈 인테리어 배치";
     }, []);
 
     const navigate = useNavigate();
-    const [doorCount, setDoorCount] = useState('1');
-    const [doorSizes, setDoorSizes] = useState([{ width: '', height: '' }]);
+    const [doorCount, setDoorCount] = useState("1");
+    const [doorSizes, setDoorSizes] = useState([{ width: "", height: "" }]);
 
     const handleCountChange = (e) => {
         let value = e.target.value;
 
-        if (value === '') {
-            setDoorCount('');
+        if (value === "") {
+            setDoorCount("");
             setDoorSizes([]);
             return;
         }
@@ -24,16 +40,33 @@ const DoorInput = () => {
             let num = parseInt(value, 10);
             if (num < 1) num = 1;
             setDoorCount(num.toString());
-            setDoorSizes(Array.from({ length: num }, (_, i) => doorSizes[i] || { width: '', height: '' }));
+            setDoorSizes(
+                Array.from({ length: num }, (_, i) => doorSizes[i] || { width: "", height: "" })
+            );
         }
     };
 
     const handleSizeChange = (index, e) => {
         const { name, value } = e.target;
-        const filteredValue = value.replace(/[^0-9]/g, '');
-        const updated = [...doorSizes];
-        updated[index][name] = filteredValue;
-        setDoorSizes(updated);
+
+        // 빈값 허용
+        if (value === "") {
+            const updated = [...doorSizes];
+            updated[index][name] = "";
+            setDoorSizes(updated);
+            return;
+        }
+
+        const filteredValue = value.replace(/[^0-9]/g, "");
+
+        if (filteredValue === "") return;
+
+        const num = Number(filteredValue);
+        if (num >= 0) {
+            const updated = [...doorSizes];
+            updated[index][name] = filteredValue;
+            setDoorSizes(updated);
+        }
     };
 
     const handleBack = () => {
@@ -41,7 +74,8 @@ const DoorInput = () => {
     };
 
     const handleNext = () => {
-        const allFilled = doorSizes.length === parseInt(doorCount, 10) && doorSizes.every(d => d.width && d.height);
+        const allFilled =
+            doorSizes.length === parseInt(doorCount, 10) && doorSizes.every((d) => d.width && d.height);
         if (allFilled) {
             localStorage.setItem("doorSizes", JSON.stringify(doorSizes));
             navigate("/window");
@@ -53,11 +87,13 @@ const DoorInput = () => {
     return (
         <div className="room-bg">
             <div className="container">
+                <ProgressBar currentStep={2} totalSteps={5} />
+
                 <h4 className="title">모든 문의 개수를 입력해주세요.</h4>
                 <input
                     type="number"
                     min="1"
-                    value={doorCount || ''}
+                    value={doorCount || ""}
                     onChange={handleCountChange}
                     className="input-field"
                 />
@@ -73,6 +109,7 @@ const DoorInput = () => {
                                 value={door.width}
                                 onChange={(e) => handleSizeChange(index, e)}
                                 className="dim-input"
+                                min="0"
                             />
                             <span className="dim-x">x</span>
                             <input
@@ -82,14 +119,19 @@ const DoorInput = () => {
                                 value={door.height}
                                 onChange={(e) => handleSizeChange(index, e)}
                                 className="dim-input"
+                                min="0"
                             />
                         </div>
                     </div>
                 ))}
 
                 <div className="button-group">
-                    <button className="back-button" onClick={handleBack}>뒤로</button>
-                    <button className="next-button" onClick={handleNext}>다음</button>
+                    <button className="back-button" onClick={handleBack}>
+                        뒤로
+                    </button>
+                    <button className="next-button" onClick={handleNext}>
+                        다음
+                    </button>
                 </div>
             </div>
         </div>
