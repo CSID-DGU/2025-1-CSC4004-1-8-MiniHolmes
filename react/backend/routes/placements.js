@@ -1,0 +1,99 @@
+const express = require('express');
+const router = express.Router();
+const Placement = require('../models/Placement');
+const auth = require('../middleware/auth');
+
+// 배치 저장
+router.post('/', auth, async (req, res) => {
+  try {
+    console.log('배치 저장 요청:', {
+      user: req.user,
+      body: req.body
+    });
+
+    const placement = new Placement({
+      userId: req.user._id,
+      name: req.body.name,
+      furniture: req.body.furniture
+    });
+
+    console.log('생성된 배치 객체:', placement);
+
+    await placement.save();
+    console.log('배치 저장 성공:', placement);
+    res.status(201).json(placement);
+  } catch (error) {
+    console.error('배치 저장 실패:', error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// 사용자의 모든 배치 불러오기
+router.get('/', auth, async (req, res) => {
+  try {
+    console.log('배치 불러오기 요청:', {
+      user: req.user
+    });
+
+    const placements = await Placement.find({ userId: req.user._id })
+      .sort({ createdAt: -1 });
+    
+    console.log('불러온 배치 수:', placements.length);
+    res.json(placements);
+  } catch (error) {
+    console.error('배치 불러오기 실패:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// 특정 배치 불러오기
+router.get('/:id', auth, async (req, res) => {
+  try {
+    console.log('특정 배치 불러오기 요청:', {
+      user: req.user,
+      placementId: req.params.id
+    });
+
+    const placement = await Placement.findOne({
+      _id: req.params.id,
+      userId: req.user._id
+    });
+
+    if (!placement) {
+      return res.status(404).json({ message: '배치를 찾을 수 없습니다.' });
+    }
+
+    console.log('배치 찾음:', placement);
+    res.json(placement);
+  } catch (error) {
+    console.error('특정 배치 불러오기 실패:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// 배치 삭제
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    console.log('배치 삭제 요청:', {
+      user: req.user,
+      placementId: req.params.id
+    });
+
+    const placement = await Placement.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id
+    });
+
+    if (!placement) {
+      return res.status(404).json({ message: '배치를 찾을 수 없습니다.' });
+    }
+
+    console.log('배치 삭제 성공:', placement);
+    res.json({ message: '배치가 삭제되었습니다.' });
+  } catch (error) {
+    console.error('배치 삭제 실패:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+module.exports = router; 

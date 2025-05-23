@@ -1,5 +1,5 @@
 .page-bg {
-    background-color: #f5f5f5 !important;
+    background-color: #f5f5f5;
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -51,7 +51,7 @@
     background-color: #1e40af;
 }
 
-.style-button {
+.colortone-button {
     width: 100%;
     padding: 14px 0;
     font-size: 1.1rem;
@@ -66,50 +66,23 @@
     margin-bottom: 12px;
 }
 
-.style-button:hover {
+.colortone-button:hover {
     background-color: #d35400;
     color: white;
     border-color: #d35400;
 }
 
-.style-button.selected {
+.colortone-button.selected {
     background-color: #d35400;
     color: white;
     border-color: #d35400;
 }
 
-.style-grid {
+.colortone-grid {
     display: flex;
     flex-direction: column;
     width: 100%;
     max-width: 300px;
     margin: 0 auto 10px auto;
     padding-top: 40px;
-}
-
-.progress-bar {
-    display: flex;
-    gap: 10px;
-    margin-top: 30px;
-    margin-bottom: 40px;
-}
-
-.step {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: lightgray;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-.step.done {
-    background: gray
-}
-
-.step.current {
-    background: orange;
 }

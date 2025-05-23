@@ -2,6 +2,23 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./style/FurnitureSelect.css";
 
+const ProgressBar = ({ currentStep, totalSteps }) => {
+    const steps = [];
+    for (let i = 1; i <= totalSteps; i++) {
+        let className = 'step';
+        if (i < currentStep) className += ' done';
+        else if (i === currentStep) className += ' current';
+
+        steps.push(
+            <div key={i} className={className}>
+                {i}
+            </div>
+        );
+    }
+
+    return <div className="progress-bar">{steps}</div>;
+};
+
 const FurnitureSelect = () => {
     const navigate = useNavigate();
     const [selectedFurniture, setSelectedFurniture] = useState([]);
@@ -29,36 +46,41 @@ const FurnitureSelect = () => {
         navigate("/order");
     };
 
+    const handleReset = () => {
+        if (window.confirm("초기화하시겠습니까?")) {
+            setSelectedFurniture([]);
+        }
+    };
+
     const handleBack = () => {
         navigate(-1);
     };
 
     return (
-        <div className="container">
-            <h1 className="title">원하는 가구를 선택해주세요</h1>
-            <p className="subtitle">(1개 이상 선택)</p>
+        <div className="page-bg">
+            <div className="container">
+                <ProgressBar currentStep={2} totalSteps={5} />
 
-            {/* {selectedFurniture.length > 0 && (
-                <div className="selected-furniture">
-                    현재 선택: {selectedFurniture.join(", ")}
+                <h1 className="title">원하는 가구를 선택해주세요</h1>
+                <p className="subtitle">(1개 이상 선택)</p>
+
+                <div className="furniture-list">
+                    {furnitureOptions.map((item) => (
+                        <button
+                            key={item}
+                            onClick={() => toggleFurniture(item)}
+                            className={`furniture-button ${selectedFurniture.includes(item) ? "selected" : ""}`}
+                        >
+                            {item}
+                        </button>
+                    ))}
                 </div>
-            )} */}
 
-            <div className="furniture-list">
-                {furnitureOptions.map((item) => (
-                    <button
-                        key={item}
-                        onClick={() => toggleFurniture(item)}
-                        className={`furniture-button ${selectedFurniture.includes(item) ? "selected" : ""}`}
-                    >
-                        {item}
-                    </button>
-                ))}
-            </div>
-
-            <div className="button-group">
-                <button className="back-button" onClick={handleBack}>뒤로</button>
-                <button className="next-button" onClick={handleNext}>다음</button>
+                <div className="button-group">
+                    <button className="back-button" onClick={handleBack}>뒤로</button>
+                    <button className="reset-button" onClick={handleReset}>초기화</button>
+                    <button className="next-button" onClick={handleNext}>다음</button>
+                </div>
             </div>
         </div>
     );

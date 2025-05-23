@@ -111,3 +111,30 @@
 .next-button:hover {
     background-color: #1e40af;
 }
+
+.progress-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+
+.step {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: lightgray;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.step.done {
+    background: gray
+}
+
+.step.current {
+    background: orange;
+}
