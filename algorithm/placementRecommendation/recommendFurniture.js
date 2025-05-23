@@ -22,7 +22,8 @@ function recommendFurniture() {
   const results = [];
   const MAX_TRIALS = 50;
 
-  recommendedSets.forEach((furnitureSet, setIdx) => {
+  recommendedSets.forEach((set, setIdx) => {
+    const furnitureSet = set.furnitureSet;
     const seenLayouts = new Set();
     let successfulTrials = 0;
     let trialCount = 0;
@@ -37,10 +38,10 @@ function recommendFurniture() {
       ];
       let reason = [];
 
-      const bed = furnitureSet.find(f => f.category === 'bed');
-      const closet = furnitureSet.find(f => f.category === 'closet');
-      const desk = furnitureSet.find(f => f.category === 'desk');
-      const bookshelf = furnitureSet.find(f => f.category === 'bookshelf');
+      const bed = furnitureSet.find(f => f.category == 'bed');
+      const closet = furnitureSet.find(f => f.category == 'closet');
+      const desk = furnitureSet.find(f => f.category == 'desk');
+      const bookshelf = furnitureSet.find(f => f.category == 'bookshelf');
 
       let result = placeBed(elements, userWeights.target_style, bed);
       elements = result.elements;
