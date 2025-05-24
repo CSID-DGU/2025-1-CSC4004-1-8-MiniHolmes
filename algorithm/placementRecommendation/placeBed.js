@@ -136,7 +136,7 @@ function filterValidPositions(positions, elements, furniture) {
       y: pos.y,
       width,
       height,
-      isHorizontal: pos.isHorizon
+      isHorizon: pos.isHorizon
     };
 
     const overlaps = elements.some(el => {
@@ -220,9 +220,25 @@ function generateWallBeltPositions(furniture, room, step = 10, belt = 30) {
 
 function getWallAndFurnitureTightnessScore(p, elements, room) {
   let score = 0;
+  const reasons = [];
 
   if (p.x === 0 || p.x + p.width === room.x) score = score + 2;
   if (p.y === 0 || p.y + p.height === room.y) score = score + 2;
+
+  let scoreflag = 0;
+
+  let wallTouchCount = 0;
+    if (p.x === 0) wallTouchCount++;
+    if (p.x + p.width === room.x) wallTouchCount++;
+    if (p.y === 0) wallTouchCount++;
+    if (p.y + p.height === room.y) wallTouchCount++;
+
+    
+    if (wallTouchCount > 0) {
+      const wallScore = wallTouchCount * 10;
+      score += wallScore;
+      reasons.push(`벽 ${wallTouchCount}면에 인접하여 안정적인 배치 (+${wallScore})`);
+    }
 
   for (const el of elements) {
     if (el.type === "room") continue;
@@ -232,8 +248,14 @@ function getWallAndFurnitureTightnessScore(p, elements, room) {
       const dy = Math.max(el.y - (p.y + p.height), p.y - (el.y + el.height), 0);
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (dist < 100) score -= 100;
-      else score += 2;
+      if (dist < 100) {
+        score -= 100;
+        reasons.push("문 주변에 배치됨(-100)");
+      }
+      else {
+        score += 2;
+        reasons.push("문 주변에 배치 피함(+2)");
+      };
       continue;
     }
 
@@ -243,27 +265,33 @@ function getWallAndFurnitureTightnessScore(p, elements, room) {
       ((p.y === el.y + el.height || p.y + p.height === el.y) &&
         !(p.x + p.width <= el.x || p.x >= el.x + el.width));
 
-    if (touching) score++;
+    if (touching) {score += 2; scoreflag = 1};
+
   }
 
+  if(scoreflag==1) {reasons.push("가구 주변에 배치됨(+2)");};
 
-  return score;
+  return {score,reasons};
 }
 
 function selectRandomFromBestScored(positions, elements, room) {
   if (positions.length === 0) return null;
 
-  const scored = positions.map(p => ({
-    ...p,
-    score: getWallAndFurnitureTightnessScore(p, elements, room)
-  }));
+  const scored = positions.map(p => {
+    const { score, reasons } = getWallAndFurnitureTightnessScore(p, elements, room);
+    return {
+      ...p,
+      score,
+      reasons
+    };
+  });
 
   const maxScore = Math.max(...scored.map(p => p.score));
   const topCandidates = scored.filter(p => p.score === maxScore);
   const index = Math.floor(Math.random() * topCandidates.length);
 
-  const { score, ...cleaned } = topCandidates[index];
-  return cleaned;
+  const { score, ...chosen } = topCandidates[index];
+  return chosen; 
 }
 
 function addToElements(elements, furniture) {
@@ -276,13 +304,13 @@ function addToElements(elements, furniture) {
   });
 }
 
-function placeBed(elements, design) {
+function placeBed(elements, design,bedData) {
   const reasons = { bed: [] };
   const room = elements.find(el => el.type === "room");
   const bed = {
     type: "bed",
-    width: 150,
-    height: 200
+    width: bedData.dimensions.width,
+    height: bedData.dimensions.height
   };
   const step = 10;
 
@@ -340,6 +368,9 @@ function placeBed(elements, design) {
             ? "자연 스타일: 창문 벽에 배치"
             : "자연 스타일: 일반 벽에 배치"
         );
+        if (chosen.reasons) {
+       Array.prototype.push.apply(reasons.bed, chosen.reasons);
+      }
         return { elements, reasons };
       }
     }
@@ -380,10 +411,13 @@ function placeBed(elements, design) {
 
     const valid = filterValidPositions(positions, elements, bed);
     const chosen = selectRandomFromBestScored(valid, elements, room);
-
+    
     if (chosen) {
       addToElements(elements, chosen);
       reasons.bed.push("모던 스타일: 창문 없는 벽에 배치");
+      if (chosen.reasons) {
+      Array.prototype.push.apply(reasons.bed, chosen.reasons);
+      }
       return { elements, reasons };
     }
   }
