@@ -135,7 +135,7 @@ function filterValidPositions(positions, elements, furniture) {
       y: pos.y,
       width,
       height,
-      isHorizontal: pos.isHorizon
+      isHorizon: pos.isHorizon
     };
 
     const overlaps = elements.some(el => {
@@ -209,6 +209,7 @@ function generateWallBeltPositions(furniture, room, step = 10, belt = 30) {
 
 function getPlacementScore(pos, elements, room) {
   let score = 0;
+  const reasons = [];
 
   const width = pos.isHorizontal ? pos.height : pos.width;
   const height = pos.isHorizontal ? pos.width : pos.height;
@@ -220,6 +221,9 @@ function getPlacementScore(pos, elements, room) {
     { dx: 0, dy: -1, width: trial.width, height: 1 },
     { dx: 0, dy: trial.height, width: trial.width, height: 1 }
   ];
+
+  var wallTouchflag = 0;
+  var nearSomethingflag = 0;
 
   for (const s of sides) {
     const sideBox = {
@@ -235,7 +239,9 @@ function getPlacementScore(pos, elements, room) {
       sideBox.y + sideBox.height === room.y
     );
     if (wallTouch) {
+      wallTouchflag = 1;
       score += 4;
+      
       continue;
     }
 
@@ -247,9 +253,14 @@ function getPlacementScore(pos, elements, room) {
       return dist > 0 && dist <= 20;
     });
     if (nearSomething) {
+      nearSomethingflag = 1;
       score += 1;
+      
     }
   }
+
+  if(wallTouchflag==1){reasons.push("벽에 인접하여 안정적인 배치(+4)");}
+  if(nearSomethingflag){reasons.push("물체에 근접하여 안정적인 배치 (+1)");}
 
   const isTouchingFurniture = elements.some(el => {
     if (el.type === "room") return false;
@@ -266,20 +277,25 @@ function getPlacementScore(pos, elements, room) {
   });
 
   if (isTouchingFurniture) {
+    reasons.push("가구에 인접하여 안정적인 배치 (+4)");
     score += 4;
   }
 
-  return score;
+  return {score,reasons};
 }
 
 function selectRandomFromBestScored(validPositions, elements, room) {
   if (validPositions.length === 0) return null;
-  const scored = validPositions.map(p => ({ ...p, score: getPlacementScore(p, elements, room) }));
+
+  const scored = validPositions.map(p => {
+    const { score, reasons } = getPlacementScore(p, elements, room);
+    return { ...p, score, reasons };
+  });
+
   const maxScore = Math.max(...scored.map(p => p.score));
   const top = scored.filter(p => p.score === maxScore);
   const index = Math.floor(Math.random() * top.length);
-  const { score, ...chosen } = top[index];
-  return chosen;
+  return top[index]; // 선택된 항목은 .score 와 .reasons 포함
 }
 
 function addToElements(elements, furniture) {
@@ -309,7 +325,11 @@ function placeWardrobe(elements) {
 
   if (chosen) {
     addToElements(elements, chosen);
+    if (chosen.reasons) {
+     Array.prototype.push.apply(reasons.wardrobe, chosen.reasons);
+    }
     reasons.wardrobe.push("벽 및 가구에 밀착된 최적 위치에 배치됨");
+    reasons.wardrobe.push("창문 및 문 근처가 아닌 지점 최적 위치에 배치됨");
   } else {
     reasons.wardrobe.push("조건에 맞는 위치 없음");
   }
