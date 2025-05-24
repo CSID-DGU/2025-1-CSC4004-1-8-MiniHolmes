@@ -20,7 +20,7 @@ const perimeter = 600;
 function recommendFurniture() {
   const recommendedSets = getRecommendedSets(userWeights, budget, perimeter);
   const results = [];
-  const MAX_TRIALS = 50;
+  const MAX_TRIALS = 25;
 
   recommendedSets.forEach((set, setIdx) => {
     const furnitureSet = set.furnitureSet;
@@ -93,7 +93,12 @@ function recommendFurniture() {
 function generateHTML(resultSets) {
   const canvasDivs = resultSets.map(({ setIdx, trial, reason }, idx) => {
     const reasonText = reason
-      .map(r => `<li><b>${r.type}</b>: ${r.reason}</li>`)
+      .map(r => {
+    const items = r.reason.split(",").map(s => s.trim());
+    return `<li><b>${r.type}</b><ul>` +
+      items.map(item => `<li>${item}</li>`).join("") +
+      `</ul></li>`;
+     })
       .join("");
 
     return `
@@ -178,5 +183,7 @@ function exportResultsToJson(resultSets) {
   fs.writeFileSync("result.json", JSON.stringify(exportData, null, 2), "utf-8");
 }
 
+
+// bookself 안고침
 
 recommendFurniture();
