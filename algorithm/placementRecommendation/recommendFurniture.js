@@ -16,6 +16,15 @@ const userWeights = {
 const budget = 1000000;
 const perimeter = 600;
 
+function roundToNearestTen(value) {
+  return Math.round(value / 10) * 10;
+}
+
+function roundDimensions(furniture) {
+  if (!furniture?.dimensions) return;
+  furniture.dimensions.width = roundToNearestTen(furniture.dimensions.width);
+  furniture.dimensions.height = roundToNearestTen(furniture.dimensions.height);
+}
 
 function recommendFurniture() {
   const recommendedSets = getRecommendedSets(userWeights, budget, perimeter);
@@ -42,6 +51,12 @@ function recommendFurniture() {
       const closet = furnitureSet.find(f => f.category == 'closet');
       const desk = furnitureSet.find(f => f.category == 'desk');
       const bookshelf = furnitureSet.find(f => f.category == 'bookshelf');
+
+      roundDimensions(bed);
+      roundDimensions(closet);
+      roundDimensions(desk);
+      roundDimensions(bookshelf);
+
 
       let result = placeBed(elements, userWeights.target_style, bed);
       elements = result.elements;
