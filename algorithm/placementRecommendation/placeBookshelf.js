@@ -141,17 +141,19 @@ const restPlace = (elements) => {
   return roomArea - occupied;
 };
 
-const generateWallBeltPositions = (furniture, room, step = 10, belt = 30) => {
+function generateWallBeltPositions(furniture, room, step = 10, belt = 30) {
   const positions = [];
-  for (let x = 0; x <= room.x - furniture.width; x += step) {
-    for (let y = 0; y <= room.y - furniture.height; y += step) {
-      positions.push({ x, y, isHorizontal: false });
-      positions.push({ x, y, isHorizontal: true });
+  for (const isHorizontal of [false, true]) {
+    const width = isHorizontal ? furniture.height : furniture.width;
+    const height = isHorizontal ? furniture.width : furniture.height;
+    for (let x = 0; x <= room.x - width; x += step) {
+      for (let y = 0; y <= room.y - height; y += step) {
+        positions.push({ x, y, isHorizontal });
+      }
     }
   }
   return positions;
-};
-
+}
 const isNearType = (trial, elements, type, maxDist) => {
   return elements.some(el => {
     if (el.type !== type) return false;
