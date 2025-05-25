@@ -13,8 +13,8 @@ import BuiltinInput from "./pages/BuiltinInput";
 import Step2 from "./pages/Step2";
 import FurnitureSelect from "./pages/FurnitureSelect";
 import ImportanceOrder from "./pages/ImportanceOrder";
-import ColortoneSelect from "./pages/StyleSelect";
-import StyleSelect from "./pages/ColortoneSelect";
+import StyleSelect from "./pages/StyleSelect";
+import ColortoneSelect from "./pages/ColortoneSelect";
 import PointcolorSelect from "./pages/PointcolorSelect";
 import Step3 from "./pages/Step3";
 import Community from "./pages/Community";
@@ -62,10 +62,10 @@ function App() {
             <Route path="/builtin" element={<BuiltinInput />} />
             <Route path="/step2" element={<Step2 />} />
             <Route path="/furniture" element={<FurnitureSelect />} />
-            <Route path="/order" element={<ImportanceOrder />} />
-            <Route path="/colortone" element={<ColortoneSelect />} />
             <Route path="/style" element={<StyleSelect />} />
+            <Route path="/colortone" element={<ColortoneSelect />} />
             <Route path="/pointcolor" element={<PointcolorSelect />} />
+            <Route path="/order" element={<ImportanceOrder />} />
             <Route path="/step3" element={<Step3 />} />
             <Route path="/community" element={<Community />} />
           </Routes>

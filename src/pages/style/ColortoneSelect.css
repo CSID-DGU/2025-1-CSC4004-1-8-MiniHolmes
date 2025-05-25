@@ -86,3 +86,30 @@
     margin: 0 auto 10px auto;
     padding-top: 40px;
 }
+
+.progress-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+
+.step {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: lightgray;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.step.done {
+    background: gray
+}
+
+.step.current {
+    background: orange;
+}

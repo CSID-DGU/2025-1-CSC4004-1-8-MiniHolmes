@@ -21,64 +21,56 @@ const ProgressBar = ({ currentStep, totalSteps }) => {
 
 const ImportanceOrder = () => {
     const navigate = useNavigate();
-    const [furnitureList, setFurnitureList] = useState([]);
-    const [rankedFurniture, setRankedFurniture] = useState({});
+
+    const criteria = ["스타일(ex. 모던)", "가구 톤(ex. 밝은색 가구)", "가구 사이즈(ex. 퀸사이즈 침대)", "저렴한 가격"];
+
+    const [rankedCriteria, setRankedCriteria] = useState({});
 
     useEffect(() => {
-        document.title = "가구배치 무료견적 | 미니홈즈 인테리어 배치";
-        const stored = localStorage.getItem("essentialFurniture");
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            setFurnitureList(parsed);
+        document.title = "중요도 순위 선택 | 미니홈즈 인테리어 배치";
 
-            // 초기 순위 설정: 모두 null
-            const initialRanked = {};
-            for (let i = 1; i <= parsed.length; i++) {
-                initialRanked[i] = null;
-            }
-            setRankedFurniture(initialRanked);
-        } else {
-            alert("선택된 가구가 없습니다. 이전 페이지로 이동합니다.");
-            navigate(-1);
+        const initialRanked = {};
+        for (let i = 1; i <= criteria.length; i++) {
+            initialRanked[i] = null;
         }
-    }, [navigate]);
+        setRankedCriteria(initialRanked);
+    }, []);
 
-    const handleChange = (rank, selectedFurniture) => {
-        // 현재 선택된 다른 랭크에서 이 가구가 선택돼있으면 제거
-        const updated = { ...rankedFurniture };
+    const handleChange = (rank, selected) => {
+        const updated = { ...rankedCriteria };
+
         for (let key in updated) {
-            if (Number(key) !== rank && updated[key] === selectedFurniture) {
+            if (Number(key) !== rank && updated[key] === selected) {
                 updated[key] = null;
             }
         }
-        updated[rank] = selectedFurniture;
-        setRankedFurniture(updated);
+        updated[rank] = selected;
+        setRankedCriteria(updated);
     };
 
     const handleNext = () => {
-        const selected = Object.values(rankedFurniture);
+        const selected = Object.values(rankedCriteria);
         if (selected.includes(null)) {
             alert("모든 순위를 선택해주세요.");
             return;
         }
 
-        // 저장 형식: {가구이름: 순위}
         const importanceOrder = {};
-        Object.entries(rankedFurniture).forEach(([rank, name]) => {
+        Object.entries(rankedCriteria).forEach(([rank, name]) => {
             importanceOrder[name] = Number(rank);
         });
 
         localStorage.setItem("importanceOrder", JSON.stringify(importanceOrder));
-        navigate("/colortone");
+        navigate("/step3");
     };
 
     const handleReset = () => {
         if (window.confirm("초기화하시겠습니까?")) {
             const initial = {};
-            for (let i = 1; i <= furnitureList.length; i++) {
+            for (let i = 1; i <= criteria.length; i++) {
                 initial[i] = null;
             }
-            setRankedFurniture(initial);
+            setRankedCriteria(initial);
             localStorage.removeItem("importanceOrder");
         }
     };
@@ -90,29 +82,31 @@ const ImportanceOrder = () => {
     return (
         <div className="page-bg">
             <div className="container">
-
-                {/* 1/5단계 ProgressBar 추가 */}
-                <ProgressBar currentStep={2} totalSteps={5} />
+                <ProgressBar currentStep={5} totalSteps={5} />
 
                 <h1 className="title">중요도 순서 설정</h1>
-                <p className="subtitle">가구의 중요도를 순서대로 선택해주세요.</p>
+                <p className="subtitle">스타일, 가구 톤, 가구 사이즈, 가격을<br />중요한 순서대로 선택해주세요.</p>
 
                 <div className="criteria-list">
-                    {Array.from({ length: furnitureList.length }, (_, i) => {
+                    {Array.from({ length: criteria.length }, (_, i) => {
                         const rank = i + 1;
-                        const selected = Object.values(rankedFurniture).filter(v => v !== null && rankedFurniture[rank] !== v);
-                        const available = furnitureList.filter(item => !selected.includes(item) || item === rankedFurniture[rank]);
+                        const selected = Object.values(rankedCriteria).filter(
+                            (v) => v !== null && rankedCriteria[rank] !== v
+                        );
+                        const available = criteria.filter(
+                            (item) => !selected.includes(item) || item === rankedCriteria[rank]
+                        );
 
                         return (
                             <div key={rank} className="criteria-item">
                                 <span className="criteria-name">{rank}순위</span>
                                 <select
-                                    value={rankedFurniture[rank] || ""}
+                                    value={rankedCriteria[rank] || ""}
                                     onChange={(e) => handleChange(rank, e.target.value)}
                                     className="select-rank"
                                 >
                                     <option value="">선택</option>
-                                    {available.map(item => (
+                                    {available.map((item) => (
                                         <option key={item} value={item}>
                                             {item}
                                         </option>

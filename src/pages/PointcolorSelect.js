@@ -23,7 +23,7 @@ const PointcolorSelect = () => {
     const [selectedPointcolor, setSelectedPointcolor] = useState("");
 
     useEffect(() => {
-        document.title = "가구배치 무료견적 | 포인트 색상 선택";
+        document.title = "가구배치 무료견적 | 미니홈즈 인테리어 배치";
     }, []);
 
     const handleSelect = (color) => {
@@ -36,7 +36,7 @@ const PointcolorSelect = () => {
             return;
         }
         localStorage.setItem("pointcolor", selectedPointcolor);
-        navigate("/Step3");
+        navigate("/order");
     };
 
     const handleBack = () => {
@@ -65,6 +65,7 @@ const PointcolorSelect = () => {
                 <ProgressBar currentStep={4} totalSteps={5} />
 
                 <h1 className="title">원하는 포인트 색상을 선택해주세요</h1>
+                <p className="subtitle">(1개 선택)</p>
 
                 <div className="colortone-grid pointcolor-grid">
                     {colorOptions.map(({ value, label }) => (
@@ -73,7 +74,21 @@ const PointcolorSelect = () => {
                             onClick={() => handleSelect(value)}
                             className={`colortone-button ${selectedPointcolor === value ? "selected" : ""}`}
                         >
+                            <span
+                                className="color-circle"
+                                style={{ backgroundColor: value }}
+                            ></span>
                             {label}
+                            <span
+                                style={{
+                                    color: value,
+                                    marginLeft: 6,
+                                    fontWeight: "bold",
+                                    textShadow: value === "white" ? "0 0 0 1px black" : "none",
+                                    WebkitTextStroke: value === "white" ? "1px black" : "none",
+                                }}
+                            > ■
+                            </span>
                         </button>
                     ))}
                 </div>

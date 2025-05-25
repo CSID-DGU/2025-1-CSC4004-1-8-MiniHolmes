@@ -2,6 +2,22 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./style/ColortoneSelect.css";
 
+const ProgressBar = ({ currentStep, totalSteps }) => {
+    const steps = [];
+    for (let i = 1; i <= totalSteps; i++) {
+        let className = "step";
+        if (i < currentStep) className += " done";
+        else if (i === currentStep) className += " current";
+
+        steps.push(
+            <div key={i} className={className}>
+                {i}
+            </div>
+        );
+    }
+    return <div className="progress-bar">{steps}</div>;
+};
+
 const ColortoneSelect = () => {
     const navigate = useNavigate();
     const [selectedColortone, setSelectedColortone] = useState("");
@@ -16,11 +32,11 @@ const ColortoneSelect = () => {
 
     const handleNext = () => {
         if (!selectedColortone) {
-            alert("원하는 방 분위기를 선택해주세요.");
+            alert("원하는 가구 톤을 선택해주세요.");
             return;
         }
         localStorage.setItem("colortone", selectedColortone);
-        navigate("/style");
+        navigate("/pointcolor");
     };
 
     const handleBack = () => {
@@ -32,7 +48,10 @@ const ColortoneSelect = () => {
     return (
         <div className="page-bg">
             <div className="container">
-                <h1 className="title">원하는 방 분위기를 선택해주세요</h1>
+                <ProgressBar currentStep={3} totalSteps={5} />
+
+                <h1 className="title">원하는 가구 톤을 선택해주세요</h1>
+                <p className="subtitle">(1개 선택)</p>
 
                 <div className="colortone-grid">
                     {colortones.map((colortone) => (

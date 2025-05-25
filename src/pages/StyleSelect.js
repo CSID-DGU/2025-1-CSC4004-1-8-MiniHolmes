@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./style/StyleSelect.css";  // 스타일은 따로 만드시면 됩니다.
+import "./style/StyleSelect.css";
 
 const ProgressBar = ({ currentStep, totalSteps }) => {
     const steps = [];
@@ -23,7 +23,7 @@ const StyleSelect = () => {
     const [selectedStyle, setSelectedStyle] = useState("");
 
     useEffect(() => {
-        document.title = "가구배치 무료견적 | 스타일 선택";
+        document.title = "가구배치 무료견적 | 미니홈즈 인테리어 배치";
     }, []);
 
     const handleSelect = (style) => {
@@ -36,22 +36,23 @@ const StyleSelect = () => {
             return;
         }
         localStorage.setItem("style", selectedStyle);
-        navigate("/pointcolor");
+        navigate("/colortone");
     };
 
     const handleBack = () => {
         navigate(-1);
     };
 
-    const styles = ["모던", "내추럴", "모르겠음"];
+    const styles = ["모던", "내추럴", "코지", "모르겠음"];
 
     return (
         <div className="page-bg">
             <div className="container">
 
-                <ProgressBar currentStep={3} totalSteps={5} />
+                <ProgressBar currentStep={2} totalSteps={5} />
 
                 <h1 className="title">원하는 스타일을 선택해주세요</h1>
+                <p className="subtitle">(1개 선택)</p>
 
                 <div className="style-grid">
                     {styles.map((style) => (

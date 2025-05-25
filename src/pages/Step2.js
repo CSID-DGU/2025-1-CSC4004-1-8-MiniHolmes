@@ -6,7 +6,7 @@ const Step2 = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        document.title = "STEP 2 - 가구 세팅 | 미니홈즈";
+        document.title = "가구배치 무료견적 | 미니홈즈 인테리어 배치";
     }, []);
 
     const handleNext = () => {
@@ -24,10 +24,8 @@ const Step2 = () => {
                 <p className="step-subtitle">가구의 크기와 구조를 먼저 입력해주세요.</p>
                 <p className="step-description">
                     이제부터 가구에 대해 차근차근 입력해볼게요.<br />
-                    방 크기부터 창문과 문 위치, 화장실 크기, 그리고 고정된 빌트인 가구까지<br />
+                    필요한 가구부터 원하는 스타일, 포인트 컬러까지<br />
                     차례대로 쉽고 빠르게 설정할 수 있어요.<br />
-                    필요한 가구를 선택하고, 중요도를 정하며<br />
-                    원하는 인테리어 스타일도 함께 골라보세요!
                 </p>
                 <div className="button-group">
                     <button className="step-back-button" onClick={handleBack}>

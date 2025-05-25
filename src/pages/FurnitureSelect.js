@@ -43,7 +43,7 @@ const FurnitureSelect = () => {
             return;
         }
         localStorage.setItem("essentialFurniture", JSON.stringify(selectedFurniture));
-        navigate("/order");
+        navigate("/style");
     };
 
     const handleReset = () => {
@@ -59,7 +59,7 @@ const FurnitureSelect = () => {
     return (
         <div className="page-bg">
             <div className="container">
-                <ProgressBar currentStep={2} totalSteps={5} />
+                <ProgressBar currentStep={1} totalSteps={5} />
 
                 <h1 className="title">원하는 가구를 선택해주세요</h1>
                 <p className="subtitle">(1개 이상 선택)</p>

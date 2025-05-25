@@ -20,7 +20,7 @@ const ProgressBar = ({ currentStep, totalSteps }) => {
 
 const ToiletInput = () => {
     useEffect(() => {
-        document.title = "화장실 크기 입력 | 미니홈즈 인테리어 배치";
+        document.title = "가구배치 무료견적 | 미니홈즈 인테리어 배치";
     }, []);
 
     const navigate = useNavigate();
