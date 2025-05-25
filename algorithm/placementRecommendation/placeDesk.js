@@ -420,7 +420,8 @@ function placeDesk(elements, design) {
     return { elements, reasons };
   }
 
-  const positions = generateWallBeltPositions(desk, room, 10, 30);
+  const step = 10;
+  const positions = generateWallBeltPositions(desk, room, step, 30);
   const valid = [];
 
   for (const pos of positions) {
