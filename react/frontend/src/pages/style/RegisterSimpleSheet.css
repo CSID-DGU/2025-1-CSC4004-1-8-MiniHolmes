@@ -1,0 +1,19 @@
+.register-simple-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 80px;
+  background: #fff;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  padding: 32px 0;
+  z-index: 50;
+}
+
+.register-simple-sheet .login-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  margin-top: 0;
+  max-height: 80vh;
+  overflow-y: auto;
+} 
