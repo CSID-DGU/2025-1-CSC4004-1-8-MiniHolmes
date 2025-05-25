@@ -11,9 +11,25 @@ import { ResizableBox } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 
 const CM_TO_M = 0.01;
-const ROOM_WIDTH = 400; // cm
-const ROOM_DEPTH = 400; // cm
-const ROOM_HEIGHT = 250; // cm
+// const ROOM_WIDTH = 400; // cm
+// const ROOM_DEPTH = 400; // cm
+// const ROOM_HEIGHT = 250; // cm
+
+// 사용자 입력값 불러오기
+const getRoomSize = () => {
+  try {
+    const saved = localStorage.getItem('roomSize');
+    if (saved) {
+      const { width, length, height } = JSON.parse(saved);
+      return {
+        width: Number(width) || 400,
+        depth: Number(length) || 400,
+        height: Number(height) || 250
+      };
+    }
+  } catch (e) {}
+  return { width: 400, depth: 400, height: 250 };
+};
 
 const RoomVisualizer = () => {
   const mountRef = useRef(null);
@@ -45,6 +61,9 @@ const RoomVisualizer = () => {
   const furnitureModelsRef = useRef({});
   const animationFrameRef = useRef(null);
 
+  // 방 크기 상태를 컴포넌트 내부에서 선언
+  const [roomSize, setRoomSize] = useState(getRoomSize());
+
   // 중앙 영역 크기 측정
   useEffect(() => {
     const updateSize = () => {
@@ -60,8 +79,16 @@ const RoomVisualizer = () => {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
+  useEffect(() => {
+    const updateRoomSize = () => setRoomSize(getRoomSize());
+    window.addEventListener('storage', updateRoomSize);
+    updateRoomSize();
+    return () => window.removeEventListener('storage', updateRoomSize);
+  }, []);
+
   // Load furniture on component mount
   useEffect(() => {
+    console.log('RoomVisualizer MOUNTED');
     const loadFurniture = async () => {
       try {
         const furnitureData = await getAllFurniture();
@@ -75,6 +102,13 @@ const RoomVisualizer = () => {
       }
     };
     loadFurniture();
+    return () => {
+      console.log('RoomVisualizer UNMOUNTED');
+      setFurniture([]);
+      setFilteredFurniture([]);
+      setSelectedItems([]);
+      // 기타 필요한 상태 초기화
+    };
   }, []);
 
   // Load user info on component mount
@@ -100,9 +134,9 @@ const RoomVisualizer = () => {
     if (!mountRef.current) return;
 
     // 방 크기(m 단위)
-    const roomWidth = ROOM_WIDTH * CM_TO_M;
-    const roomDepth = ROOM_DEPTH * CM_TO_M;
-    const roomHeight = ROOM_HEIGHT * CM_TO_M;
+    const roomWidth = roomSize.width * CM_TO_M;
+    const roomDepth = roomSize.depth * CM_TO_M;
+    const roomHeight = roomSize.height * CM_TO_M;
     const maxRoomSize = Math.max(roomWidth, roomDepth, roomHeight);
 
     // 씬 생성
@@ -117,7 +151,11 @@ const RoomVisualizer = () => {
       0.1,
       1000
     );
-    camera.position.set(0, maxRoomSize * 0.8, maxRoomSize * 1.2);
+    // 카메라 시점 변경
+    // camera.position.set(0, maxRoomSize * 0.8, maxRoomSize * 1.2);
+    // camera.position.set(roomWidth * 0.7, roomHeight * 1.2, roomDepth * 0.7);
+    // camera.position.set(0, roomHeight * 1.2, roomDepth * 1.2);
+    camera.position.set(0, roomHeight / 2, roomDepth * 1.2);
     camera.up.set(0, 1, 0);
     camera.lookAt(0, roomHeight / 2, 0);
     cameraRef.current = camera;
@@ -145,26 +183,63 @@ const RoomVisualizer = () => {
     floor.name = 'floor';
     scene.add(floor);
 
-    // 뒷벽
-    const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, side: THREE.DoubleSide });
-    const backWallGeometry = new THREE.PlaneGeometry(roomWidth, roomHeight);
-    const backWall = new THREE.Mesh(backWallGeometry, wallMaterial);
+    // 벽 material 준비 (각 벽마다 clone)
+    const wallMaterialBack = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, side: THREE.DoubleSide, transparent: true, opacity: 1 });
+    const wallMaterialFront = wallMaterialBack.clone();
+    const wallMaterialLeft = wallMaterialBack.clone();
+    const wallMaterialRight = wallMaterialBack.clone();
+
+    // 뒷벽(북쪽)
+    const backWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(roomWidth, roomHeight),
+      wallMaterialBack
+    );
     backWall.position.z = -roomDepth / 2;
     backWall.position.y = roomHeight / 2;
     backWall.name = 'backWall';
     scene.add(backWall);
 
-    // 왼쪽 벽
-    const leftWallGeometry = new THREE.PlaneGeometry(roomDepth, roomHeight);
-    const leftWall = new THREE.Mesh(leftWallGeometry, wallMaterial);
+    // 앞벽(남쪽)
+    const frontWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(roomWidth, roomHeight),
+      wallMaterialFront
+    );
+    frontWall.position.z = roomDepth / 2;
+    frontWall.position.y = roomHeight / 2;
+    frontWall.rotation.y = Math.PI;
+    frontWall.name = 'frontWall';
+    scene.add(frontWall);
+
+    // 왼쪽 벽(서쪽)
+    const leftWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(roomDepth, roomHeight),
+      wallMaterialLeft
+    );
     leftWall.position.x = -roomWidth / 2;
     leftWall.position.y = roomHeight / 2;
     leftWall.rotation.y = Math.PI / 2;
     leftWall.name = 'leftWall';
     scene.add(leftWall);
 
+    // 오른쪽 벽(동쪽)
+    const rightWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(roomDepth, roomHeight),
+      wallMaterialRight
+    );
+    rightWall.position.x = roomWidth / 2;
+    rightWall.position.y = roomHeight / 2;
+    rightWall.rotation.y = -Math.PI / 2;
+    rightWall.name = 'rightWall';
+    scene.add(rightWall);
+
     // 그리드 헬퍼
-    const gridHelper = new THREE.GridHelper(roomWidth, roomWidth / 0.2);
+    const gridHelper = new THREE.GridHelper(
+      Math.max(roomWidth, roomDepth), // 방의 더 큰 크기를 기준으로 그리드 생성
+      Math.max(roomWidth, roomDepth) / 0.25, // 50cm 간격으로 그리드 라인 생성
+      new THREE.Color(0x888888), // 그리드 색상
+      new THREE.Color(0xcccccc)  // 중앙선 색상
+    );
+    gridHelper.name = 'gridHelper';
     scene.add(gridHelper);
 
     // 조명
@@ -180,52 +255,332 @@ const RoomVisualizer = () => {
     controls.update();
     controlsRef.current = controls;
 
+    // 문(door) 텍스처 로드
+    const textureLoader = new THREE.TextureLoader();
+    const doorTexture = textureLoader.load('/textures/door_wood.jpg');
+
+    // 문(door) 표시
+    let doorSizes = [];
+    try {
+      doorSizes = JSON.parse(localStorage.getItem('doorSizes')) || [];
+    } catch (e) {}
+    const thickness = 0.005; // 문 두께(5cm)
+    doorSizes.forEach(door => {
+      if (!door.wall || !door.width || !door.height) return;
+      const doorWidth = Number(door.width) * CM_TO_M;
+      const doorHeight = Number(door.height) * CM_TO_M;
+      const offset = Number(door.offset) * CM_TO_M;
+      const geometry = new THREE.PlaneGeometry(doorWidth, doorHeight);
+      const material = new THREE.MeshStandardMaterial({ 
+        map: doorTexture,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.98
+      });
+      const doorMesh = new THREE.Mesh(geometry, material);
+      const doorMeshBack = doorMesh.clone();
+      switch (door.wall) {
+        case 'north': // 뒷벽 (북쪽 벽 - 북->남 시점 왼쪽 기준)
+          doorMesh.position.set(
+            roomWidth / 2 - offset - doorWidth / 2,
+            doorHeight / 2,
+            -roomDepth / 2 + thickness
+          );
+          doorMeshBack.position.set(
+            roomWidth / 2 - offset - doorWidth / 2,
+            doorHeight / 2,
+            -roomDepth / 2 - thickness
+          );
+          break;
+        case 'south': // 앞벽 (남쪽 벽 - 남->북 시점 왼쪽 기준)
+          doorMesh.position.set(
+            -roomWidth / 2 + offset + doorWidth / 2,
+            doorHeight / 2,
+            roomDepth / 2 - thickness
+          );
+          doorMesh.rotation.y = Math.PI;
+          doorMeshBack.position.set(
+            -roomWidth / 2 + offset + doorWidth / 2,
+            doorHeight / 2,
+            roomDepth / 2 + thickness
+          );
+          doorMeshBack.rotation.y = Math.PI;
+          break;
+        case 'west': // 왼쪽 벽 (서쪽 벽 - 서->동 시점 왼쪽 기준)
+          doorMesh.position.set(
+            -roomWidth / 2 + thickness,
+            doorHeight / 2,
+            -roomWidth / 2 + offset + doorWidth / 2 // Z calculation
+          );
+          doorMesh.rotation.y = Math.PI / 2;
+          doorMeshBack.position.set(
+            -roomWidth / 2 - thickness,
+            doorHeight / 2,
+            -roomWidth / 2 + offset + doorWidth / 2 // Z calculation
+          );
+          doorMeshBack.rotation.y = Math.PI / 2;
+          break;
+        case 'east': // 오른쪽 벽 (동쪽 벽 - 동->서 시점 왼쪽 기준)
+          doorMesh.position.set(
+            roomWidth / 2 - thickness,
+            doorHeight / 2,
+            roomDepth / 2 - offset - doorWidth / 2 // Z calculation
+          );
+          doorMesh.rotation.y = -Math.PI / 2;
+          doorMeshBack.position.set(
+            roomWidth / 2 + thickness,
+            doorHeight / 2,
+            roomDepth / 2 - offset - doorWidth / 2 // Z calculation
+          );
+          doorMeshBack.rotation.y = -Math.PI / 2;
+          break;
+      }
+      scene.add(doorMesh);
+      scene.add(doorMeshBack);
+    });
+
+    // Partition zones 표시
+    let partitionZones = [];
+    try {
+      partitionZones = JSON.parse(localStorage.getItem('partitionZones')) || [];
+    } catch (e) {}
+    partitionZones.forEach(zone => {
+      if (zone.type === 'partition') {
+        // 가벽: 벽에 평행하게 배치
+        const length = Number(zone.length);
+        const height = Number(zone.height);
+        const wallOffset = Number(zone.wallOffset) || 0;
+        if (!length || !height) return;
+        const geometry = new THREE.PlaneGeometry(length, height);
+        const material = new THREE.MeshStandardMaterial({
+          color: 0xbbbbbb,
+          side: THREE.DoubleSide,
+          opacity: 0.95,
+          transparent: true
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+    
+        // 벽에 평행하게 배치하도록 방향과 위치 계산
+        switch (zone.wall) {
+          case 'north':
+            mesh.position.set(
+              roomWidth / 2 - length / 2, // x: 방의 왼쪽 끝에서 length/2만큼 이동
+              height / 2, // y: 높이의 중앙
+              -roomDepth / 2 + wallOffset // z: 북쪽 벽에서 wallOffset만큼 떨어짐
+            );
+            mesh.rotation.y = 0; // 북쪽 벽에 평행
+            break;
+          case 'south':
+            mesh.position.set(
+              -roomWidth / 2 + length / 2,
+              height / 2,
+              roomDepth / 2 - wallOffset // z: 남쪽 벽에서 wallOffset만큼 떨어짐
+            );
+            mesh.rotation.y = 0; // 남쪽 벽에 평행
+            break;
+          case 'west':
+            mesh.position.set(
+              -roomWidth / 2 + wallOffset, // x: 서쪽 벽에서 wallOffset만큼 떨어짐
+              height / 2,
+              -roomDepth / 2 + length / 2 // z: 방의 아래쪽 끝에서 length/2만큼 이동
+            );
+            mesh.rotation.y = Math.PI / 2; // 서쪽 벽에 평행
+            break;
+          case 'east':
+            mesh.position.set(
+              roomWidth / 2 - wallOffset, // x: 동쪽 벽에서 wallOffset만큼 떨어짐
+              height / 2,
+              roomDepth / 2 - length / 2
+            );
+            mesh.rotation.y = Math.PI / 2; // 동쪽 벽에 평행
+            break;
+        }
+        // 가벽(mesh)은 무조건 추가
+        scene.add(mesh);
+
+        // 문 렌더링 (가벽에 문이 있는 경우)
+        if (zone.doors && Array.isArray(zone.doors) && zone.doors.length > 0) {
+          zone.doors.forEach(door => {
+            const doorWidth = Number(door.width);
+            const doorHeight = Number(door.height);
+            const doorOffset = Number(door.offset);
+            if (!doorWidth || !doorHeight) {
+              console.warn('문 크기 오류:', door);
+              return;
+            }
+            // 나무 텍스처 적용
+            const doorGeometry = new THREE.PlaneGeometry(doorWidth, doorHeight);
+            const doorMaterial = new THREE.MeshStandardMaterial({ 
+              map: doorTexture,
+              side: THREE.DoubleSide,
+              transparent: true,
+              opacity: 0.98
+            });
+            const doorMesh = new THREE.Mesh(doorGeometry, doorMaterial);
+            const doorMeshBack = doorMesh.clone();
+            switch (zone.wall) {
+              case 'north': {
+                const baseZ = -roomDepth / 2 + Number(zone.wallOffset);
+                const posX = roomWidth / 2 - doorOffset - doorWidth / 2;
+                const posZ = baseZ + 0.01;
+                doorMesh.position.set(posX, doorHeight / 2, posZ);
+                doorMeshBack.position.set(posX, doorHeight / 2, baseZ - 0.01);
+                console.log('[가벽문 north] length:', length, 'doorWidth:', doorWidth, 'doorOffset:', doorOffset, 'posX:', posX, 'posZ:', posZ);
+                break;
+              }
+              case 'south': {
+                const baseZ = roomDepth / 2 - Number(zone.wallOffset);
+                const posX = -roomWidth / 2 + doorOffset + doorWidth / 2;
+                const posZ = baseZ - 0.01;
+                doorMesh.position.set(posX, doorHeight / 2, posZ);
+                doorMesh.rotation.y = Math.PI;
+                doorMeshBack.position.set(posX, doorHeight / 2, baseZ + 0.01);
+                doorMeshBack.rotation.y = Math.PI;
+                console.log('[가벽문 south] length:', length, 'doorWidth:', doorWidth, 'doorOffset:', doorOffset, 'posX:', posX, 'posZ:', posZ);
+                break;
+              }
+              case 'west': {
+                const baseX = -roomWidth / 2 + Number(zone.wallOffset);
+                const posX = baseX + 0.01;
+                const posZ = -roomWidth / 2 + doorOffset + doorWidth / 2;
+                doorMesh.position.set(posX, doorHeight / 2, posZ);
+                doorMesh.rotation.y = Math.PI / 2;
+                doorMeshBack.position.set(baseX - 0.01, doorHeight / 2, posZ);
+                doorMeshBack.rotation.y = Math.PI / 2;
+                console.log('[가벽문 west] length:', length, 'doorWidth:', doorWidth, 'doorOffset:', doorOffset, 'posX:', posX, 'posZ:', posZ);
+                break;
+              }
+              case 'east': {
+                const baseX = roomWidth / 2 - Number(zone.wallOffset);
+                const posX = baseX - 0.01;
+                const posZ = roomDepth / 2 - doorOffset - doorWidth / 2;
+                doorMesh.position.set(posX, doorHeight / 2, posZ);
+                doorMesh.rotation.y = Math.PI / 2;
+                doorMeshBack.position.set(baseX + 0.01, doorHeight / 2, posZ);
+                doorMeshBack.rotation.y = Math.PI / 2;
+                console.log('[가벽문 east] length:', length, 'doorWidth:', doorWidth, 'doorOffset:', doorOffset, 'posX:', posX, 'posZ:', posZ);
+                break;
+              }
+            }
+            scene.add(doorMesh);
+            scene.add(doorMeshBack);
+            console.log('가벽 문 렌더링:', { wall: zone.wall, doorWidth, doorHeight, doorOffset, position: doorMesh.position });
+          });
+        }
+      } else if (zone.type === 'color') {
+        // 색상 구역: 기존 코드 유지
+        const width = Number(zone.width);
+        const depth = Number(zone.depth);
+        if (!width || !depth) {
+          console.warn('Invalid dimensions for color zone:', zone);
+          return;
+        }
+        let color = zone.color || '#4CAF50';
+        if (!/^#[0-9A-F]{6}$/i.test(color)) {
+          console.warn(`Invalid color format for zone: ${color}, using default green (#4CAF50)`);
+          color = '#4CAF50';
+        }
+        console.log('Applying color to zone:', color);
+        const geometry = new THREE.PlaneGeometry(width, depth);
+        const material = new THREE.MeshStandardMaterial({
+          color: color,
+          side: THREE.DoubleSide,
+          opacity: 1,
+          transparent: false
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.x = -Math.PI / 2;
+        const x = Number(zone.x) - roomWidth / 2 + width / 2;
+        const z = roomDepth / 2 - Number(zone.y) - depth / 2;
+        mesh.position.set(x, 0.02, z);
+        scene.add(mesh);
+      }
+    });
+
     // 애니메이션 루프
     const animate = () => {
       animationFrameRef.current = requestAnimationFrame(animate);
       if (controlsRef.current) {
         controlsRef.current.update();
       }
+      // 벽 투명도 동적 조절
+      updateWallTransparency();
       renderer.render(scene, camera);
     };
+
+    // 벽 투명도 조절 함수
+    function updateWallTransparency() {
+      const cameraPos = camera.position;
+      const wallCenters = {
+        frontWall: new THREE.Vector3(0, roomHeight / 2, roomDepth / 2),
+        backWall: new THREE.Vector3(0, roomHeight / 2, -roomDepth / 2),
+        leftWall: new THREE.Vector3(-roomWidth / 2, roomHeight / 2, 0),
+        rightWall: new THREE.Vector3(roomWidth / 2, roomHeight / 2, 0),
+      };
+      ['frontWall', 'backWall', 'leftWall', 'rightWall'].forEach(name => {
+        const wall = scene.getObjectByName(name);
+        if (wall) {
+          const dist = cameraPos.distanceTo(wallCenters[name]);
+          // 가까우면 더 투명, 멀면 불투명 (2~4m 사이에서 0.2~1)
+          wall.material.opacity = Math.max(0.2, Math.min(1, (dist - 2) / 2));
+          wall.material.transparent = true;
+          wall.material.needsUpdate = true;
+        }
+      });
+    }
+
     animate();
 
     // 정리
     return () => {
       cancelAnimationFrame(animationFrameRef.current);
       
-      // Dispose of all geometries and materials
-      scene.traverse((object) => {
+      // Dispose of controls
+      if (controlsRef.current) {
+        controlsRef.current.dispose();
+        controlsRef.current = null; // Clear control ref immediately after disposing
+      }
+
+      // Dispose of all geometries and materials and textures
+      if (sceneRef.current) {
+        // Iterate through children to dispose resources
+        // We collect children first because removing during iteration can cause issues
+        const children = [...sceneRef.current.children];
+        children.forEach((object) => {
         if (object.geometry) {
           object.geometry.dispose();
         }
         if (object.material) {
           if (Array.isArray(object.material)) {
-            object.material.forEach(material => material.dispose());
+              object.material.forEach(material => {
+                if (material.map) material.map.dispose(); // Dispose texture
+              });
           } else {
+              if (object.material.map) object.material.map.dispose(); // Dispose texture
+            }
             object.material.dispose();
           }
-        }
+
+          // Also remove the object from the scene
+          sceneRef.current.remove(object);
       });
 
       // Dispose of renderer
-      if (renderer) {
-        renderer.dispose();
-        renderer.forceContextLoss();
-        renderer.domElement.remove();
+        if (rendererRef.current) {
+          rendererRef.current.dispose();
+          rendererRef.current = null; // Clear renderer ref immediately after disposing
       }
 
-      // Clear refs
+        // Clear scene and camera refs
       sceneRef.current = null;
       cameraRef.current = null;
-      rendererRef.current = null;
-      controlsRef.current = null;
+      }
 
       if (mountRef.current) {
         mountRef.current.innerHTML = '';
       }
     };
-  }, []);
+  }, [roomSize, canvasWidth, canvasHeight]);
 
   // 캔버스 리사이즈 시 카메라/렌더러 갱신
   useEffect(() => {
@@ -257,7 +612,7 @@ const RoomVisualizer = () => {
         const maxBudget = 5000000;
 
         // 방 둘레 계산 (예시)
-        const perimeter = (ROOM_WIDTH + ROOM_DEPTH) * 2;
+        const perimeter = (roomSize.width + roomSize.depth) * 2;
 
         // 추천 API 호출
         const recommendationResult = await getRecommendedFurniture(userWeights, maxBudget, perimeter);
@@ -292,8 +647,8 @@ const RoomVisualizer = () => {
         console.log('배치 결과:', placements);
         
         // 방 크기 (미터 단위)
-        const roomWidth = ROOM_WIDTH * CM_TO_M;
-        const roomDepth = ROOM_DEPTH * CM_TO_M;
+        const roomWidth = roomSize.width * CM_TO_M;
+        const roomDepth = roomSize.depth * CM_TO_M;
         
         // 벽과의 최소 간격 (미터 단위)
         const WALL_MARGIN = 0.05; // 5cm
@@ -424,8 +779,8 @@ const RoomVisualizer = () => {
             },
             body: JSON.stringify({
                 furniture_list: furnitureList,
-                room_width: ROOM_WIDTH,
-                room_height: ROOM_DEPTH
+                room_width: roomSize.width,
+                room_height: roomSize.depth
             })
         });
 
@@ -789,16 +1144,15 @@ const RoomVisualizer = () => {
   };
 
   return (
-    <div style={{ 
-      width: '100%', 
-      height: '100%', 
-      display: 'flex', 
+    <div style={{
+      width: '100vw',
+      minHeight: '500px',
+      maxHeight: 'calc(100vh - 180px)',
+      display: 'flex',
       overflow: 'hidden',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0
+      background: '#fff',
+      borderRadius: '16px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
     }}>
       {/* 왼쪽 영역 - 가구 목록 */}
       <div style={{ width: '20%', minWidth: '100px', background: '#fff', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '1rem' }}>
@@ -823,7 +1177,7 @@ const RoomVisualizer = () => {
           width={canvasWidth}
           height={canvasHeight}
           minConstraints={[300, 200]}
-          maxConstraints={[maxWidth, 800]}
+          maxConstraints={[700, 500]}
           onResize={(e, data) => {
             setCanvasWidth(data.size.width);
             setCanvasHeight(data.size.height);
