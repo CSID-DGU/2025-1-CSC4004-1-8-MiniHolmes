@@ -77,7 +77,7 @@ const Register = () => {
       <div className={styles.formContainer}>
         <div>
           <h2 className={styles.title}>회원가입</h2>
-          <p className={styles.subtitle}>RoomViz의 새로운 멤버가 되어주세요</p>
+          {/* <p className={styles.subtitle}>RoomViz의 새로운 멤버가 되어주세요</p> */}
         </div>
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
