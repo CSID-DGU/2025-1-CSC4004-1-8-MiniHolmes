@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './Login.module.css';
 
-const Login = () => {
+const Login = ({ onLoginSuccess, onShowRegister }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     userId: '',
@@ -37,11 +37,22 @@ const Login = () => {
       const savedToken = localStorage.getItem('token');
       console.log('저장된 토큰:', savedToken ? '있음' : '없음');
       
-      navigate('/');
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       console.error('로그인 에러:', error);
       const errorMessage = error.response?.data?.message || '로그인 중 오류가 발생했습니다.';
       setError(errorMessage);
+    }
+  };
+
+  const handleRegisterClick = (e) => {
+    e.preventDefault();
+    if (onShowRegister) {
+      onShowRegister();
     }
   };
 
@@ -53,7 +64,7 @@ const Login = () => {
             로그인
           </h2>
           <p className={styles.subtitle}>
-            RoomViz에 오신 것을 환영합니다
+          이메일을 입력하여 로그인하거나 계정을 만드세요.
           </p>
         </div>
         <form className={styles.form} onSubmit={handleSubmit}>
@@ -104,7 +115,7 @@ const Login = () => {
           <div className={styles.linkContainer}>
             <p>
               계정이 없으신가요?{' '}
-              <a href="/register" className={styles.link}>
+              <a href="#" onClick={handleRegisterClick} className={styles.link}>
                 회원가입
               </a>
             </p>
@@ -115,4 +126,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;
