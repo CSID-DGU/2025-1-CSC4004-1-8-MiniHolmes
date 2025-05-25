@@ -1,5 +1,5 @@
 console.log("=== Script Started ===");
-
+const crypto = require('crypto');
 // 기존 코드와 달라진 부분 : 
 // 1. style 에 cozy 추가. 이제 cozy는 natural 가구를 우선 추천하고 데코는 cozy를 우선 추천함
 // 2. 모르겠음은 style 에 donknow 입력하면 된다.
@@ -4304,7 +4304,46 @@ function calculateTotalPrice(items) {
 }
 
 // --- 결과 출력 ---
+recommended.forEach((set, index) => {
+  const furniture = set.furnitureSet;
+  const deco = set.decorationSet;
 
+  const furniturePrice = calculateTotalPrice(furniture);
+  const decoItems = [deco?.bedding, deco?.mattress_cover, deco?.curtain].filter(Boolean);
+  const decoPrice = calculateTotalPrice(decoItems);
+
+  console.log(`\n --- 추천 세트 ${index + 1} ---`);
+  console.log(`- 가구 가격: ${furniturePrice.toLocaleString()}원`);
+  console.log(`- 데코 가격: ${decoPrice.toLocaleString()}원`);
+
+  console.log("\n 가구 세트:");
+  furniture.forEach(item => {
+    console.log(`- ${item.name} (${item.category}) | 스타일: ${item.style}, 컬러: ${item.colortone}, 가격: ${item.price.toLocaleString()}원`);
+    console.log(`  크기: ${item.dimensions.width}mm (가로) × ${item.dimensions.depth}mm (세로)`);
+    console.log(`  링크: ${item.url}`);
+  });
+
+  if (deco) {
+    console.log("\n 데코 세트:");
+    if (deco.bedding) {
+      console.log(`- 침구: ${deco.bedding.name} | 스타일: ${deco.bedding.style}, 컬러: ${deco.bedding.colortone}, 가격: ${deco.bedding.price.toLocaleString()}원`);
+      console.log(`  크기: ${deco.bedding.dimensions.length}mm (가로) × ${deco.bedding.dimensions.width}mm (세로)`);
+      console.log(`  링크: ${deco.bedding.url}`);
+    }
+    if (deco.mattress_cover) {
+      console.log(`- 매트리스 커버: ${deco.mattress_cover.name} | 스타일: ${deco.mattress_cover.style}, 컬러: ${deco.mattress_cover.colortone}, 가격: ${deco.mattress_cover.price.toLocaleString()}원`);
+      console.log(`  크기: ${deco.mattress_cover.dimensions.length}mm (가로) × ${deco.mattress_cover.dimensions.width}mm (세로)`);
+      console.log(`  링크: ${deco.mattress_cover.url}`);
+    }
+    if (deco.curtain) {
+      console.log(`- 커튼: ${deco.curtain.name} | 스타일: ${deco.curtain.style}, 컬러: ${deco.curtain.colortone}, 가격: ${deco.curtain.price.toLocaleString()}원`);
+      console.log(`  크기: ${deco.curtain.dimensions.length}mm (가로) × ${deco.curtain.dimensions.width}mm (세로)`);
+      console.log(`  링크: ${deco.curtain.url}`);
+    }
+  } else {
+    console.log("\n 데코 세트를 찾을 수 없습니다.");
+  }
+});
 
 
 function getRecommendedSets(userWeights,budget,perimeter) {
