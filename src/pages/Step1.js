@@ -6,7 +6,7 @@ const Step1 = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        document.title = "STEP 1 - 공간 기본 세팅 | 미니홈즈";
+        document.title = "가구배치 무료견적 | 미니홈즈 인테리어 배치";
     }, []);
 
     const handleNext = () => {

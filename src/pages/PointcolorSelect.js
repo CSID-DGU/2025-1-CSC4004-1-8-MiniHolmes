@@ -62,7 +62,7 @@ const PointcolorSelect = () => {
         <div className="page-bg">
             <div className="container">
 
-                <ProgressBar currentStep={4} totalSteps={5} />
+                <ProgressBar currentStep={5} totalSteps={6} />
 
                 <h1 className="title">원하는 포인트 색상을 선택해주세요</h1>
                 <p className="subtitle">(1개 선택)</p>

@@ -34,6 +34,11 @@
     margin-bottom: 20px;
 }
 
+.subtitle.tight {
+    margin-top: 0px;
+    margin-bottom: 40px;
+}
+
 .selected-furniture {
     color: #2563eb;
     font-weight: 600;
@@ -46,7 +51,7 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     width: 100%;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     padding-top: 30px;
 }
 

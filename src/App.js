@@ -5,12 +5,12 @@ import Home from "./pages/Home";
 import Step1 from "./pages/Step1";
 import About from "./pages/About";
 import RoomSizeInput from "./pages/RoomSizeInput";
-// import DoorWindowSizeInput from "./pages/DoorWindowSizeInput";
 import DoorSizeInput from "./pages/DoorSizeInput";
 import WindowSizeInput from "./pages/WindowSizeInput";
 import ToiletInput from "./pages/ToiletInput";
 import BuiltinInput from "./pages/BuiltinInput";
 import Step2 from "./pages/Step2";
+import BudgetSelect from "./pages/BudgetSelect";
 import FurnitureSelect from "./pages/FurnitureSelect";
 import ImportanceOrder from "./pages/ImportanceOrder";
 import StyleSelect from "./pages/StyleSelect";
@@ -61,6 +61,7 @@ function App() {
             <Route path="/toilet" element={<ToiletInput />} />
             <Route path="/builtin" element={<BuiltinInput />} />
             <Route path="/step2" element={<Step2 />} />
+            <Route path="/budget" element={<BudgetSelect />} />
             <Route path="/furniture" element={<FurnitureSelect />} />
             <Route path="/style" element={<StyleSelect />} />
             <Route path="/colortone" element={<ColortoneSelect />} />

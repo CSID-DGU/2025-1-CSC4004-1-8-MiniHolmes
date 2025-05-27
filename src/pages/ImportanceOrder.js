@@ -22,7 +22,7 @@ const ProgressBar = ({ currentStep, totalSteps }) => {
 const ImportanceOrder = () => {
     const navigate = useNavigate();
 
-    const criteria = ["스타일(ex. 모던)", "가구 톤(ex. 밝은색 가구)", "가구 사이즈(ex. 퀸사이즈 침대)", "저렴한 가격"];
+    const criteria = ["스타일(ex. 모던)", "가구 톤(ex. 밝은색 가구)", "가구 사이즈(ex. 퀸사이즈 침대)", "예산 내 가격"];
 
     const [rankedCriteria, setRankedCriteria] = useState({});
 
@@ -82,10 +82,10 @@ const ImportanceOrder = () => {
     return (
         <div className="page-bg">
             <div className="container">
-                <ProgressBar currentStep={5} totalSteps={5} />
+                <ProgressBar currentStep={6} totalSteps={6} />
 
                 <h1 className="title">중요도 순서 설정</h1>
-                <p className="subtitle">스타일, 가구 톤, 가구 사이즈, 가격을<br />중요한 순서대로 선택해주세요.</p>
+                <p className="subtitle">스타일, 가구 톤, 가구 사이즈, 가격 정확도를<br />중요한 순서대로 선택해주세요.</p>
 
                 <div className="criteria-list">
                     {Array.from({ length: criteria.length }, (_, i) => {

@@ -48,7 +48,7 @@ const ColortoneSelect = () => {
     return (
         <div className="page-bg">
             <div className="container">
-                <ProgressBar currentStep={3} totalSteps={5} />
+                <ProgressBar currentStep={4} totalSteps={6} />
 
                 <h1 className="title">원하는 가구 톤을 선택해주세요</h1>
                 <p className="subtitle">(1개 선택)</p>

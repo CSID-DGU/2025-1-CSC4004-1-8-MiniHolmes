@@ -59,10 +59,11 @@ const FurnitureSelect = () => {
     return (
         <div className="page-bg">
             <div className="container">
-                <ProgressBar currentStep={1} totalSteps={5} />
+                <ProgressBar currentStep={2} totalSteps={6} />
 
                 <h1 className="title">원하는 가구를 선택해주세요</h1>
                 <p className="subtitle">(1개 이상 선택)</p>
+                <p className="subtitle tight">(🚨 선택한 가구가 많은 경우 입력 예산을 초과할 수 있습니다.)</p>
 
                 <div className="furniture-list">
                     {furnitureOptions.map((item) => (

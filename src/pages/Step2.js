@@ -10,7 +10,7 @@ const Step2 = () => {
     }, []);
 
     const handleNext = () => {
-        navigate("/furniture");
+        navigate("/budget");
     };
 
     const handleBack = () => {
