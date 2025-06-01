@@ -17,14 +17,16 @@ const placementSchema = new mongoose.Schema({
       required: true
     },
     position: {
-      x: Number,
-      y: Number,
-      z: Number
+      type: [Number],
+      default: [0,0,0]
     },
     rotation: {
-      x: Number,
-      y: Number,
-      z: Number
+      type: [Number],
+      default: [0,0,0,1]
+    },
+    scale: {
+      type: [Number],
+      default: [1,1,1]
     }
   }],
   createdAt: {
