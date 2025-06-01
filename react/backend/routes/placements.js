@@ -6,18 +6,23 @@ const auth = require('../middleware/auth');
 // 배치 저장
 router.post('/', auth, async (req, res) => {
   try {
-    console.log('배치 저장 요청:', {
-      user: req.user,
-      body: req.body
-    });
+    console.log('배치 저장 요청 Raw Body:', JSON.stringify(req.body, null, 2));
+
+    // 스키마 구조에 맞게 가구 배열을 명시적으로 매핑
+    const mappedFurniture = req.body.furniture.map(f => ({
+      furnitureId: f.furnitureId,
+      position: f.position,    // 숫자 배열인지 확인
+      rotation: f.rotation,    // 숫자 배열인지 확인
+      scale: f.scale           // 숫자 배열인지 확인
+    }));
 
     const placement = new Placement({
       userId: req.user._id,
       name: req.body.name,
-      furniture: req.body.furniture
+      furniture: mappedFurniture // 명시적으로 매핑된 배열 사용
     });
 
-    console.log('생성된 배치 객체:', placement);
+    console.log('생성된 배치 객체 (매핑 후):', JSON.stringify(placement.toObject(), null, 2));
 
     await placement.save();
     console.log('배치 저장 성공:', placement);
