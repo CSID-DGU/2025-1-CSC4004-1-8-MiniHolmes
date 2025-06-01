@@ -56,16 +56,12 @@ export const getFurnitureByCategory = async (category) => {
 };
 
 // 가구 추천 API 호출
-export const getRecommendedFurniture = async (userWeights, maxBudget, perimeter) => {
+export const getRecommendedFurniture = async (payload) => {
   try {
-    const response = await api.post('/furniture/recommend', {
-      user_weights: userWeights,
-      max_budget: maxBudget,
-      perimeter: perimeter
-    });
+    const response = await api.post('/furniture-placement', payload);
     return response.data;
   } catch (error) {
-    console.error('API 오류:', error);
+    console.error('API 오류 (getRecommendedFurniture):', error);
     throw error;
   }
 };
