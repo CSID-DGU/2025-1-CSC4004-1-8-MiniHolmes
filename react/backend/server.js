@@ -4,13 +4,36 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
-const { recommendFurniture } = require('./algorithm/placementRecommendation/recommendFurniture.cjs');
-const { spawn } = require('child_process');
+const fs = require('fs'); // Import the file system module
+// 기존 recommendFurniture 임포트 제거
+// const { recommendFurniture } = require('./algorithm/placementRecommendation/recommendFurniture.js');
+// const { spawn } = require('child_process'); // spawn은 더 이상 사용되지 않으므로 주석 처리 또는 제거
 const authRoutes = require('./routes/auth');
 const placementsRouter = require('./routes/placements');
+const furniturePlacementApiRoutes = require('./api/furniturePlacementRoute.js');
+
+// furniture_choosing.js에서 recommendSets 함수와 convertRanksToWeights 함수를 임포트
+// REMOVE or COMMENT OUT the old placementRecommendation/furnitureChoosing imports
+// const {
+//   recommendSets,
+//   convertRanksToWeights,
+//   FurnitureItem,
+//   BeddingItem,
+//   MattressItem,
+//   CurtainItem
+// } = require('./algorithm/furnitureChoosing/furniture_choosing.js');
+
+// 개별 가구 배치 알고리즘 임포트 (경로 수정)
+const { placeBed } = require('./algorithm/furnitureplacement/placeBed.js');
+const { placeDesk } = require('./algorithm/furnitureplacement/placeDesk.js');
+const { placeWardrobe } = require('./algorithm/furnitureplacement/placeCloset.js'); // Corrected to placeCloset.js
+const { placeBookshelf } = require('./algorithm/furnitureplacement/placeBookshelf.js');
+
+// recommendFurniture.js 에서 recommendFurniture 함수를 임포트 (경로 수정)
+const { recommendFurniture } = require('./algorithm/furnitureplacement/recommendFurniture.js');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // 미들웨어 설정
 app.use(cors({
@@ -24,16 +47,25 @@ app.use(cors({
 
 // 요청 로깅 미들웨어 추가
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  console.log('Request Headers:', req.headers);
-  console.log('Request Body:', req.body);
+  console.log(new Date().toISOString() + ' - ' + req.method + ' ' + req.url);
+  // console.log('Request Headers:', req.headers);
+  // console.log('Request Body:', req.body); // body는 json() 파싱 후 로깅
   next();
 });
 
 app.use(express.json());
 
+// JSON body 파싱 후 다시 로깅 (필요하다면)
+app.use((req, res, next) => {
+  if (req.method === 'POST' || req.method === 'PUT') {
+    // console.log('Parsed Request Body:', req.body);
+  }
+  next();
+});
+
 // 인증 라우트 추가
 app.use('/api/auth', authRoutes);
+app.use('/api', furniturePlacementApiRoutes);
 
 // static 파일 서빙 설정
 const publicPath = path.join(__dirname, 'public');
@@ -93,6 +125,64 @@ const furnitureSchema = new mongoose.Schema({
 
 const Furniture = mongoose.models.Furniture || mongoose.model('Furniture', furnitureSchema, 'furniture');
 
+// 침구 스키마 정의
+const beddingSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    category: { type: String, required: true }, // bedding
+    style: { type: String },
+    dimensions: {
+        length: { type: Number, required: true },
+        width: { type: Number, required: true }
+    },
+    colortone: { type: String },
+    material: { type: String },
+    price: { type: Number },
+    brand: { type: String },
+    jpg_file: { type: String },
+    url: { type: String }
+});
+
+const Bedding = mongoose.models.Bedding || mongoose.model('Bedding', beddingSchema, 'bedding');
+
+// 매트리스 커버 스키마 정의
+const mattressCoverSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    category: { type: String, required: true }, // mattresscover
+    style: { type: String },
+    dimensions: {
+        length: { type: Number, required: true },
+        width: { type: Number, required: true }
+    },
+    colortone: { type: String },
+    material: { type: String },
+    price: { type: Number },
+    brand: { type: String },
+    jpg_file: { type: String },
+    url: { type: String }
+});
+
+const MattressCover = mongoose.models.MattressCover || mongoose.model('MattressCover', mattressCoverSchema, 'mattresscover');
+
+// 커튼 스키마 정의
+const curtainSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    category: { type: String, required: true }, // curtain
+    style: { type: String },
+    dimensions: {
+        length: { type: Number, required: true },
+        width: { type: Number, required: true }
+    },
+    colortone: { type: String },
+    opaqueness: { type: String },
+    price: { type: Number },
+    brand: { type: String },
+    jpg_file: { type: String },
+    url: { type: String }
+});
+
+const Curtain = mongoose.models.Curtain || mongoose.model('Curtain', curtainSchema, 'curtain');
+
+
 // API 라우트
 app.get('/api/furniture', async (req, res) => {
   try {
@@ -135,226 +225,179 @@ app.get('/api/furniture/category/:category', async (req, res) => {
 
 // 가구 자동 배치 API
 app.post('/api/furniture/auto-placement', async (req, res) => {
-  let { furniture, roomDimensions } = req.body;
+  let { furniture, roomDimensions, design } = req.body;
+
   if (!roomDimensions) {
     return res.status(400).json({ message: '방 크기 정보가 필요합니다' });
   }
-  // furniture가 undefined/null이면 빈 배열로 처리
-  if (!Array.isArray(furniture)) furniture = [];
-  try {
-    const result = await recommendFurniture(furniture, roomDimensions);
-    res.json(result);
-  } catch (error) {
-    console.error('자동 배치 오류:', error);
-    res.status(500).json({ message: '자동 배치 중 오류가 발생했습니다', error: error.message });
+  if (!furniture || !Array.isArray(furniture)) {
+    return res.status(400).json({ message: '배치할 가구 목록이 필요합니다' });
   }
-});
 
-// 가구 추천 API
-app.post('/api/furniture/recommend', async (req, res) => {
   try {
-    const { user_weights, max_budget, perimeter } = req.body;
-    
-    // 모든 가구 데이터 가져오기
-    const furnitureList = await Furniture.find({}, {
-      _id: 1,
-      name: 1,
-      category: 1,
-      style: 1,
-      dimensions: 1,
-      colortone: 1,
-      price: 1,
-      brand: 1,
-      glb_file: 1,
-      url: 1
-    }).lean();
-    
-    // Python 알고리즘에 맞는 형식으로 데이터 변환
-    const furnitureData = furnitureList.map(item => ({
-      _id: item._id ? item._id.toString() : null,
-      name: item.name,
-      category: item.category,
-      style: item.style,
-      dimensions: item.dimensions,
-      colortone: item.colortone,
-      price: item.price,
-      brand: item.brand,
-      glb_file: item.glb_file,
-      url: item.url
-    }));
-
-    // Python 스크립트 실행
-    const pythonProcess = spawn('python3', [
-      './algorithm/furnitureChoosing/furniture_choosing_algorithm.py'
-    ]);
-
-    // 입력 데이터를 JSON으로 변환하여 표준 입력으로 전달
-    const inputData = {
-      furniture_db: furnitureData,
-      user_weights,
-      max_budget,
-      perimeter
-    };
-    pythonProcess.stdin.write(JSON.stringify(inputData));
-    pythonProcess.stdin.end();
-
-    let result = '';
-    let error = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      result += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      const logMessage = data.toString();
-      error += logMessage;
-      // Python 스크립트의 로그를 서버 콘솔에 출력
-      console.log('[Python Log]', logMessage.trim());
-    });
-
-    pythonProcess.on('close', (code) => {
-      if (code !== 0) {
-        console.error('[Python Error]', error);
-        return res.status(500).json({ message: '가구 추천 중 오류가 발생했습니다', error });
-      }
-
-      try {
-        const recommendedSets = JSON.parse(result);
-        // 추천된 가구 세트의 ID 목록 반환
-        const recommendedIds = recommendedSets.recommended_sets.flat().map(item => item._id);
-        
-        // 추천 결과 요약 로그
-        console.log('[Recommendation Summary]');
-        console.log(`- 총 추천 가구 수: ${recommendedIds.length}개`);
-        const categoryCounts = {};
-        recommendedSets.recommended_sets.forEach(set => {
-          set.forEach(item => {
-            categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1;
-          });
-        });
-        Object.entries(categoryCounts).forEach(([category, count]) => {
-          console.log(`- ${category}: ${count}개`);
-        });
-        
-        res.json({ recommendedIds });
-      } catch (e) {
-        console.error('[JSON Parse Error]', e);
-        res.status(500).json({ message: '결과 처리 중 오류가 발생했습니다', error: e.message });
-      }
-    });
-  } catch (error) {
-    console.error('[Server Error]', error);
-    res.status(500).json({ message: '서버 오류가 발생했습니다', error: error.message });
-  }
-});
-
-// 가구 배치 알고리즘 실행
-app.post('/api/furniture/place', async (req, res) => {
-    try {
-        const { furniture_list, room_width, room_height } = req.body;
-        
-        // Python 스크립트 실행
-        const pythonProcess = spawn('python3', [
-            path.join(__dirname, 'algorithm/furnitureChoosing/furniture_placement_algorithm.py')
-        ]);
-
-        // 입력 데이터 전송
-        pythonProcess.stdin.write(JSON.stringify({
-            furniture_list,
-            room_width,
-            room_height
-        }));
-        pythonProcess.stdin.end();
-
-        let result = '';
-        let error = '';
-
-        // 결과 수집
-        pythonProcess.stdout.on('data', (data) => {
-            result += data.toString();
-        });
-
-        pythonProcess.stderr.on('data', (data) => {
-            error += data.toString();
-        });
-
-        // 프로세스 완료 대기
-        await new Promise((resolve, reject) => {
-            pythonProcess.on('close', (code) => {
-                if (code !== 0) {
-                    reject(new Error(`Python process exited with code ${code}: ${error}`));
-                } else {
-                    resolve();
-                }
-            });
-        });
-
-        // 결과 파싱 및 반환
-        const placements = JSON.parse(result);
-        res.json(placements);
-
-    } catch (error) {
-        console.error('가구 배치 중 오류 발생:', error);
-        res.status(500).json({ error: error.message });
+    // Convert door dimensions to numbers
+    const formattedElements = [{ ...roomDimensions, type: 'room' }];
+    if (roomDimensions.doors) {
+      formattedElements.push(...roomDimensions.doors.map(door => ({
+        ...door,
+        type: 'door',
+        width: Number(door.width),
+        height: Number(door.height)
+      })));
     }
+    if (roomDimensions.windows) {
+      formattedElements.push(...roomDimensions.windows.map(window => ({
+        ...window,
+        type: 'window',
+        width: Number(window.width),
+        height: Number(window.height)
+      })));
+    }
+    if (roomDimensions.roomDividers) {
+      formattedElements.push(...roomDimensions.roomDividers.map(divider => ({
+        ...divider,
+        type: 'roomDivider',
+        width: Number(divider.width),
+        height: Number(divider.height)
+      })));
+    }
+
+    let placedElements = formattedElements;
+    const placementResults = [];
+    const categoryOrder = ['bed', 'closet', 'desk', 'bookshelf'];
+
+    const sortedFurniture = furniture.sort((a, b) => {
+      return categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category);
+    });
+
+    for (const item of sortedFurniture) {
+      let result;
+      if (!item.dimensions || typeof item.dimensions.width === 'undefined' || typeof item.dimensions.height === 'undefined') {
+        console.warn('Skipping item ' + item.name + ' due to missing or invalid dimensions', item);
+        placementResults.push({ item: item.name, status: 'skipped', reason: 'Missing or invalid dimensions' });
+        continue;
+      }
+
+      const furnitureDataForPlacement = {
+        ...item,
+        width: item.dimensions.width,
+        depth: item.dimensions.depth,
+        height: item.dimensions.height,
+        type: item.category
+      };
+
+      switch (item.category) {
+        case 'bed':
+          result = placeBed([...placedElements], design, furnitureDataForPlacement);
+          break;
+        case 'desk':
+          result = placeDesk([...placedElements], design, furnitureDataForPlacement);
+          break;
+        case 'closet':
+          result = placeWardrobe([...placedElements], furnitureDataForPlacement);
+          break;
+        case 'bookshelf':
+          result = placeBookshelf([...placedElements], furnitureDataForPlacement);
+          break;
+        default:
+          console.warn('No placement algorithm for category: ' + item.category);
+          placementResults.push({ item: item.name, status: 'skipped', reason: 'No algorithm for ' + item.category });
+          continue;
+      }
+
+      if (result && result.bestPosition) {
+        const placedItem = {
+          ...furnitureDataForPlacement,
+          name: item.name,
+          oid: item.oid,
+          glb_file: item.glb_file,
+          url: item.url,
+          x: result.bestPosition.x,
+          y: result.bestPosition.y,
+          isHorizon: result.bestPosition.isHorizon,
+          width: result.bestPosition.isHorizon ? furnitureDataForPlacement.depth : furnitureDataForPlacement.width,
+          height: result.bestPosition.isHorizon ? furnitureDataForPlacement.width : furnitureDataForPlacement.depth,
+          placementScore: result.score,
+          placementReasons: result.reasons
+        };
+        placedElements.push(placedItem);
+        placementResults.push({ item: item.name, status: 'placed', details: placedItem });
+      } else {
+        placementResults.push({ item: item.name, status: 'failed', reason: 'Could not find suitable position', result: result });
+        console.warn('Failed to place ' + item.category + ': ' + item.name, result);
+      }
+    }
+    res.json({ placedItems: placedElements.filter(el => el.type !== 'room'), summary: placementResults });
+  } catch (error) {
+    console.error('자동 배치 중 오류 발생:', error);
+    res.status(500).json({ message: '자동 배치 중 오류가 발생했습니다', error: error.message, stack: error.stack });
+  }
 });
 
-// 가구 배치 함수들
-const placeBed = (elements, design) => {
-  const room = elements.find(el => el.type === "room");
-  const bed = {
-    type: "bed",
-    x: room.x / 4,
-    y: room.y / 4,
-    width: 200,
-    height: 180,
-    rotation: 0
-  };
-  return { elements: [...elements, bed], reason: ["침대는 방의 왼쪽 구석에 배치했습니다."] };
-};
+// === FURNITUREPLACEMENT LOGIC START ===
+// const fpPath = path.join(__dirname, 'algorithm', 'furnitureplacement'); // Not used directly it seems
+// We are now using recommendFurniture from furnitureplacement which handles its own sub-imports
 
-const placeWardrobe = (elements, reason) => {
-  const room = elements.find(el => el.type === "room");
-  const wardrobe = {
-    type: "wardrobe",
-    x: room.x - 100,
-    y: room.y / 2,
-    width: 100,
-    height: 180,
-    rotation: Math.PI / 2
-  };
-  return { elements: [...elements, wardrobe], reason: [...reason, "옷장은 방의 오른쪽 벽에 배치했습니다."] };
-};
+// 기존 /api/furniture/recommend 라우트 제거 또는 주석 처리 후 아래로 대체
+/*
+app.post('/api/furniture/recommend', async (req, res) => {
+  console.log("[server.js] /api/furniture/recommend POST request received.");
+  // Destructure user_weights from req.body and rename it to userPreferenceRank
+  const { user_weights: userPreferenceRank, currentBudget, perimeter, currentPointColor, roomInfo } = req.body;
 
-const placeDesk = (elements, reason) => {
-  const room = elements.find(el => el.type === "room");
-  const desk = {
-    type: "desk",
-    x: room.x / 2,
-    y: room.y - 100,
-    width: 120,
-    height: 60,
-    rotation: 0
-  };
-  return { elements: [...elements, desk], reason: [...reason, "책상은 창문 근처에 배치했습니다."] };
-};
+  console.log("[server.js] Request body for recommend:", JSON.stringify(req.body, null, 2));
+  console.log("[server.js] userPreferenceRank after destructuring:", JSON.stringify(userPreferenceRank, null, 2));
 
-const placeBookshelf = (elements, reason) => {
-  const room = elements.find(el => el.type === "room");
-  const bookshelf = {
-    type: "bookshelf",
-    x: room.x - 80,
-    y: room.y - 80,
-    width: 80,
-    height: 180,
-    rotation: Math.PI / 2
-  };
-  return { elements: [...elements, bookshelf], reason: [...reason, "책장은 책상 근처에 배치했습니다."] };
-};
+  if (!userPreferenceRank || typeof currentBudget === 'undefined' || !roomInfo || typeof perimeter === 'undefined' || typeof currentPointColor === 'undefined') {
+    console.error("[server.js] Missing required fields for recommendation:", { userPreferenceRank, currentBudget, perimeter, currentPointColor, roomInfo });
+    return res.status(400).json({ message: '필수 입력 정보(선호도, 예산, 방 정보, 둘레, 포인트색상)가 누락되었습니다.' });
+  }
+
+  const { width: roomWidth, depth: roomDepth } = roomInfo;
+
+  if (typeof roomWidth === 'undefined' || typeof roomDepth === 'undefined') {
+    console.error("[server.js] Missing room dimensions:", { roomWidth, roomDepth });
+    return res.status(400).json({ message: '방 크기(너비, 깊이) 정보가 필요합니다.' });
+  }
+
+  try {
+    // recommendFurniture is now async and handles everything
+    const result = await recommendFurniture(userPreferenceRank, currentBudget, perimeter, currentPointColor, roomInfo);
+    
+    console.log("[server.js] Result from recommendFurniture (furnitureplacement):");
+    // console.log(JSON.stringify(result, null, 2)); // Can be very verbose
+
+    if (!result || !result.recommendedSet || !result.placements) {
+      console.error("[server.js] Recommendation logic failed to return expected structure.", result);
+      return res.status(500).json({ error: 'Recommendation logic failed or returned unexpected structure' });
+    }
+
+    // The placements from recommendFurniture should already have enriched element details.
+    const responsePayload = {
+      recommendedSet: result.recommendedSet,
+      placements: result.placements 
+    };
+    
+    console.log("📤 API 응답 데이터 (from furnitureplacement/recommendFurniture):");
+    // console.log(JSON.stringify(responsePayload, null, 2)); // Can be very verbose
+    res.json(responsePayload);
+
+  } catch (error) {
+    console.error("[server.js] /api/furniture/recommend Error:", error.message, error.stack);
+    res.status(500).json({ error: '추천 실패: ' + error.message });
+  }
+});
+*/
+// === FURNITUREPLACEMENT LOGIC END ===
 
 app.use('/api/placements', placementsRouter);
 
+// 루트 경로 리다이렉트 추가
+app.get('/', (req, res) => {
+  res.redirect('http://localhost:3000/miniholmes/mypage');
+});
+
 // 서버 실행
 app.listen(PORT, () => {
-  console.log(`서버가 http://localhost:${PORT}에서 실행 중입니다.`);
+  console.log('서버가 포트 ' + PORT + '에서 실행 중입니다.');
 });
