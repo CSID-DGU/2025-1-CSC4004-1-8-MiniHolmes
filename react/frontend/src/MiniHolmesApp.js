@@ -16,6 +16,12 @@ import Community from "./pages/Community";
 import RoomVisualizer from "./components/RoomVisualizer";
 import PartitionZoneInput from './pages/PartitionZoneInput';
 import PartitionDoorInput from './pages/PartitionDoorInput';
+import Step1 from "./pages/Step1";
+import Step2 from "./pages/Step2";
+import BudgetSelect from "./pages/BudgetSelect";
+import ColortoneSelect from "./pages/ColortoneSelect";
+import PointcolorSelect from "./pages/PointcolorSelect";
+import Step3 from "./pages/Step3";
 
 import logo from "./assets/logo.png";
 import "./pages/style/TopMenu.css";
@@ -78,7 +84,7 @@ function MiniHolmesApp() {
     e.preventDefault();
     localStorage.removeItem('roomSize');
     localStorage.removeItem('placement');
-    navigate('/miniholmes/input');
+    navigate('/miniholmes/step1');
   };
 
   const handleShowRegister = () => {
@@ -128,6 +134,15 @@ function MiniHolmesApp() {
             <Route path="input/order" element={<ImportanceOrder />} />
             <Route path="visualizer" element={<RoomVisualizer />} />
             <Route path="community" element={<Community />} />
+            <Route path="step1" element={<Step1 />} />
+            <Route path="step2" element={<Step2 />} />
+            <Route path="budget" element={<BudgetSelect />} />
+            <Route path="furniture" element={<FurnitureSelect />} />
+            <Route path="style" element={<StyleSelect />} />
+            <Route path="colortone" element={<ColortoneSelect />} />
+            <Route path="pointcolor" element={<PointcolorSelect />} />
+            <Route path="order" element={<ImportanceOrder />} />
+            <Route path="step3" element={<Step3 />} />
             <Route path="mypage" element={
               user ? (
                 <div style={{ textAlign: "center", marginTop: "40px" }}>
