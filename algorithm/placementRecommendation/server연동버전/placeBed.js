@@ -134,6 +134,7 @@ function filterValidPositions(positions, elements, furniture, room) {
 }
 
 function getWallAndFurnitureTightnessScore(p, elements, room, design) {
+  if(design=="cozy"){design="natural"}
   let score = 0;
   const reasons = [];
   let wallTouch = 0;
@@ -163,11 +164,11 @@ function getWallAndFurnitureTightnessScore(p, elements, room, design) {
       }
     }
     if (el.type === "window") {
-      if (design === "modern" && dist < 10) {
+      if (design === "modern" && dist < 100) {
         score -= 50;
         reasons.push("창문 인접 배치(-50)");
       }
-      if (design === "natural" && dist < 10) {
+      if (design === "natural" && dist < 100) {
         score += 30;
         reasons.push("자연 스타일: 창문 근처 배치(+30)");
       }
