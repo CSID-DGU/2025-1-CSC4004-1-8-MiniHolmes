@@ -310,8 +310,7 @@ function placeCloset(elements, closetData) {
   const closet = {
     type: "closet",
     width: closetData.dimensions.width,
-    height: closetData.dimensions.height,
-    depth: closetData.dimensions.depth,
+    height: closetData.dimensions.depth,
     oid: closetData.oid,
     name: closetData.name,
     glb_file: closetData.glb_file
