@@ -1,3 +1,9 @@
+/*
+// 원본이랑 달라진 점
+// 1. room 객체 크기 필드명이 x, y → width, depth로 바뀜
+//    room.x, room.y 대신 room.width, room.depth 사용
+// 2. 나머지 로직, cellSize 기본값, 코드 스타일은 그대로임
+*/
 function isEmptySpaceConnected(elements, room, cellSize = 20) {
   const rows = Math.ceil(room.depth / cellSize);
   const cols = Math.ceil(room.width / cellSize);
@@ -205,86 +211,74 @@ function generateWallBeltPositions(furniture, room, step = 10, belt = 30) {
   return positions;
 }
 
-function getPlacementScore(pos, elements, room) {
+function getPlacementScore(pos, elements, room, furniture) {
+  const width = pos.isHorizon ? furniture.height : furniture.width;
+  const height = pos.isHorizon ? furniture.width : furniture.height;
+  const trial = { x: pos.x, y: pos.y, width, height };
+  const EPS = 1;
+
   let score = 0;
   const reasons = [];
 
-  const width = pos.isHorizontal ? pos.height : pos.width;
-  const height = pos.isHorizontal ? pos.width : pos.height;
-  const trial = { x: pos.x, y: pos.y, width, height };
+  const longSide = Math.max(width, height);
+  const isHorizontal = width === longSide;
 
-  const sides = [
-    { dx: -1, dy: 0, width: 1, height: trial.height },
-    { dx: trial.width, dy: 0, width: 1, height: trial.height },
-    { dx: 0, dy: -1, width: trial.width, height: 1 },
-    { dx: 0, dy: trial.height, width: trial.width, height: 1 }
-  ];
-
-  var wallTouchflag = 0;
-  var nearSomethingflag = 0;
-
-  for (const s of sides) {
-    const sideBox = {
-      x: trial.x + s.dx,
-      y: trial.y + s.dy,
-      width: s.width,
-      height: s.height
-    };
-
-    const wallTouch = (
-      sideBox.x === 0 || sideBox.y === 0 ||
-      sideBox.x + sideBox.width === room.width ||
-      sideBox.y + sideBox.height === room.depth
-    );
-    if (wallTouch) {
-      wallTouchflag = 1;
-      score += 4;
-      continue;
-    }
-
-    const nearSomething = elements.some(el => {
-      if (el.type === "room") return false;
-      const dx = Math.max(el.x - (trial.x + trial.width), trial.x - (el.x + el.width), 0);
-      const dy = Math.max(el.y - (trial.y + trial.height), trial.y - (el.y + el.height), 0);
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      return dist > 0 && dist <= 20;
-    });
-    if (nearSomething) {
-      nearSomethingflag = 1;
-      score += 1;
-    }
+  // 긴 변이 벽에 붙어 있는 경우 큰 점수 부여
+  const touchesLongSideWall =
+    (isHorizontal && (Math.abs(trial.y - 0) <= EPS || Math.abs(trial.y + height - room.depth) <= EPS)) ||
+    (!isHorizontal && (Math.abs(trial.x - 0) <= EPS || Math.abs(trial.x + width - room.width) <= EPS));
+  if (touchesLongSideWall) {
+    score += 10;
+    reasons.push("긴 변이 벽에 밀착되어 높은 안정성 (+10)");
   }
 
-  if (wallTouchflag == 1) reasons.push("벽에 인접하여 안정적인 배치(+4)");
-  if (nearSomethingflag) reasons.push("물체에 근접하여 안정적인 배치 (+1)");
+  // 벽 접촉 면수 계산
+  let wallTouchCount = 0;
+  if (Math.abs(trial.x - 0) <= EPS) wallTouchCount++;
+  if (Math.abs(trial.x + width - room.width) <= EPS) wallTouchCount++;
+  if (Math.abs(trial.y - 0) <= EPS) wallTouchCount++;
+  if (Math.abs(trial.y + height - room.depth) <= EPS) wallTouchCount++;
 
-  const isTouchingFurniture = elements.some(el => {
-    if (el.type === "room") return false;
+  if (wallTouchCount >= 1) {
+    score += wallTouchCount * 4;
+    reasons.push(`${wallTouchCount}면이 벽에 밀착됨 (+${wallTouchCount * 4})`);
+  }
 
-    const horizontallyTouching =
-      (trial.x === el.x + el.width || trial.x + trial.width === el.x) &&
-      !(trial.y + trial.height <= el.y || trial.y >= el.y + el.height);
-
-    const verticallyTouching =
-      (trial.y === el.y + el.height || trial.y + trial.height === el.y) &&
-      !(trial.x + trial.width <= el.x || trial.x >= el.x + el.width);
-
-    return horizontallyTouching || verticallyTouching;
-  });
-
-  if (isTouchingFurniture) {
-    reasons.push("가구에 인접하여 안정적인 배치 (+4)");
-    score += 4;
+  // 가구 접촉 면 계산 (문/창문 제외)
+  let furnitureTouchCount = 0;
+  const margin = 1;
+  const directions = [
+    { dx: -margin, dy: 0, width: margin, height: height },
+    { dx: width, dy: 0, width: margin, height: height },
+    { dx: 0, dy: -margin, width: width, height: margin },
+    { dx: 0, dy: height, width: width, height: margin }
+  ];
+  for (const dir of directions) {
+    const box = {
+      x: trial.x + dir.dx,
+      y: trial.y + dir.dy,
+      width: dir.width,
+      height: dir.height
+    };
+    const touching = elements.some(el =>
+      el.type !== "room" && el.type !== "door" && el.type !== "window" && isOverlapping(el, box)
+    );
+    if (touching) furnitureTouchCount++;
+  }
+  if (furnitureTouchCount >= 1) {
+    score += furnitureTouchCount * 3;
+    reasons.push(`${furnitureTouchCount}면이 가구에 밀착됨 (+${furnitureTouchCount * 3})`);
   }
 
   return { score, reasons };
 }
 
-function selectRandomFromBestScored(validPositions, elements, room) {
+
+function selectRandomFromBestScored(validPositions, elements, room, furniture) {
   if (validPositions.length === 0) return null;
 
   const scored = validPositions.map(p => {
-    const { score, reasons } = getPlacementScore(p, elements, room);
+    const { score, reasons } = getPlacementScore(p, elements, room, furniture);
     return { ...p, score, reasons };
   });
 
@@ -316,8 +310,7 @@ function placeCloset(elements, closetData) {
   const closet = {
     type: "closet",
     width: closetData.dimensions.width,
-    height: closetData.dimensions.height,
-    depth: closetData.dimensions.depth,
+    height: closetData.dimensions.depth,
     oid: closetData.oid,
     name: closetData.name,
     glb_file: closetData.glb_file
@@ -345,16 +338,21 @@ function placeCloset(elements, closetData) {
   }
 
   const scoredPositions = validPositions.map(pos => {
-    const { score, reasons } = getPlacementScore(pos, elements, room);
+    const { score, reasons } = getPlacementScore(pos, elements, room,closet);
     return { ...pos, score, reasons };
   });
 
-  const bestPosition = selectRandomFromBestScored(scoredPositions, elements, room);
+  const bestPosition = selectRandomFromBestScored(scoredPositions, elements, room,closet);
+  console.log("여기가 옷장");
+  console.log(bestPosition);
 
   if (!bestPosition) {
     reasons.closet.push("최적 위치 선정 실패");
     return { elements, reasons };
   }
+
+  const finalWidth = bestPosition.isHorizon ? closet.height : closet.width;
+  const finalHeight = bestPosition.isHorizon ? closet.width : closet.height;
 
   const placedCloset = {
     type: closet.type,
@@ -363,8 +361,8 @@ function placeCloset(elements, closetData) {
     glb_file: closet.glb_file,
     x: bestPosition.x,
     y: bestPosition.y,
-    width: bestPosition.width,
-    height: bestPosition.height,
+    width: finalWidth,
+    height: finalHeight,
     isHorizon: bestPosition.isHorizon
   };
   elements.push(placedCloset);
@@ -378,8 +376,8 @@ function placeCloset(elements, closetData) {
     glb_file: closet.glb_file,
     x: bestPosition.x,
     y: bestPosition.y,
-    width: bestPosition.width,
-    height: bestPosition.height,
+    width: finalWidth,
+    height: finalHeight,
     isHorizon: bestPosition.isHorizon
   };
 
