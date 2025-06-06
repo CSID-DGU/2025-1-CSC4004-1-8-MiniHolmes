@@ -1,5 +1,7 @@
-// 2025.06.04 벽지 컬러링 코드 추가 (새로 추가된 부분 주석 검색 : '하지연')
-// 기존 코드는 수정x 추가만 했습니다
+// 2025.06.06 아래 지연님이 수정하신 코드 미반영. 백업해두었고 반영 예정입니다.
+
+    // 2025.06.04 벽지 컬러링 코드 추가 (새로 추가된 부분 주석 검색 : '하지연')
+    // 기존 코드는 수정x 추가만 했습니다  
 
 import React, { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
@@ -61,20 +63,6 @@ const RoomVisualizer = () => {
   const [pointColor, setPointColor] = useState('beige');
   const [recommendedFurnitureForRender, setRecommendedFurnitureForRender] = useState([]);
 
-  // 벽/바닥 색상 및 벽지 상태 : 하지연 수정
-  const [wallType, setWallType] = useState('color'); // 'color' or 'wallpaper'
-  const [wallColor, setWallColor] = useState('#f5f5f5');
-  const [wallWallpaper, setWallWallpaper] = useState('wallpaper1');
-  const [floorColor, setFloorColor] = useState('#eeeeee');
-
-  // 벽지 텍스처 경로 : 하지연 수정
-  const WALLPAPER_PATHS = {
-      wallpaper1: '/textures/wallpaper1.jpg',
-      wallpaper2: '/textures/wallpaper2.jpg',
-      wallpaper3: '/textures/wallpaper3.jpg'
-  };
-
-
   // Three.js 관련 레퍼런스
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -82,16 +70,6 @@ const RoomVisualizer = () => {
   const controlsRef = useRef(null);
   const furnitureModelsRef = useRef({});
   const animationFrameRef = useRef(null);
-
-  // 벽/바닥 material 참조 변수 추가 : 하지연 수정
-  const wallMaterialRefs = useRef({ 
-    frontWall: null,
-    backWall: null,
-    leftWall: null,
-    rightWall: null,
-  });
-  const floorMaterialRef = useRef(null);
-
 
   // 방 크기 상태를 컴포넌트 내부에서 선언
   const [roomSize, setRoomSize] = useState(getRoomSize());
@@ -225,7 +203,6 @@ const RoomVisualizer = () => {
     floor.receiveShadow = true;
     floor.name = 'floor';
     scene.add(floor);
-    floorMaterialRef.current = floorMaterial; // material 참조 저장 : 하지연 수정
 
     // 벽 material 준비 (각 벽마다 clone)
     const wallMaterialBack = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, side: THREE.DoubleSide, transparent: true, opacity: 1 });
@@ -242,7 +219,6 @@ const RoomVisualizer = () => {
     backWall.position.y = roomHeight / 2;
     backWall.name = 'backWall';
     scene.add(backWall);
-    wallMaterialRefs.current.backWall = backWall.material; // 하지연 수정
 
     // 앞벽(남쪽)
     const frontWall = new THREE.Mesh(
@@ -254,7 +230,6 @@ const RoomVisualizer = () => {
     frontWall.rotation.y = Math.PI;
     frontWall.name = 'frontWall';
     scene.add(frontWall);
-    wallMaterialRefs.current.frontWall = frontWall.material;// 하지연 수정
 
     // 왼쪽 벽(서쪽)
     const leftWall = new THREE.Mesh(
@@ -266,7 +241,6 @@ const RoomVisualizer = () => {
     leftWall.rotation.y = Math.PI / 2;
     leftWall.name = 'leftWall';
     scene.add(leftWall);
-    wallMaterialRefs.current.leftWall = leftWall.material; // 하지연 수정
 
     // 오른쪽 벽(동쪽)
     const rightWall = new THREE.Mesh(
@@ -278,8 +252,6 @@ const RoomVisualizer = () => {
     rightWall.rotation.y = -Math.PI / 2;
     rightWall.name = 'rightWall';
     scene.add(rightWall);
-    wallMaterialRefs.current.rightWall = rightWall.material; // 하지연 수정
-
 
     // 그리드 헬퍼
     const gridHelper = new THREE.GridHelper(
@@ -1265,35 +1237,6 @@ const RoomVisualizer = () => {
     return modelGroup;
   };
 
-  // 벽/바닥 색상·벽지 일괄 적용 useEffect 추가 : 하지연 수정
-  useEffect(() => {
-      // 벽 4면 일괄 적용
-      ['frontWall', 'backWall', 'leftWall', 'rightWall'].forEach((name) => {
-          const material = wallMaterialRefs.current[name];
-          if (material) {
-              if (wallType === 'color') {
-                  material.color.set(wallColor);
-                  material.map = null;
-              } else if (wallType === 'wallpaper') {
-                  const loader = new THREE.TextureLoader();
-                  loader.load(WALLPAPER_PATHS[wallWallpaper], (texture) => {
-                      material.map = texture;
-                      material.color.set('#ffffff');
-                      material.needsUpdate = true;
-                  });
-              }
-              material.needsUpdate = true;
-          }
-      });
-      // 바닥 색상 적용
-      if (floorMaterialRef.current) {
-          floorMaterialRef.current.color.set(floorColor);
-          floorMaterialRef.current.needsUpdate = true;
-      }
-  }, [wallType, wallColor, wallWallpaper, floorColor]);
-  // 이부분 하지연 수정 마무리
-
-
   // Load all furniture models
   const loadAllFurnitureModels = async (furnitureList) => {
     console.log('Loading furniture models for:', furnitureList);
@@ -1450,7 +1393,6 @@ const RoomVisualizer = () => {
   }
 
   return (
-
     <div style={{
       width: '100vw',
       minHeight: '500px',
@@ -1621,41 +1563,8 @@ const RoomVisualizer = () => {
           onLoadPlacements={loadSavedPlacements}
           onLoadPlacement={handleLoadPlacement}
         />
-
-
-        {/* 하지연 수정코드 */}
-        <div>
-          <div>
-            <label>벽 타입:</label>
-            <select value={wallType} onChange={e => setWallType(e.target.value)}>
-              <option value="color">색상</option>
-              <option value="wallpaper">벽지</option>
-            </select>
-            {wallType === 'color' ? (
-              <input type="color" value={wallColor} onChange={e => setWallColor(e.target.value)} />
-            ) : (
-              <select value={wallWallpaper} onChange={e => setWallWallpaper(e.target.value)}>
-                <option value="wallpaper1">벽지1</option>
-                <option value="wallpaper2">벽지2</option>
-                <option value="wallpaper3">벽지3</option>
-              </select>
-            )}
-          </div>
-          <div>
-            <label>바닥 색상:</label>
-            <input type="color" value={floorColor} onChange={e => setFloorColor(e.target.value)} />
-          </div>
-        </div>
-       {/* 하지연 수정코드 마무리 */}
-
-
-
-
       </div>
-      </div>
-
-    
-
+    </div>
   );
 };
 
