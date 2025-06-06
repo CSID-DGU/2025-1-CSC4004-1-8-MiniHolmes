@@ -41,6 +41,56 @@ async function fetchFromMongo() {
   }
 }
 
+function selectCategory(furnitureDb, userWeights, maxBudget, perimeter) {
+  const koreanToEnglish = {
+    "침대": "bed",
+    "책상": "desk",
+    "옷장": "closet",
+    "책장": "bookshelf"
+  };
+
+  // 🟡 진짜 입력 확인
+  console.log("🧩 userWeights 입력값 전체:", userWeights);
+  console.log("🧩 essentialFurniture 원본:", userWeights.essentialFurniture);
+
+  const desiredCategoriesKorean = Array.isArray(userWeights.essentialFurniture)
+    ? userWeights.essentialFurniture
+    : [];
+
+  console.log("🧩 desiredCategoriesKorean:", desiredCategoriesKorean);
+
+  const desiredCategories = desiredCategoriesKorean
+    .map(kor => koreanToEnglish[kor])
+    .filter(val => typeof val === "string")
+    .map(str => str.toLowerCase().trim());
+
+  console.log("✅ [selectCategory] desiredCategories (정제됨):", desiredCategories);
+
+  // 매칭 여부 로그
+  furnitureDb.forEach(item => {
+    const raw = item.category;
+    const normalized = typeof raw === "string" ? raw.toLowerCase().trim() : "(invalid)";
+    const matched = desiredCategories.includes(normalized);
+    console.log(`- '${raw}' → '${normalized}' => match: ${matched}`);
+  });
+
+  // 필터링
+  let filteredItems = [];
+  try {
+    filteredItems = furnitureDb.filter(item =>
+      typeof item.category === "string" &&
+      desiredCategories.includes(item.category.toLowerCase().trim())
+    );
+    console.log("✅ [selectCategory] filteredItems (개수):", filteredItems.length);
+    console.log("🪑 포함된 가구 목록:", filteredItems.map(f => f.name));
+  } catch (error) {
+    console.error("❌ [selectCategory] 필터링 중 에러 발생:", error);
+  }
+
+  return filteredItems;
+}
+
+
 // 가구 클래스 정의(데이터 구조 설계)
 class FurnitureItem {
     constructor(item) {
@@ -147,114 +197,87 @@ function normalizeStyleForFurniture(style) {
 
 //가구 선택 함수
 function selectItems(furnitureDb, weights, budget, perimeter) {
-    // 함수의 입력값은 (가구 DB, 사용자 선호도(가중치), 예산, 가구 배치 공간)
+  
+  console.log("[selectItems] DB 항목 샘플:");
+    furnitureDb.slice(0, 5).forEach(f => {
+    console.log(`- ${f.name}: ${f.category}`);
+    });
+  
+  
+  //함수의 입력값은 (가구 DB, 사용자 선호도(가중치), 예산, 가구 배치 면적적)
   const categories = ["bed", "closet", "desk", "bookshelf"];//카테고리별 후보군
   const selectedItems = [];
-  console.log("[selectItems] 입력값:", { budget, perimeter, target_style: weights.target_style, target_colortone: weights.target_colortone });
 
   for (const category of categories) {
-    const candidates = furnitureDb.filter(f => f.category && f.category.toLowerCase() === category.toLowerCase());//카테고리별 후보군
-    console.log(`\n[${category}] 초기 후보군 (${candidates.length}개):`, candidates.map(c => `${c.name} (${c.style}, ${c.colortone}, ${c.dimensions.width}mm, ${c.price}원)`));
-    if (candidates.length === 0) {
-      console.warn(`[${category}] 카테고리 후보 없음!`);
-      continue;
-    }
-
-    const normalizedStyle = normalizeStyleForFurniture(weights.target_style);
-    const styleFiltered = candidates.filter(a => a.style === normalizedStyle);
-    console.log(`  [${category}] 스타일(${normalizedStyle}) 필터링 후 (${styleFiltered.length}개):`, styleFiltered.map(c => c.name));
-    if (styleFiltered.length === 0) {
-      console.warn(`[${category}] 스타일(${normalizedStyle}) 일치 후보 없음!`);
-      // 스타일 불일치 시, 모든 후보를 대상으로 계속 진행 (선택 사항)
-      // continue; 
-    }
-
-    const colortoneFiltered = (styleFiltered.length > 0 ? styleFiltered : candidates).filter(a => a.colortone === weights.target_colortone);
-    console.log(`  [${category}] 컬러톤(${weights.target_colortone}) 필터링 후 (${colortoneFiltered.length}개):`, colortoneFiltered.map(c => c.name));
-    if (colortoneFiltered.length === 0) {
-        console.warn(`[${category}] 컬러톤(${weights.target_colortone}) 일치 후보 없음!`);
-        // 컬러톤 불일치 시, 스타일 필터된 후보를 대상으로 계속 진행 (선택 사항)
-        // continue;
-    }
-    
-    const finalCandidates = colortoneFiltered.length > 0 ? colortoneFiltered : (styleFiltered.length > 0 ? styleFiltered : candidates);
-    if (finalCandidates.length === 0) {
-        console.warn(`[${category}] 최종 후보 없음!`);
-        continue;
-    }
-
-    // 점수 기반 정렬 (기존 로직)
-    finalCandidates.sort((a, b) => { 
+    const candidates = furnitureDb.filter(
+  f => f.category?.toLowerCase().trim() === category
+);//카테고리별 후보군
+    if (candidates.length === 0) continue;
+    const normalizedStyle = normalizeStyleForFurniture(weights.target_style); //cozy를 natural로 변환
+    candidates.sort((a, b) => { //1을 각 4가지 조건에 따라 소수점으로 나누어 나눠진 가중치에 곱셈 통해 정렬
       const scoreA =
         weights.style * (a.style === normalizedStyle) +
         weights.colortone * (a.colortone === weights.target_colortone) -
         weights.size * a.sizeGrade() -
         weights.price * a.priceGrade();
+
       const scoreB =
         weights.style * (b.style === normalizedStyle) +
         weights.colortone * (b.colortone === weights.target_colortone) -
         weights.size * b.sizeGrade() -
         weights.price * b.priceGrade();
-      return scoreB - scoreA; // 내림차순 정렬
+
+      return scoreB - scoreA; // 내림차순
     });
-    console.log(`  [${category}] 점수 정렬 후 상위 3개:`, finalCandidates.slice(0,3).map(c => `${c.name} (스타일:${c.style}, 컬러:${c.colortone})`));
 
-    if (finalCandidates[0]) {
-        selectedItems.push(finalCandidates[0]);
-        console.log(`  [${category}] 최종 선택: ${finalCandidates[0].name}`);
-    } else {
-        console.warn(`[${category}] 최종 선택된 가구 없음!`);
+    selectedItems.push(candidates[0]);
+  }
+
+  //크기 조건 및 가격 조건 검사
+let adjustCount = 0;
+const MAX_ITER = 100;
+
+while (
+  (totalWidth(selectedItems) > perimeter * 0.75 || totalPrice(selectedItems) > budget) &&
+  adjustCount < MAX_ITER
+) {
+  // 크기 초과 시 가장 큰 가구를 더 작은 대안으로 교체
+  if (totalWidth(selectedItems) > perimeter * 0.75) {
+    let largest = selectedItems.reduce((a, b) => (a.sizeGrade() > b.sizeGrade() ? a : b));
+    let category = largest.category;
+    let alternatives = furnitureDb
+      .filter(f => f.category === category && f !== largest)
+      .sort((a, b) => a.sizeGrade() - b.sizeGrade());
+
+    if (alternatives.length > 0) {
+      let beforeWidth = totalWidth(selectedItems);
+      selectedItems[selectedItems.indexOf(largest)] = alternatives[0];
+      let afterWidth = totalWidth(selectedItems);
+      if (afterWidth >= beforeWidth) break;
     }
   }
 
-  console.log("\n[selectItems] 초기 선택된 가구:", selectedItems.map(item => `${item.name} (${item.category})`));
-  console.log("  총 폭:", totalWidth(selectedItems), "vs 예산 폭:", perimeter * 0.75);
-  console.log("  총 가격:", totalPrice(selectedItems), "vs 예산:", budget);
+  // 가격 초과 시 가장 비싼 가구를 더 저렴한 대안으로 교체
+  if (totalPrice(selectedItems) > budget) {
+    let expensive = selectedItems.reduce((a, b) => (a.priceGrade() > b.priceGrade() ? a : b));
+    let category = expensive.category;
+    let alternatives = furnitureDb
+      .filter(f => f.category === category && f !== expensive)
+      .sort((a, b) => a.priceGrade() - b.priceGrade());
 
-  //크기 및 가격 조건 검사
-  let adjustCount = 0;
-  const MAX_ITER = 100;
-
-  while (
-    (totalWidth(selectedItems) > perimeter * 0.75 || totalPrice(selectedItems) > budget) &&
-    adjustCount < MAX_ITER
-  ) {
-    // 크기 초과 시 가장 큰 가구를 더 작은 대안으로 교체
-    if (totalWidth(selectedItems) > perimeter * 0.75) {
-      let largest = selectedItems.reduce((a, b) => (a.sizeGrade() > b.sizeGrade() ? a : b));
-      let category = largest.category;
-      let alternatives = furnitureDb
-        .filter(f => f.category === category && f !== largest)
-        .sort((a, b) => a.sizeGrade() - b.sizeGrade());
-
-      if (alternatives.length > 0) {
-        let beforeWidth = totalWidth(selectedItems);
-        selectedItems[selectedItems.indexOf(largest)] = alternatives[0];
-        let afterWidth = totalWidth(selectedItems);
-        if (afterWidth >= beforeWidth) break;
-      }
+    if (alternatives.length > 0) {
+      let beforePrice = totalPrice(selectedItems);
+      selectedItems[selectedItems.indexOf(expensive)] = alternatives[0];
+      let afterPrice = totalPrice(selectedItems);
+      if (afterPrice >= beforePrice) break;
     }
-
-    // 가격 초과 시 가장 비싼 가구를 더 저렴한 대안으로 교체
-    if (totalPrice(selectedItems) > budget) {
-      let expensive = selectedItems.reduce((a, b) => (a.priceGrade() > b.priceGrade() ? a : b));
-      let category = expensive.category;
-      let alternatives = furnitureDb
-        .filter(f => f.category === category && f !== expensive)
-        .sort((a, b) => a.priceGrade() - b.priceGrade());
-
-      if (alternatives.length > 0) {
-        let beforePrice = totalPrice(selectedItems);
-        selectedItems[selectedItems.indexOf(expensive)] = alternatives[0];
-        let afterPrice = totalPrice(selectedItems);
-        if (afterPrice >= beforePrice) break;
-      }
-    }
-
-    adjustCount++;
   }
+
+  adjustCount++;
+}
   return selectedItems;
 }
+
 
 
 // 침구 클래스 정의
@@ -444,8 +467,8 @@ function recommendSets(furnitureDb, beddingList, mattressList, curtainList, user
 
   for (let i = 0; i < 3; i++) {
     // 1. 가구 세트 선택
-    
-    const selectedFurniture = selectItems(availableItems, userWeights, maxBudget, perimeter);
+    const filteredItems = selectCategory(availableItems, userWeights, maxBudget, perimeter);
+    const selectedFurniture = selectItems(filteredItems, userWeights, maxBudget, perimeter);
 
     // 2. 침대 추출
     const selectedBed = selectedFurniture.find(item => item.category === "bed");
@@ -482,7 +505,7 @@ function recommendSets(furnitureDb, beddingList, mattressList, curtainList, user
 
 // 사용자가 1, 2, 3, 4 순으로 순위를 부여하면 이를 바탕으로 가중치를 부여
 function convertRanksToWeights(rankObj) {
-  const baseWeight = 0.1; //기본값 0.1 부여한 뒤 남은 0.6을 순위에 따라 분배배
+  const baseWeight = 0.1;
   const bonusMap = {
     1: 0.24,
     2: 0.18,
@@ -500,7 +523,7 @@ function convertRanksToWeights(rankObj) {
 
   // target_style은 그대로 복사
   weightMap["target_style"] = rankObj["target_style"];
-  weightMap["target_colortone"] = rankObj["target_colortone"]; // 추가됨
+  weightMap["essentialFurniture"] = rankObj["essentialFurniture"]; // 가구 카테고리 선택을 위해 추가된 항목
   return weightMap;
 }
 
