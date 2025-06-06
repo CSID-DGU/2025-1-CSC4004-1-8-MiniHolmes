@@ -1,3 +1,8 @@
+/*
+// 원본이랑 달라진 점
+// 1. mongoose로 DB 모델(Furniture, Bedding 등) 정의하는 코드가 추가됨
+// 2. recommendFurnitureWhat에서 여러 객체(require)하는 부분 추가
+*/
 const mongoose = require('mongoose');
 const { placeBed } = require('./placeBed');
 const { placeDesk } = require('./placeDesk');
@@ -203,7 +208,7 @@ async function recommendFurniture(userPreferenceRank, currentBudget, perimeter, 
     return { recommendedSet: null, placements: [] }; 
   }
 
-  const firstRecommendedSet = allRecommendedSets[0]; // 가장 첫 번째 추천 세트를 사용
+  const firstRecommendedSet = allRecommendedSets[1]; // 가장 첫 번째 추천 세트를 사용
   const furnitureListToPlace = firstRecommendedSet.furnitureSet;
 
   // 4. Prepare elements for placement, now with calculated x, y for doors/windows
