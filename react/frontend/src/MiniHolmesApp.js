@@ -22,6 +22,7 @@ import BudgetSelect from "./pages/BudgetSelect";
 import ColortoneSelect from "./pages/ColortoneSelect";
 import PointcolorSelect from "./pages/PointcolorSelect";
 import Step3 from "./pages/Step3";
+import MyPage from "./pages/MyPage";
 
 import logo from "./assets/logo.png";
 import "./pages/style/TopMenu.css";
@@ -82,6 +83,10 @@ function MiniHolmesApp() {
 
   const handleServiceStart = (e) => {
     e.preventDefault();
+    if (!user) {
+      navigate('/miniholmes/mypage');
+      return;
+    }
     localStorage.removeItem('roomSize');
     localStorage.removeItem('placement');
     navigate('/miniholmes/step1');
@@ -145,24 +150,7 @@ function MiniHolmesApp() {
             <Route path="step3" element={<Step3 />} />
             <Route path="mypage" element={
               user ? (
-                <div style={{ textAlign: "center", marginTop: "40px" }}>
-                  <div style={{ fontSize: "1.2rem", marginBottom: "16px" }}>
-                    안녕하세요, <b>{user.userId || user.name || user.email}</b>님!
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    style={{
-                      background: "#6c63ff",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "6px",
-                      padding: "8px 20px",
-                      cursor: "pointer"
-                    }}
-                  >
-                    로그아웃
-                  </button>
-                </div>
+                <MyPage user={user} onLogout={handleLogout} />
               ) : null
             } />
             <Route path="input/*" element={<Navigate to="/miniholmes/input" replace />} />
