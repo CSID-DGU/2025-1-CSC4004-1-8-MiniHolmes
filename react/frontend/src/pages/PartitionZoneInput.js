@@ -2,6 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../pages/style/WindowSizeInput.css';
 
+const ProgressBar = ({ currentStep, totalSteps }) => {
+  const steps = [];
+  for (let i = 1; i <= totalSteps; i++) {
+    let className = 'step';
+    if (i < currentStep) className += ' done';
+    else if (i === currentStep) className += ' current';
+
+    steps.push(
+      <div key={i} className={className}>
+        {i}
+      </div>
+    );
+  }
+
+  return <div className="progress-bar">{steps}</div>;
+};
+
 const defaultZone = {
   type: 'partition', // 'partition' or 'color'
   wall: 'north', // 'north', 'south', 'east', 'west', 'none'
@@ -26,6 +43,7 @@ const wallOptions = [
 const PartitionZoneInput = () => {
   const [zones, setZones] = useState([]);
   const [input, setInput] = useState(defaultZone);
+  const [isInitialized, setIsInitialized] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,12 +51,15 @@ const PartitionZoneInput = () => {
     if (saved) {
       setZones(JSON.parse(saved));
     }
+    setIsInitialized(true);
     document.title = '가구배치 무료견적 | 미니홈즈 인테리어 배치';
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('partitionZones', JSON.stringify(zones));
-  }, [zones]);
+    if (isInitialized) {
+      localStorage.setItem('partitionZones', JSON.stringify(zones));
+    }
+  }, [zones, isInitialized]);
 
   const getRoomSize = () => {
     const saved = localStorage.getItem('roomSize');
@@ -79,7 +100,7 @@ const PartitionZoneInput = () => {
   const handleAdd = () => {
     const { width: roomWidth, depth: roomDepth } = getRoomSize();
     if (input.type === 'partition') {
-      if (!input.length || !input.height || !input.wallOffset) return alert('길이, 높이, 벽에서의 거리를 입력하세요.');
+      if (input.length === '' || input.height === '' || input.wallOffset === '') return alert('길이, 높이, 벽에서의 거리를 입력하세요.');
       // 입력값이 방 크기를 초과하는지 확인
       if (input.wall === 'north' || input.wall === 'south') {
         if (input.length > roomWidth) return alert('가벽 길이가 방 너비를 초과합니다.');
@@ -89,7 +110,7 @@ const PartitionZoneInput = () => {
         if (input.wallOffset > roomWidth) return alert('벽에서의 거리가 방 너비를 초과합니다.');
       }
     } else {
-      if (!input.width || !input.depth || !input.x || !input.y) return alert('가로, 세로, x좌표, y좌표를 입력하세요.');
+      if (input.width === '' || input.depth === '' || input.x === '' || input.y === '') return alert('가로, 세로, x좌표, y좌표를 입력하세요.');
       // 색상 구역이 방 크기를 초과하는지 확인
       if (input.x + input.width > roomWidth) return alert('색상 구역이 방 너비를 초과합니다.');
       if (input.y + input.depth > roomDepth) return alert('색상 구역이 방 깊이를 초과합니다.');
@@ -104,10 +125,11 @@ const PartitionZoneInput = () => {
 
   return (
     <div className="room-bg">
-      <div className="container">
+      <div className="container" style={{ maxWidth: '600px', width: '100%' }}>
+        <ProgressBar currentStep={3} totalSteps={3} />
         <h4 className="title">가벽/색상 구역을 입력해주세요.</h4>
         
-        <div style={{ marginBottom: 32 }}>
+        <div style={{ marginBottom: 32, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* 입력 폼 */}
           <div style={{ 
             background: '#fff', 
@@ -115,13 +137,14 @@ const PartitionZoneInput = () => {
             padding: '24px', 
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
             marginBottom: '24px',
-            minWidth: '500px' // 최소 너비 설정으로 겹침 방지
+            width: '100%',
+            maxWidth: '600px' // 일관된 최대 너비 설정
           }}>
             {/* 첫 번째 줄: 종류와 벽/바닥 */}
             <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: '200px 250px', 
-              gap: '30px', // 간격을 넓게 설정
+              gridTemplateColumns: '1fr 1fr', 
+              gap: '20px', 
               marginBottom: '24px',
               justifyContent: 'start'
             }}>
@@ -216,7 +239,7 @@ const PartitionZoneInput = () => {
                       step="0.01" 
                       className="input-field" 
                       style={{ 
-                        width: '84%', 
+                        width: '100%', 
                         height: '45px',
                         fontSize: '15px',
                         paddingLeft: '12px',
@@ -245,7 +268,7 @@ const PartitionZoneInput = () => {
                       step="0.01" 
                       className="input-field" 
                       style={{ 
-                        width: '86%', 
+                        width: '100%', 
                         height: '45px',
                         fontSize: '15px',
                         paddingLeft: '12px',
@@ -277,7 +300,7 @@ const PartitionZoneInput = () => {
                       step="0.01" 
                       className="input-field" 
                       style={{ 
-                        width: '84%', 
+                        width: '100%', 
                         height: '45px',
                         fontSize: '15px',
                         paddingLeft: '12px',
@@ -306,7 +329,7 @@ const PartitionZoneInput = () => {
                       step="0.01" 
                       className="input-field" 
                       style={{ 
-                        width: '86%', 
+                        width: '100%', 
                         height: '45px',
                         fontSize: '15px',
                         paddingLeft: '12px',
@@ -320,11 +343,49 @@ const PartitionZoneInput = () => {
               )}
             </div>
 
+            {/* 색상 선택 (색상 구역만) */}
+            {input.type === 'color' && (
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1fr', 
+                gap: '20px',
+                marginBottom: '24px',
+                justifyContent: 'start'
+              }}>
+                <div>
+                  <label style={{ 
+                    display: 'block', 
+                    fontWeight: '500', 
+                    marginBottom: '8px', 
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    색상
+                  </label>
+                  <input 
+                    type="color" 
+                    name="color" 
+                    value={input.color} 
+                    onChange={handleChange} 
+                    className="input-field" 
+                    style={{ 
+                      width: '100px', 
+                      height: '45px',
+                      padding: '5px',
+                      border: '2px solid #cbd5e1',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* 세 번째 줄: 위치 입력 */}
             <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: '200px 250px', 
-              gap: '30px',
+              gridTemplateColumns: '1fr 1fr', 
+              gap: '20px',
               marginBottom: '24px',
               justifyContent: 'start'
             }}>
@@ -376,7 +437,7 @@ const PartitionZoneInput = () => {
                       step="0.01" 
                       className="input-field" 
                       style={{ 
-                        width: '84%', 
+                        width: '100%', 
                         height: '45px',
                         fontSize: '15px',
                         paddingLeft: '12px',
@@ -435,7 +496,7 @@ const PartitionZoneInput = () => {
                       step="0.01" 
                       className="input-field" 
                       style={{ 
-                        width: '84%', 
+                        width: '100%', 
                         height: '45px',
                         fontSize: '15px',
                         paddingLeft: '12px',
@@ -464,7 +525,7 @@ const PartitionZoneInput = () => {
                       step="0.01" 
                       className="input-field" 
                       style={{ 
-                        width: '86%', 
+                        width: '100%', 
                         height: '45px',
                         fontSize: '15px',
                         paddingLeft: '12px',
@@ -506,7 +567,9 @@ const PartitionZoneInput = () => {
           <div style={{ 
             background: '#f8f9fa', 
             borderRadius: '12px', 
-            padding: '20px' 
+            padding: '20px',
+            width: '100%',
+            maxWidth: '600px' // 일관된 최대 너비 설정
           }}>
             <h5 style={{ 
               margin: '0 0 16px 0', 
@@ -604,7 +667,7 @@ const PartitionZoneInput = () => {
           </div>
         </div>
 
-        <div className="button-group">
+        <div className="button-group" style={{ maxWidth: '600px', width: '100%' }}>
           <button className="back-button" onClick={() => navigate('/miniholmes/input/window')}>
             뒤로
           </button>
