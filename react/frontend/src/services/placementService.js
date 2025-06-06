@@ -5,7 +5,7 @@ import { getAllFurniture } from './api';
 // 자동 배치 함수
 export const getAutoPlacement = async (selectedFurniture, roomDimensions) => {
   // selectedFurniture: 가구의 _id 배열 (ex: ['661...', ...])
-  const response = await fetch('http://localhost:3001/api/furniture/auto-placement', {
+  const response = await fetch('/api/furniture/auto-placement', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ furniture: selectedFurniture, roomDimensions })
