@@ -1,3 +1,13 @@
+/*
+// 원본이랑 달라진 점
+// 1. DB 접근할 때 roomviz DB 하나에서 컬렉션만 바꿔서 씀
+//    (원본은 컬렉션마다 DB 따로 썼음)
+// 2. mattress 컬렉션명이 mattresscover로 바뀜
+// 3. 클래스 생성자에서 oid 처리 방식이 살짝 다름
+//    (원본은 _id.$oid, 변경본은 oid 우선)
+// 4. cozy 스타일 관련 로직, 주석이 더 추가됨
+// 5. 함수/클래스 생성자 파라미터명이 data → item으로 바뀐 것도 있음
+*/
 console.log("=== Script Started ===");
 const crypto = require('crypto');
 // 기존 코드와 달라진 부분 : 

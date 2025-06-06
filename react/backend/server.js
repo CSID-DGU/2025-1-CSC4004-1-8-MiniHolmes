@@ -10,6 +10,7 @@ const fs = require('fs'); // Import the file system module
 // const { spawn } = require('child_process'); // spawn은 더 이상 사용되지 않으므로 주석 처리 또는 제거
 const authRoutes = require('./routes/auth');
 const placementsRouter = require('./routes/placements');
+const communityRoutes = require('./routes/community');
 const furniturePlacementApiRoutes = require('./api/furniturePlacementRoute.js');
 
 // furniture_choosing.js에서 recommendSets 함수와 convertRanksToWeights 함수를 임포트
@@ -33,7 +34,7 @@ const { placeBookshelf } = require('./algorithm/furnitureplacement/placeBookshel
 const { recommendFurniture } = require('./algorithm/furnitureplacement/recommendFurniture.js');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // 미들웨어 설정
 app.use(cors({
@@ -65,6 +66,7 @@ app.use((req, res, next) => {
 
 // 인증 라우트 추가
 app.use('/api/auth', authRoutes);
+app.use('/api/community', communityRoutes);
 app.use('/api', furniturePlacementApiRoutes);
 
 // static 파일 서빙 설정

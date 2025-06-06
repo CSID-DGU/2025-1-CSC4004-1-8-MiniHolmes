@@ -26,7 +26,7 @@ const DoorSizeInput = () => {
 
     const navigate = useNavigate();
     const [doorCount, setDoorCount] = useState('1');
-    const [doorSizes, setDoorSizes] = useState([{ width: '', height: '', wall: '', offset: '' }]);
+    const [doorSizes, setDoorSizes] = useState([{ width: '', height: '', wall: '', offset: '', distance: '' }]);
 
     const handleCountChange = (e) => {
         let value = e.target.value;
@@ -41,7 +41,7 @@ const DoorSizeInput = () => {
             let num = parseInt(value, 10);
             if (num < 1) num = 1;
             setDoorCount(num.toString());
-            setDoorSizes(Array.from({ length: num }, (_, i) => doorSizes[i] || { width: '', height: '', wall: '', offset: '' }));
+            setDoorSizes(Array.from({ length: num }, (_, i) => doorSizes[i] || { width: '', height: '', wall: '', offset: '', distance: '' }));
         }
     };
 
@@ -71,19 +71,91 @@ const DoorSizeInput = () => {
     };
 
     const handleNext = () => {
-        const allFilled = doorSizes.length === parseInt(doorCount, 10) && doorSizes.every(d => d.width && d.height && d.wall && d.offset !== '');
+        const allFilled = doorSizes.length === parseInt(doorCount, 10) && doorSizes.every(d => d.width && d.height && d.wall && d.offset !== '' && d.distance !== '');
         if (allFilled) {
             localStorage.setItem("doorSizes", JSON.stringify(doorSizes));
+            // Create color zones for door areas
+            const doorColorZones = doorSizes.map((door, index) => {
+                // For north/south walls: width = door width, depth = door distance
+                // For east/west walls: width = door distance, depth = door width
+                const isNorthSouth = door.wall === 'north' || door.wall === 'south';
+                return {
+                    type: 'color',
+                    wall: 'none',
+                    width: isNorthSouth ? door.width : door.distance,
+                    depth: isNorthSouth ? door.distance : door.width,
+                    color: '#FF5722', // Orange color for door zones
+                    x: calculateDoorZoneX(door),
+                    y: calculateDoorZoneY(door),
+                    isDoorZone: true,
+                    doorIndex: index
+                };
+            });
+            
+            // Get existing partition zones and add door zones
+            const existingZones = JSON.parse(localStorage.getItem('partitionZones') || '[]');
+            const updatedZones = [...existingZones.filter(z => !z.isDoorZone), ...doorColorZones];
+            localStorage.setItem('partitionZones', JSON.stringify(updatedZones));
+            
             navigate('/miniholmes/input/window');
         } else {
-            alert("문의 크기와 위치를 모두 입력해주세요.");
+            alert("문의 크기, 위치, 그리고 문 앞 거리를 모두 입력해주세요.");
+        }
+    };
+    
+    const getRoomSize = () => {
+        const saved = localStorage.getItem('roomSize');
+        if (saved) {
+            try {
+                const { width, length } = JSON.parse(saved);
+                return { width: Number(width), depth: Number(length) };
+            } catch { return { width: 400, depth: 400 }; }
+        }
+        return { width: 400, depth: 400 };
+    };
+    
+    const calculateDoorZoneX = (door) => {
+        const { width: roomWidth } = getRoomSize();
+        const doorWidth = Number(door.width);
+        const offset = Number(door.offset);
+        
+        switch (door.wall) {
+            case 'north': // 북쪽 벽
+                return roomWidth - offset - doorWidth;
+            case 'south': // 남쪽 벽  
+                return offset;
+            case 'west': // 서쪽 벽
+                return 0;
+            case 'east': // 동쪽 벽
+                return roomWidth - Number(door.distance);
+            default:
+                return 0;
+        }
+    };
+    
+    const calculateDoorZoneY = (door) => {
+        const { depth: roomDepth } = getRoomSize();
+        const doorWidth = Number(door.width);
+        const offset = Number(door.offset);
+        
+        switch (door.wall) {
+            case 'north': // 북쪽 벽
+                return 0;
+            case 'south': // 남쪽 벽
+                return roomDepth - Number(door.distance);
+            case 'west': // 서쪽 벽
+                return roomDepth - offset - doorWidth;
+            case 'east': // 동쪽 벽
+                return offset;
+            default:
+                return 0;
         }
     };
 
     return (
         <div className="room-bg">
             <div className="container">
-                <ProgressBar currentStep={2} totalSteps={5} />
+                <ProgressBar currentStep={1} totalSteps={3} />
                 <h4 className="title">모든 문의 개수를 입력해주세요.</h4>
                 <input
                     type="number"
@@ -137,6 +209,26 @@ const DoorSizeInput = () => {
                                 placeholder="거리"
                                 value={door.offset || ""}
                                 onChange={e => handleOffsetChange(index, e)}
+                                className="dim-input"
+                                min={0}
+                            />
+                        </div>
+                        <div style={{ fontSize: '0.95em', color: '#888', margin: '10px 0' }}>
+                            ※ 문 앞 거리: 가구를 배치하지 않을 영역의 깊이입니다.
+                        </div>
+                        <div className="dimension-group">
+                            <span style={{ minWidth: '80px', fontSize: '0.9em', color: '#333' }}>문 앞 거리</span>
+                            <input
+                                type="number"
+                                name="distance"
+                                placeholder="깊이(cm)"
+                                value={door.distance || ""}
+                                onChange={e => {
+                                    const filteredValue = e.target.value.replace(/[^0-9]/g, '');
+                                    const updated = [...doorSizes];
+                                    updated[index].distance = filteredValue;
+                                    setDoorSizes(updated);
+                                }}
                                 className="dim-input"
                                 min={0}
                             />

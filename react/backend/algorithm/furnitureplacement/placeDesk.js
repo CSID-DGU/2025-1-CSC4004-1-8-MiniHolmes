@@ -1,3 +1,9 @@
+/*
+// 원본이랑 달라진 점
+// 1. room 객체 크기 필드명이 x, y → width, depth로 바뀜
+//    room.x, room.y 대신 room.width, room.depth 사용
+// 2. 나머지 로직, cellSize 기본값, 코드 스타일은 그대로임
+*/
 function isEmptySpaceConnected(elements, room, cellSize = 20) {
   const rows = Math.ceil(room.depth / cellSize);
   const cols = Math.ceil(room.width / cellSize);
@@ -122,12 +128,12 @@ function restPlace(elements) {
 
 function generateWallBeltPositions(furniture, room, step = 10, belt = 30) {
   const positions = [];
-  for (const isHorizontal of [false, true]) {
-    const width = isHorizontal ? furniture.height : furniture.width;
-    const height = isHorizontal ? furniture.width : furniture.height;
+  for (const isHorizon of [false, true]) {
+    const width = isHorizon ? furniture.height : furniture.width;
+    const height = isHorizon ? furniture.width : furniture.height;
     for (let x = 0; x <= room.width - width; x += step) {
       for (let y = 0; y <= room.depth - height; y += step) {
-        positions.push({ x, y, isHorizontal });
+        positions.push({ x, y, isHorizon });
       }
     }
   }
@@ -136,8 +142,8 @@ function generateWallBeltPositions(furniture, room, step = 10, belt = 30) {
 
 function isBackSpaceClear(pos, elements, desk, chairGap) {
   const room = elements.find(el => el.type === "room");
-  const width = pos.isHorizontal ? desk.height : desk.width;
-  const height = pos.isHorizontal ? desk.width : desk.height;
+  const width = pos.isHorizon ? desk.height : desk.width;
+  const height = pos.isHorizon ? desk.width : desk.height;
   const trial = { x: pos.x, y: pos.y, width, height };
 
   function isInsideRoom(area) {
@@ -154,7 +160,7 @@ function isBackSpaceClear(pos, elements, desk, chairGap) {
       !elements.some(el => el.type !== "room" && isOverlapping(area, el));
   }
 
-  if (!pos.isHorizontal) {
+  if (!pos.isHorizon) {
     const topArea = {
       x: trial.x,
       y: trial.y - chairGap,
@@ -186,8 +192,8 @@ function isBackSpaceClear(pos, elements, desk, chairGap) {
 }
 
 function isTooCloseToDoor(pos, elements, desk, threshold = 60) {
-  const width = pos.isHorizontal ? desk.height : desk.width;
-  const height = pos.isHorizontal ? desk.width : desk.height;
+  const width = pos.isHorizon ? desk.height : desk.width;
+  const height = pos.isHorizon ? desk.width : desk.height;
   const trial = { x: pos.x, y: pos.y, width, height };
 
   return elements.some(el => {
@@ -212,8 +218,12 @@ function findAvailableWalls(elements, room) {
   return [...wallSet];
 }
 
-function getPlacementScoreWithReason(pos, elements, room, design) {
-  const { x, y, width, height } = pos;
+function getPlacementScoreWithReason(pos, elements, room, design,furniture) {
+  if(design=="cozy"){design="natural"}
+  const x = pos.x;
+const y = pos.y;
+const width = pos.isHorizon ? furniture.height : furniture.width;
+const height = pos.isHorizon ? furniture.width : furniture.height;
   let score = 0;
   const reasons = [];
 
@@ -400,8 +410,8 @@ function placeDesk(elements, design, deskData) {
   let validPositions = [];
 
   for (const pos of positions) {
-    const trialWidth = pos.isHorizontal ? desk.height : desk.width;
-    const trialHeight = pos.isHorizontal ? desk.width : desk.height;
+    const trialWidth = pos.isHorizon ? desk.height : desk.width;
+    const trialHeight = pos.isHorizon ? desk.width : desk.height;
 
     const trial = {
       type: desk.type,
@@ -409,7 +419,7 @@ function placeDesk(elements, design, deskData) {
       y: pos.y,
       width: trialWidth,
       height: trialHeight,
-      isHorizon: pos.isHorizontal,
+      isHorizon: pos.isHorizon,
       oid: desk.oid,
       name: desk.name,
       glb_file: desk.glb_file
@@ -431,14 +441,29 @@ function placeDesk(elements, design, deskData) {
     return { elements, reasons };
   }
 
+  
+
   const scoredPositions = validPositions.map(pos => {
-    const { score, reasons: placementReasons } = getPlacementScoreWithReason(pos, elements, room, design);
+    const { score, reasons: placementReasons } = getPlacementScoreWithReason(pos, elements, room, design,desk);
     return { ...pos, score, placementReasons };
   });
+const bestH = scoredPositions.find(p => p.isHorizon);
+const bestV = scoredPositions.find(p => !p.isHorizon);
+console.log("수평 최고 점수:", bestH?.score, bestH);
+console.log("수직 최고 점수:", bestV?.score, bestV);
+  scoredPositions.slice(0, 10).forEach((pos, idx) => {
+  console.log(`#${idx + 1}:`, pos);
+});
+console.log("=== 정렬 전 ===");
+scoredPositions.slice(0, 5).forEach(p => console.log(p.score, p.isHorizon));
 
-  scoredPositions.sort((a, b) => b.score - a.score);
+scoredPositions.sort((a, b) => b.score - a.score);
+
+console.log("=== 정렬 후 ===");
+scoredPositions.slice(0, 5).forEach(p => console.log(p.score, p.isHorizon));
   const bestPosition = scoredPositions[0];
-
+  console.log("여기가 책상");
+  console.log(bestPosition);
   if (!bestPosition) {
     reasons.desk.push("최적 위치 선정 실패");
     return { elements, reasons };
@@ -448,8 +473,8 @@ function placeDesk(elements, design, deskData) {
     reasons.desk.push(...bestPosition.placementReasons);
   }
 
-  const placedDeskWidth = bestPosition.isHorizontal ? desk.height : desk.width;
-  const placedDeskHeight = bestPosition.isHorizontal ? desk.width : desk.height;
+  const placedDeskWidth = bestPosition.isHorizon ? desk.height : desk.width;
+  const placedDeskHeight = bestPosition.isHorizon ? desk.width : desk.height;
 
   const placedDesk = {
     type: desk.type,
@@ -460,7 +485,7 @@ function placeDesk(elements, design, deskData) {
     y: bestPosition.y,
     width: placedDeskWidth,
     height: placedDeskHeight,
-    isHorizon: bestPosition.isHorizontal
+    isHorizon: bestPosition.isHorizon
   };
   elements.push(placedDesk);
 
@@ -473,7 +498,7 @@ function placeDesk(elements, design, deskData) {
     y: bestPosition.y,
     width: placedDeskWidth,
     height: placedDeskHeight,
-    isHorizontal: bestPosition.isHorizontal
+    isHorizon: bestPosition.isHorizon
   };
 
   console.log("[placeDesk] Returning:", { element: deskDetails, reason: reasons });
