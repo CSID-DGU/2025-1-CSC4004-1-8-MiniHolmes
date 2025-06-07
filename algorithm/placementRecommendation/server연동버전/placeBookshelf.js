@@ -110,7 +110,33 @@ const getBookshelfScore = (pos, elements, room, shelf) => {
     return dist > 0 && dist <= 20;
   });
   if (nearFurniture) score += 1;
+   // 긴쪽이 닿은 옷장 감점
+  for (const el of elements) {
+    if (el.type === "closet") {
+      const elLongSide = Math.max(el.width, el.height);
+      const elShortSide = Math.min(el.width, el.height);
+      const dx = Math.max(el.x - (trial.x + width), trial.x - (el.x + el.width), 0);
+      const dy = Math.max(el.y - (trial.y + height), trial.y - (el.y + el.height), 0);
+      const dist = Math.sqrt(dx * dx + dy * dy);
 
+      if (dist < 1) {
+        const sharedVertical =
+          (Math.abs(trial.x + width - el.x) <= 1 || Math.abs(el.x + el.width - trial.x) <= 1) &&
+          (trial.y < el.y + el.height && trial.y + height > el.y);
+        const sharedHorizontal =
+          (Math.abs(trial.y + height - el.y) <= 1 || Math.abs(el.y + el.height - trial.y) <= 1) &&
+          (trial.x < el.x + el.width && trial.x + width > el.x);
+
+        const closetIsLongHorizontally = el.width >= el.height;
+
+        if ((closetIsLongHorizontally && sharedHorizontal) ||
+            (!closetIsLongHorizontally && sharedVertical)) {
+          score -= 10;
+          
+        }
+      }
+    }
+  }
   return score;
 };
 
