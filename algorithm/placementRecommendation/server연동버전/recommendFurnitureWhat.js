@@ -50,28 +50,22 @@ function selectCategory(furnitureDb, userWeights, maxBudget, perimeter) {
   };
 
   // 🟡 진짜 입력 확인
-  console.log("🧩 userWeights 입력값 전체:", userWeights);
-  console.log("🧩 essentialFurniture 원본:", userWeights.essentialFurniture);
-
   const desiredCategoriesKorean = Array.isArray(userWeights.essentialFurniture)
     ? userWeights.essentialFurniture
     : [];
 
-  console.log("🧩 desiredCategoriesKorean:", desiredCategoriesKorean);
 
   const desiredCategories = desiredCategoriesKorean
     .map(kor => koreanToEnglish[kor])
     .filter(val => typeof val === "string")
     .map(str => str.toLowerCase().trim());
 
-  console.log("✅ [selectCategory] desiredCategories (정제됨):", desiredCategories);
 
   // 매칭 여부 로그
   furnitureDb.forEach(item => {
     const raw = item.category;
     const normalized = typeof raw === "string" ? raw.toLowerCase().trim() : "(invalid)";
     const matched = desiredCategories.includes(normalized);
-    console.log(`- '${raw}' → '${normalized}' => match: ${matched}`);
   });
 
   // 필터링
@@ -81,8 +75,6 @@ function selectCategory(furnitureDb, userWeights, maxBudget, perimeter) {
       typeof item.category === "string" &&
       desiredCategories.includes(item.category.toLowerCase().trim())
     );
-    console.log("✅ [selectCategory] filteredItems (개수):", filteredItems.length);
-    console.log("🪑 포함된 가구 목록:", filteredItems.map(f => f.name));
   } catch (error) {
     console.error("❌ [selectCategory] 필터링 중 에러 발생:", error);
   }
