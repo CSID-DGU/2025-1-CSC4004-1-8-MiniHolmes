@@ -134,6 +134,7 @@ function filterValidPositions(positions, elements, furniture, room) {
 }
 
 function getWallAndFurnitureTightnessScore(p, elements, room, design) {
+  windowDistance = 1000;
   if(design=="cozy"){design="natural"}
   let score = 0;
   const reasons = [];
@@ -163,12 +164,13 @@ function getWallAndFurnitureTightnessScore(p, elements, room, design) {
         reasons.push("문 회피(+2)");
       }
     }
+    
     if (el.type === "window") {
-      if (design === "modern" && dist < 100) {
+      if (design === "modern" && dist < windowDistance) {
         score -= 50;
         reasons.push("창문 인접 배치(-50)");
       }
-      if (design === "natural" && dist < 100) {
+      if (design === "natural" && dist < windowDistance) {
         score += 30;
         reasons.push("자연 스타일: 창문 근처 배치(+30)");
       }
@@ -259,6 +261,7 @@ function placeBed(elements, design, bedData) {
       isHorizon: best.isHorizon
     };
     elements.push(placed);
+    console.log("[placeBed] placed:", placed);
     if (best.reasons) reasons.bed.push(...best.reasons);
     return { element: placed, reasons };
   }
