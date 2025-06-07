@@ -276,7 +276,7 @@ const height = pos.isHorizon ? furniture.width : furniture.height;
   }
 
   const farFromWardrobe = elements.every(el => {
-    if (el.type !== "wardrobe") return true;
+    if (el.type !== "closet") return true;
     const dx = Math.max(el.x - (x + width), x - (el.x + el.width), 0);
     const dy = Math.max(el.y - (y + height), y - (el.y + el.height), 0);
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -372,7 +372,37 @@ const height = pos.isHorizon ? furniture.width : furniture.height;
       reasons.push("침대 옆에 배치되어 아늑한 분위기 조성 (내추럴 스타일 선호, 확률 적용)");
     }
   }
+  // 옷장의 긴 변과 접촉하면 감점
+for (const el of elements) {
+  if (el.type !== "closet" && el.type !== "wardrobe") continue;
 
+  const closetLong = Math.max(el.width, el.height);
+  const closetShort = Math.min(el.width, el.height);
+
+  const dx = Math.max(el.x - (x + width), x - (el.x + el.width), 0);
+  const dy = Math.max(el.y - (y + height), y - (el.y + el.height), 0);
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist < 1) {
+    const sharedVertical =
+      (Math.abs(x + width - el.x) <= 1 || Math.abs(el.x + el.width - x) <= 1) &&
+      (y < el.y + el.height && y + height > el.y);
+    const sharedHorizontal =
+      (Math.abs(y + height - el.y) <= 1 || Math.abs(el.y + el.height - y) <= 1) &&
+      (x < el.x + el.width && x + width > el.x);
+
+    const closetIsLongHorizontal = el.width >= el.height;
+
+    const touchingLongSide =
+      (closetIsLongHorizontal && sharedHorizontal) ||
+      (!closetIsLongHorizontal && sharedVertical);
+
+    if (touchingLongSide) {
+      score -= 10;
+      reasons.push("옷장의 긴 변과 접촉하여 감점");
+    }
+  }
+}
   return { score, reasons };
 }
 
