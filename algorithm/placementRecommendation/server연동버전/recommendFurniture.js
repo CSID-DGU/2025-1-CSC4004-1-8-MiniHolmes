@@ -81,6 +81,24 @@ function roundToNearestTen(value) {
   return Math.round(value / 10) * 10;
 }
 
+
+function normalizeElements(elements) {
+  return elements.map(el => {
+    const normalized = { ...el };
+
+    // color_zone: depth → height 변환
+    if (el.type === 'color_zone') {
+      normalized.height = el.depth ?? el.height ?? 0;
+    }
+
+    // 일부 요소에 width/height가 없으면 기본값 0 설정
+    if (typeof el.width !== 'number') normalized.width = 0;
+    if (typeof el.height !== 'number') normalized.height = 0;
+
+    return normalized;
+  });
+}
+
 function roundDimensions(furniture) {
   if (!furniture?.dimensions) return;
   furniture.dimensions.width = roundToNearestTen(furniture.dimensions.width);
@@ -212,14 +230,14 @@ async function recommendFurniture(userPreferenceRank, currentBudget, perimeter, 
   const furnitureListToPlace = firstRecommendedSet.furnitureSet;
 
   // 4. Prepare elements for placement, now with calculated x, y for doors/windows
-  const elements = [
+  let elements = [
     { type: 'room', width: Number(roomWidth), depth: Number(roomDepth) },
     ...(doors || []).map(door => calculateWallItemCoordinates({ ...door, type: 'door' }, Number(roomWidth), Number(roomDepth))),
     ...(windows || []).map(window => calculateWallItemCoordinates({ ...window, type: 'window' }, Number(roomWidth), Number(roomDepth))),
     ...(roomDividers || []).map(divider => partitionWallToElement(divider, Number(roomWidth), Number(roomDepth))),
     ...(colorZones || []).map(zone => ({ ...zone, type: 'color_zone' }))
   ];
-  
+  elements = normalizeElements(elements);
   console.log("[recommendFurniture in furnitureplacement] Elements for placement (with x,y for doors/windows):", JSON.stringify(elements, null, 2));
 
 
@@ -256,12 +274,13 @@ async function recommendFurniture(userPreferenceRank, currentBudget, perimeter, 
     roundDimensions(furnitureForPlacement); // furnitureForPlacement 객체의 치수를 수정
 
     if (design === "cozy") design = "natural"; // 'cozy' 스타일은 'natural'로 처리
-
+    
     let placed; // 배치 결과 저장 변수
     if (category === "bed" || category === "desk") { // 침대 또는 책상인 경우 디자인 스타일 전달
       placed = placementFunctions[category](currentElementsInTrial, design, furnitureForPlacement);
     } else { // 그 외 가구는 디자인 스타일 불필요
       placed = placementFunctions[category](currentElementsInTrial, furnitureForPlacement);
+      
     }
 
     if (placed?.element) {
@@ -297,7 +316,7 @@ async function recommendFurniture(userPreferenceRank, currentBudget, perimeter, 
   }
 
   console.log("[recommendFurniture in furnitureplacement] Final placement results:", JSON.stringify(placementResults, null, 2));
-  
+  console.log("[recommendFurniture in furnitureplacement] Received roomInfo:", JSON.stringify(roomInfo, null, 2));
   return {
     recommendedSet: firstRecommendedSet, // 추천된 전체 가구 세트
     placements: placementResults // 전체 세부 정보가 포함된 배치된 요소들의 배열 반환
