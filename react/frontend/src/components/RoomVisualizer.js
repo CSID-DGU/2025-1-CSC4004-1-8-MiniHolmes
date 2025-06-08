@@ -1,3 +1,4 @@
+// 2025.06.08 카메라 자동 시점 변경 (턴테이블 형식), 커뮤니티 포스트 렌더링 수정
 // 2025.06.06 아래 지연님이 수정하신 코드 미반영. 백업해두었고 반영 예정입니다.
 
     // 2025.06.04 벽지 컬러링 코드 추가 (새로 추가된 부분 주석 검색 : '하지연')
@@ -70,6 +71,25 @@ const RoomVisualizer = () => {
   const controlsRef = useRef(null);
   const furnitureModelsRef = useRef({});
   const animationFrameRef = useRef(null);
+  
+  // 카메라 회전 관련 상태
+  const [isRotating, setIsRotating] = useState(false);
+  const [isOrbiting, setIsOrbiting] = useState(false);
+  const rotationStateRef = useRef({
+    currentDirection: 0, // 0: South, 1: East, 2: North, 3: West
+    targetDirection: 0,
+    progress: 0,
+    startPosition: new THREE.Vector3(),
+    targetPosition: new THREE.Vector3(),
+    isAnimating: false
+  });
+  const orbitStateRef = useRef({
+    angle: 0, // 현재 회전 각도 (라디안)
+    radius: 0, // 회전 반경
+    speed: 0.005, // 회전 속도 (더 빠르게)
+    isActive: false // 궤도 회전 활성 상태
+  });
+  
 
   // 방 크기 상태를 컴포넌트 내부에서 선언
   const [roomSize, setRoomSize] = useState(getRoomSize());
@@ -276,6 +296,7 @@ const RoomVisualizer = () => {
     controls.update();
     controlsRef.current = controls;
 
+
     // 문(door) 텍스처 로드
     const textureLoader = new THREE.TextureLoader();
     const doorTexture = textureLoader.load('/textures/door_wood.jpg');
@@ -331,13 +352,14 @@ const RoomVisualizer = () => {
           doorMesh.position.set(
             -roomWidth / 2 + thickness,
             doorHeight / 2,
-            -roomWidth / 2 + offset + doorWidth / 2 // Z calculation
-          );
+            -roomWidth / 2 + doorWidth + offset / 2  // Z calculation
+            
+          ); console.log(`west positioned at: (from input: x=${-roomWidth / 2 + thickness}cm, y=${-roomWidth / 2 + offset + (doorWidth - offset)}cm)`);
           doorMesh.rotation.y = Math.PI / 2;
           doorMeshBack.position.set(
             -roomWidth / 2 - thickness,
             doorHeight / 2,
-            -roomWidth / 2 + offset + doorWidth / 2 // Z calculation
+            -roomWidth / 2 + doorWidth + offset / 2 // Z calculation
           );
           doorMeshBack.rotation.y = Math.PI / 2;
           break;
@@ -632,9 +654,16 @@ const RoomVisualizer = () => {
     // 애니메이션 루프
     const animate = () => {
       animationFrameRef.current = requestAnimationFrame(animate);
-      if (controlsRef.current) {
+      
+      // OrbitControls 업데이트 (궤도 회전 중이 아닐 때만)
+      if (controlsRef.current && !orbitStateRef.current.isActive) {
         controlsRef.current.update();
       }
+      
+      // 카메라 회전 애니메이션 업데이트
+      updateCameraRotation();
+      // 카메라 궤도 회전 업데이트
+      updateCameraOrbit();
       // 벽 투명도 동적 조절
       updateWallTransparency();
       renderer.render(scene, camera);
@@ -649,12 +678,21 @@ const RoomVisualizer = () => {
         leftWall: new THREE.Vector3(-roomWidth / 2, roomHeight / 2, 0),
         rightWall: new THREE.Vector3(roomWidth / 2, roomHeight / 2, 0),
       };
+      
+      // 궤도 회전 중일 때는 모든 벽을 더 투명하게 설정
+      const isOrbiting = orbitStateRef.current.isActive;
+      
       ['frontWall', 'backWall', 'leftWall', 'rightWall'].forEach(name => {
         const wall = scene.getObjectByName(name);
         if (wall) {
-          const dist = cameraPos.distanceTo(wallCenters[name]);
-          // 가까우면 더 투명, 멀면 불투명 (2~4m 사이에서 0.2~1)
-          wall.material.opacity = Math.max(0.2, Math.min(1, (dist - 2) / 2));
+          if (isOrbiting) {
+            // 궤도 회전 중: 모든 벽을 반투명하게 (0.3 opacity)
+            wall.material.opacity = 0.3;
+          } else {
+            // 일반 모드: 거리 기반 투명도
+            const dist = cameraPos.distanceTo(wallCenters[name]);
+            wall.material.opacity = Math.max(0.2, Math.min(1, (dist - 2) / 2));
+          }
           wall.material.transparent = true;
           wall.material.needsUpdate = true;
         }
@@ -720,8 +758,258 @@ const RoomVisualizer = () => {
     }
   }, [canvasWidth, canvasHeight]);
 
+
   // ResizableBox의 최대 크기 제한 계산
   const maxWidth = containerSize.width ? containerSize.width - 40 : 1000;
+
+
+
+
+  const resetCameraPosition = () => {
+    if (cameraRef.current && controlsRef.current) {
+      const roomHeight = roomSize.height * CM_TO_M;
+      const roomDepth = roomSize.depth * CM_TO_M;
+      cameraRef.current.position.set(0, roomHeight / 2, roomDepth * 1.2);
+      cameraRef.current.lookAt(0, roomHeight / 2, 0);
+      controlsRef.current.target.set(0, roomHeight / 2, 0);
+      controlsRef.current.update();
+    }
+  };
+
+  const setTopDownView = () => {
+    if (cameraRef.current && controlsRef.current) {
+      const roomWidth = roomSize.width * CM_TO_M;
+      const roomDepth = roomSize.depth * CM_TO_M;
+      const roomHeight = roomSize.height * CM_TO_M;
+      
+      // Position camera directly above the room center
+      const maxRoomSize = Math.max(roomWidth, roomDepth);
+      const cameraHeight = Math.max(maxRoomSize * 1.5, roomHeight * 3);
+      
+      cameraRef.current.position.set(0, cameraHeight, 0);
+      cameraRef.current.lookAt(0, 0, 0);
+      controlsRef.current.target.set(0, 0, 0);
+      controlsRef.current.update();
+    }
+  };
+
+  const setEastView = () => {
+    if (cameraRef.current && controlsRef.current) {
+      const roomWidth = roomSize.width * CM_TO_M;
+      const roomHeight = roomSize.height * CM_TO_M;
+      
+      // Position camera on the east side (positive X), looking west toward center
+      const distance = roomWidth * 1.2;
+      
+      cameraRef.current.position.set(distance, roomHeight / 2, 0);
+      cameraRef.current.lookAt(0, roomHeight / 2, 0);
+      controlsRef.current.target.set(0, roomHeight / 2, 0);
+      controlsRef.current.update();
+    }
+  };
+
+  const setWestView = () => {
+    if (cameraRef.current && controlsRef.current) {
+      const roomWidth = roomSize.width * CM_TO_M;
+      const roomHeight = roomSize.height * CM_TO_M;
+      
+      // Position camera on the west side (negative X), looking east toward center
+      const distance = roomWidth * 1.2;
+      
+      cameraRef.current.position.set(-distance, roomHeight / 2, 0);
+      cameraRef.current.lookAt(0, roomHeight / 2, 0);
+      controlsRef.current.target.set(0, roomHeight / 2, 0);
+      controlsRef.current.update();
+    }
+  };
+
+  const setSouthView = () => {
+    if (cameraRef.current && controlsRef.current) {
+      const roomDepth = roomSize.depth * CM_TO_M;
+      const roomHeight = roomSize.height * CM_TO_M;
+      
+      // Position camera on the south side (positive Z), looking north toward center
+      const distance = roomDepth * 1.2;
+      
+      cameraRef.current.position.set(0, roomHeight / 2, distance);
+      cameraRef.current.lookAt(0, roomHeight / 2, 0);
+      controlsRef.current.target.set(0, roomHeight / 2, 0);
+      controlsRef.current.update();
+    }
+  };
+
+  const setNorthView = () => {
+    if (cameraRef.current && controlsRef.current) {
+      const roomDepth = roomSize.depth * CM_TO_M;
+      const roomHeight = roomSize.height * CM_TO_M;
+      
+      // Position camera on the north side (negative Z), looking south toward center
+      const distance = roomDepth * 1.2;
+      
+      cameraRef.current.position.set(0, roomHeight / 2, -distance);
+      cameraRef.current.lookAt(0, roomHeight / 2, 0);
+      controlsRef.current.target.set(0, roomHeight / 2, 0);
+      controlsRef.current.update();
+    }
+  };
+
+  // 카메라 회전 애니메이션 업데이트 함수
+  const updateCameraRotation = () => {
+    if (!rotationStateRef.current.isAnimating || !cameraRef.current || !controlsRef.current) return;
+    
+    const state = rotationStateRef.current;
+    state.progress += 0.02; // 애니메이션 속도 (값이 클수록 빠름)
+    
+    if (state.progress >= 1) {
+      // 애니메이션 완료
+      state.progress = 1;
+      state.isAnimating = false;
+      state.currentDirection = state.targetDirection;
+    }
+    
+    // easeInOutQuad 애니메이션 곡선 적용
+    const easeProgress = state.progress < 0.5 
+      ? 2 * state.progress * state.progress 
+      : 1 - Math.pow(-2 * state.progress + 2, 2) / 2;
+    
+    // 시작 위치와 목표 위치 사이를 보간
+    const currentPos = new THREE.Vector3().lerpVectors(
+      state.startPosition, 
+      state.targetPosition, 
+      easeProgress
+    );
+    
+    cameraRef.current.position.copy(currentPos);
+    
+    // 항상 방 중심을 바라보도록 설정
+    const roomHeight = roomSize.height * CM_TO_M;
+    const lookAtTarget = new THREE.Vector3(0, roomHeight / 2, 0);
+    cameraRef.current.lookAt(lookAtTarget);
+    controlsRef.current.target.copy(lookAtTarget);
+    controlsRef.current.update();
+    
+    // 애니메이션이 완료되면 회전 상태 업데이트
+    if (!state.isAnimating) {
+      setIsRotating(false);
+    }
+  };
+
+  // 다음 방향으로 부드럽게 회전하는 함수
+  const rotateToNextDirection = () => {
+    if (rotationStateRef.current.isAnimating || isOrbiting) return; // 이미 애니메이션 중이거나 궤도 회전 중이면 무시
+    
+    const roomWidth = roomSize.width * CM_TO_M;
+    const roomDepth = roomSize.depth * CM_TO_M;
+    const roomHeight = roomSize.height * CM_TO_M;
+    const distance = Math.max(roomWidth, roomDepth) * 1.2;
+    
+    const state = rotationStateRef.current;
+    
+    // 다음 방향 계산 (South → East → North → West → South)
+    state.targetDirection = (state.currentDirection + 1) % 4;
+    
+    // 현재 카메라 위치를 시작 위치로 설정
+    if (cameraRef.current) {
+      state.startPosition.copy(cameraRef.current.position);
+    }
+    
+    // 목표 위치 계산
+    switch (state.targetDirection) {
+      case 0: // South (positive Z)
+        state.targetPosition.set(0, roomHeight / 2, roomDepth * 1.2);
+        break;
+      case 1: // East (positive X)
+        state.targetPosition.set(roomWidth * 1.2, roomHeight / 2, 0);
+        break;
+      case 2: // North (negative Z)
+        state.targetPosition.set(0, roomHeight / 2, -roomDepth * 1.2);
+        break;
+      case 3: // West (negative X)
+        state.targetPosition.set(-roomWidth * 1.2, roomHeight / 2, 0);
+        break;
+    }
+    
+    // 애니메이션 시작
+    state.progress = 0;
+    state.isAnimating = true;
+    setIsRotating(true);
+  };
+
+  // 연속 궤도 회전 업데이트 함수
+  const updateCameraOrbit = () => {
+    const orbitState = orbitStateRef.current;
+    
+    if (!orbitState.isActive || !cameraRef.current) return;
+    
+    const roomWidth = roomSize.width * CM_TO_M;
+    const roomDepth = roomSize.depth * CM_TO_M;
+    const roomHeight = roomSize.height * CM_TO_M;
+    
+    // 각도 증가 (연속 회전)
+    orbitState.angle += orbitState.speed;
+    
+    // 2π를 넘으면 0으로 리셋 (무한 회전)
+    if (orbitState.angle >= Math.PI * 2) {
+      orbitState.angle = 0;
+    }
+    
+    // 회전 반경 계산 (방 크기에 기반)
+    orbitState.radius = Math.max(roomWidth, roomDepth) * 1.2;
+    
+    // 원형 궤도 위치 계산
+    const x = Math.cos(orbitState.angle) * orbitState.radius;
+    const z = Math.sin(orbitState.angle) * orbitState.radius;
+    const y = roomHeight / 2; // 눈높이 유지
+    
+    // 카메라 위치 설정
+    cameraRef.current.position.set(x, y, z);
+    
+    // 항상 방 중심을 바라보도록 설정
+    const lookAtTarget = new THREE.Vector3(0, roomHeight / 2, 0);
+    cameraRef.current.lookAt(lookAtTarget);
+    
+    // // 디버깅: 매 60프레임마다 위치 로그
+    // if (Math.floor(orbitState.angle * 100) % 20 === 0) {
+    //   console.log(`Orbit angle: ${orbitState.angle.toFixed(2)}, Camera pos: x=${x.toFixed(2)}, z=${z.toFixed(2)}`);
+    // }
+  };
+
+  // 연속 궤도 회전 토글 함수
+  const toggleCameraOrbit = () => {
+    if (rotationStateRef.current.isAnimating) return; // 단계별 회전 중이면 무시
+    
+    const orbitState = orbitStateRef.current;
+    const newOrbitState = !isOrbiting;
+    setIsOrbiting(newOrbitState);
+    orbitState.isActive = newOrbitState;
+    
+    if (newOrbitState) {
+      // 궤도 회전 시작 - 현재 카메라 위치에서 각도 계산
+      const roomWidth = roomSize.width * CM_TO_M;
+      const roomDepth = roomSize.depth * CM_TO_M;
+      
+      if (cameraRef.current) {
+        const currentPos = cameraRef.current.position;
+        const currentAngle = Math.atan2(currentPos.z, currentPos.x);
+        orbitState.angle = currentAngle;
+        orbitState.radius = Math.max(roomWidth, roomDepth) * 1.2;
+        
+        console.log('Starting orbit rotation from angle:', currentAngle);
+        console.log('Camera position:', currentPos.x, currentPos.y, currentPos.z);
+      }
+      
+      // OrbitControls 비활성화
+      if (controlsRef.current) {
+        controlsRef.current.enabled = false;
+      }
+    } else {
+      // 궤도 회전 중지 - OrbitControls 재활성화
+      if (controlsRef.current) {
+        controlsRef.current.enabled = true;
+      }
+      console.log('Stopping orbit rotation');
+    }
+  };
 
   // Handler functions
   const handleRecommendFurniture = async () => {
@@ -1562,6 +1850,16 @@ const RoomVisualizer = () => {
           onSavePlacement={handleSavePlacement}
           onLoadPlacements={loadSavedPlacements}
           onLoadPlacement={handleLoadPlacement}
+          onResetCamera={resetCameraPosition}
+          onTopDownView={setTopDownView}
+          onEastView={setEastView}
+          onWestView={setWestView}
+          onSouthView={setSouthView}
+          onNorthView={setNorthView}
+          onRotateCamera={rotateToNextDirection}
+          isRotating={isRotating}
+          onToggleOrbit={toggleCameraOrbit}
+          isOrbiting={isOrbiting}
         />
       </div>
     </div>
