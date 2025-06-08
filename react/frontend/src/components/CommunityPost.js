@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { togglePostLike, addComment, deleteComment } from '../services/communityService';
+import { togglePostLike, addComment, deleteComment, getCommunityPost } from '../services/communityService';
 import RoomVisualizerModal from './RoomVisualizerModal';
 import './CommunityPost.css';
 
@@ -13,6 +13,8 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
   const [comments, setComments] = useState(post.comments || []);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [showVisualizerModal, setShowVisualizerModal] = useState(false);
+  const [completePostData, setCompletePostData] = useState(null);
+  const [loadingPostData, setLoadingPostData] = useState(false);
 
   const handleLike = async () => {
     if (!currentUser) {
@@ -68,9 +70,33 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
     }
   };
 
-  const handleViewLayout = () => {
+  const handleViewLayout = async () => {
     console.log('Opening 3D modal for post:', post.title);
-    setShowVisualizerModal(true);
+    
+    // If we already have complete post data, use it
+    if (completePostData && completePostData.placementData) {
+      console.log('Using cached complete post data');
+      setShowVisualizerModal(true);
+      return;
+    }
+    
+    // Fetch complete post data including placementData
+    try {
+      setLoadingPostData(true);
+      console.log('Fetching complete post data for ID:', post._id);
+      
+      const fullPostData = await getCommunityPost(post._id);
+      console.log('Received complete post data:', fullPostData);
+      console.log('Furniture data:', fullPostData.placementData?.furniture);
+      
+      setCompletePostData(fullPostData);
+      setShowVisualizerModal(true);
+    } catch (error) {
+      console.error('Failed to fetch complete post data:', error);
+      alert('포스트 데이터를 불러오는데 실패했습니다.');
+    } finally {
+      setLoadingPostData(false);
+    }
   };
 
   const handleCloseModal = () => {
@@ -96,7 +122,11 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
 
       {/* 포스트 이미지 영역 (3D 뷰어 대신 플레이스홀더) */}
       <div className="post-image">
-        <div className="layout-preview" onClick={handleViewLayout}>
+        <div 
+          className="layout-preview" 
+          onClick={handleViewLayout}
+          style={{ cursor: loadingPostData ? 'wait' : 'pointer' }}
+        >
           <div className="preview-content">
             <h3>{post.title}</h3>
             <p>🏠 3D 미리보기 열기</p>
@@ -123,8 +153,12 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
           >
             💬
           </button>
-          <button className="view-btn" onClick={handleViewLayout}>
-            👁️
+          <button 
+            className="view-btn" 
+            onClick={handleViewLayout}
+            disabled={loadingPostData}
+          >
+            {loadingPostData ? '⏳' : '👁️'}
           </button>
         </div>
         <div className="likes-count">
@@ -198,7 +232,7 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
 
       {/* 3D 시각화 모달 */}
       <RoomVisualizerModal 
-        post={post}
+        post={completePostData || post}
         isOpen={showVisualizerModal}
         onClose={handleCloseModal}
       />
