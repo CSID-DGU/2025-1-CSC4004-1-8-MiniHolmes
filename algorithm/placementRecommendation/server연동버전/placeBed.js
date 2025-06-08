@@ -146,7 +146,7 @@ function getWallAndFurnitureTightnessScore(p, elements, room, design) {
   if (wallTouch > 0) {
     const bonus = wallTouch === 1 ? 10 : wallTouch === 2 ? 30 : 50;
     score += bonus;
-    reasons.push(`벽 ${wallTouch}면에 인접(+${bonus})`);
+    reasons.push(`벽 ${wallTouch}면에 인접`);
   }
   for (const el of elements) {
     if (el.type === "room") continue;
@@ -158,21 +158,21 @@ function getWallAndFurnitureTightnessScore(p, elements, room, design) {
     if (el.type === "door") {
       if (dist < 10) {
         score -= 100;
-        reasons.push("문 주변 배치(-100)");
+        reasons.push("문 주변 배치");
       } else {
         score += 2;
-        reasons.push("문 회피(+2)");
+        reasons.push("문 회피");
       }
     }
     
     if (el.type === "window") {
       if (design === "modern" && dist < windowDistance) {
         score -= 50;
-        reasons.push("창문 인접 배치(-50)");
+        reasons.push("창문 인접 배치");
       }
       if (design === "natural" && dist < windowDistance) {
         score += 30;
-        reasons.push("자연 스타일: 창문 근처 배치(+30)");
+        reasons.push("내추럴 스타일: 창문 근처 배치");
       }
     }
     
