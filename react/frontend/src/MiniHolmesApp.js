@@ -87,8 +87,13 @@ function MiniHolmesApp() {
       navigate('/miniholmes/mypage');
       return;
     }
+    // Clear all layout-related data for new layout
     localStorage.removeItem('roomSize');
     localStorage.removeItem('placement');
+    localStorage.removeItem('colorZones');
+    localStorage.removeItem('partitionZones');
+    localStorage.removeItem('doorSizes');
+    localStorage.removeItem('windowSizes');
     navigate('/miniholmes/step1');
   };
 
