@@ -59,7 +59,7 @@ router.post('/posts', auth, async (req, res) => {
     console.log('Community post creation request:', req.body);
     console.log('User from auth middleware:', req.user);
     
-    const { title, description, placementData, roomDimensions, tags } = req.body;
+    const { title, description, placementData, roomDimensions, roomConfiguration, tags } = req.body;
 
     if (!title || !placementData) {
       console.log('Missing required fields:', { title, placementData });
@@ -73,6 +73,7 @@ router.post('/posts', auth, async (req, res) => {
       description,
       placementData,
       roomDimensions,
+      roomConfiguration,
       tags: tags || []
     });
 
