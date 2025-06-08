@@ -313,7 +313,7 @@ const height = pos.isHorizon ? furniture.width : furniture.height;
         const dx = bedCenterX - deskCenterX;
         const dy = bedCenterY - deskCenterY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        return dist > 100;
+        return dist > 500;
       });
 
     if (farFromBed) {
@@ -334,7 +334,7 @@ const height = pos.isHorizon ? furniture.width : furniture.height;
         return dist <= 100;
       });
 
-    if (nearDoor && Math.random() < 0.3) {
+    if (nearDoor && Math.random() < 0.4) {
       score += 5;
       reasons.push("문 근처에 배치되어 출입 동선에 유리 (모던 스타일 선호)");
     }
@@ -353,7 +353,7 @@ const height = pos.isHorizon ? furniture.width : furniture.height;
       return dist <= 100;
     });
 
-    if (nearWindow && Math.random() < 0.4) {
+    if (nearWindow && Math.random() < 0.5) {
       score += 5;
       reasons.push("창문 근처로 자연광 활용 가능 (내추럴 스타일 선호, 확률 적용)");
     }
@@ -367,7 +367,7 @@ const height = pos.isHorizon ? furniture.width : furniture.height;
         return dist <= 20;
       });
 
-    if (nearBed && Math.random() < 0.4) {
+    if (nearBed && Math.random() < 0.5) {
       score += 5;
       reasons.push("침대 옆에 배치되어 아늑한 분위기 조성 (내추럴 스타일 선호, 확률 적용)");
     }
@@ -420,8 +420,8 @@ function placeDesk(elements, design, deskData) {
   const desk = {
     type: "desk",
     width: deskData.dimensions.width,
-    height: deskData.dimensions.height,
-    depth: deskData.dimensions.depth,
+    height: deskData.dimensions.depth,
+    depth: deskData.dimensions.height,
     oid: deskData.oid,
     name: deskData.name,
     glb_file: deskData.glb_file
