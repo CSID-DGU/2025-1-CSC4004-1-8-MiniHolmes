@@ -12,6 +12,7 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
   const sceneRef = useRef(null);
   const rendererRef = useRef(null);
   const controlsRef = useRef(null);
+  const animationFrameRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [error, setError] = useState(null);
@@ -27,14 +28,50 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
   }, [isOpen, post]);
 
   const cleanup = () => {
+    // Stop animation loop
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
+    if (sceneRef.current) {
+      sceneRef.current.traverse((object) => {
+        if (object.geometry) {
+          object.geometry.dispose();
+        }
+        if (object.material) {
+          if (Array.isArray(object.material)) {
+            object.material.forEach(material => {
+              if (material.map) material.map.dispose();
+              if (material.normalMap) material.normalMap.dispose();
+              if (material.roughnessMap) material.roughnessMap.dispose();
+              if (material.metalnessMap) material.metalnessMap.dispose();
+              material.dispose();
+            });
+          } else {
+            if (object.material.map) object.material.map.dispose();
+            if (object.material.normalMap) object.material.normalMap.dispose();
+            if (object.material.roughnessMap) object.material.roughnessMap.dispose();
+            if (object.material.metalnessMap) object.material.metalnessMap.dispose();
+            object.material.dispose();
+          }
+        }
+      });
+      sceneRef.current.clear();
+      sceneRef.current = null;
+    }
+    
     if (controlsRef.current) {
       controlsRef.current.dispose();
+      controlsRef.current = null;
     }
+    
     if (rendererRef.current) {
+      if (mountRef.current && rendererRef.current.domElement) {
+        mountRef.current.removeChild(rendererRef.current.domElement);
+      }
       rendererRef.current.dispose();
-    }
-    if (mountRef.current && rendererRef.current) {
-      mountRef.current.removeChild(rendererRef.current.domElement);
+      rendererRef.current = null;
     }
   };
 
@@ -46,9 +83,15 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
 
       // Get room configuration from post
       const roomConfig = post.roomConfiguration || {};
-      const roomSize = roomConfig.roomSize || post.roomDimensions || { width: 400, depth: 400, height: 240 };
+      const roomSize = {
+        width: roomConfig.roomSize?.width || post.roomDimensions?.width || 400,
+        depth: roomConfig.roomSize?.depth || post.roomDimensions?.depth || 400,
+        height: roomConfig.roomSize?.height || post.roomDimensions?.height || 240
+      };
       const doors = roomConfig.doors || [];
       const windows = roomConfig.windows || [];
+      
+      console.log('Room data for preview:', { roomSize, doors, windows, furniture: post.placementData?.furniture });
 
       // Scene setup
       const scene = new THREE.Scene();
@@ -74,16 +117,12 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
       controls.dampingFactor = 0.1;
       controlsRef.current = controls;
 
-      // Lighting
-      const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
-      scene.add(ambientLight);
-
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(5, 10, 5);
-      directionalLight.castShadow = true;
-      directionalLight.shadow.mapSize.width = 2048;
-      directionalLight.shadow.mapSize.height = 2048;
-      scene.add(directionalLight);
+      // Lighting - Match main RoomVisualizer lighting
+      scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(2, 3, 1); // m units - same as main visualizer
+      dirLight.castShadow = true;
+      scene.add(dirLight);
 
       // Create room
       createRoom(scene, roomSize, doors, windows);
@@ -99,7 +138,7 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
 
       // Animation loop
       const animate = () => {
-        requestAnimationFrame(animate);
+        animationFrameRef.current = requestAnimationFrame(animate);
         if (controlsRef.current) {
           controlsRef.current.update();
         }
@@ -155,23 +194,41 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
     rightWall.rotation.y = -Math.PI/2;
     scene.add(rightWall);
 
-    // Add doors and windows (simplified for modal)
+    // Add doors
     doors.forEach(door => {
       if (door.width && door.height) {
         const doorGeometry = new THREE.PlaneGeometry(door.width * CM_TO_M, door.height * CM_TO_M);
         const doorMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
         const doorMesh = new THREE.Mesh(doorGeometry, doorMaterial);
         
+        const doorWidth = door.width * CM_TO_M;
+        const doorHeight = door.height * CM_TO_M;
+        const offset = (door.offset || 0) * CM_TO_M;
+        
         // Position door based on wall
-        if (door.wall === 'front') {
-          doorMesh.position.set((door.offset || 0) * CM_TO_M, door.height * CM_TO_M / 2, -depth/2 + 0.01);
+        switch (door.wall) {
+          case 'north':
+            doorMesh.position.set(width/2 - offset - doorWidth/2, doorHeight/2, depth/2 - 0.01);
+            doorMesh.rotation.y = Math.PI;
+            break;
+          case 'south':
+            doorMesh.position.set(-width/2 + offset + doorWidth/2, doorHeight/2, -depth/2 + 0.01);
+            break;
+          case 'east':
+            doorMesh.position.set(width/2 - 0.01, doorHeight/2, -depth/2 + offset + doorWidth/2);
+            doorMesh.rotation.y = -Math.PI/2;
+            break;
+          case 'west':
+            doorMesh.position.set(-width/2 + 0.01, doorHeight/2, depth/2 - offset - doorWidth/2);
+            doorMesh.rotation.y = Math.PI/2;
+            break;
         }
-        // Add other wall positions as needed
         
         scene.add(doorMesh);
       }
     });
 
+    // Add windows
     windows.forEach(window => {
       if (window.width && window.height) {
         const windowGeometry = new THREE.PlaneGeometry(window.width * CM_TO_M, window.height * CM_TO_M);
@@ -182,15 +239,29 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
         });
         const windowMesh = new THREE.Mesh(windowGeometry, windowMaterial);
         
-        // Position window based on wall and altitude
-        if (window.wall === 'front') {
-          windowMesh.position.set(
-            (window.offset || 0) * CM_TO_M, 
-            (window.altitude || 100) * CM_TO_M, 
-            -depth/2 + 0.01
-          );
+        const windowWidth = window.width * CM_TO_M;
+        const windowHeight = window.height * CM_TO_M;
+        const offset = (window.offset || 0) * CM_TO_M;
+        const altitude = (window.altitude || 100) * CM_TO_M;
+        
+        // Position window based on wall
+        switch (window.wall) {
+          case 'north':
+            windowMesh.position.set(width/2 - offset - windowWidth/2, altitude + windowHeight/2, depth/2 - 0.01);
+            windowMesh.rotation.y = Math.PI;
+            break;
+          case 'south':
+            windowMesh.position.set(-width/2 + offset + windowWidth/2, altitude + windowHeight/2, -depth/2 + 0.01);
+            break;
+          case 'east':
+            windowMesh.position.set(width/2 - 0.01, altitude + windowHeight/2, -depth/2 + offset + windowWidth/2);
+            windowMesh.rotation.y = -Math.PI/2;
+            break;
+          case 'west':
+            windowMesh.position.set(-width/2 + 0.01, altitude + windowHeight/2, depth/2 - offset - windowWidth/2);
+            windowMesh.rotation.y = Math.PI/2;
+            break;
         }
-        // Add other wall positions as needed
         
         scene.add(windowMesh);
       }
@@ -198,6 +269,13 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
   };
 
   const loadFurniture = async (scene, furnitureData) => {
+    console.log('Loading furniture data:', furnitureData);
+    
+    if (!furnitureData || !Array.isArray(furnitureData) || furnitureData.length === 0) {
+      console.log('No furniture data to load');
+      return;
+    }
+
     const loader = new GLTFLoader();
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('/draco/');
@@ -208,14 +286,25 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
 
     for (const furniture of furnitureData) {
       try {
+        console.log('Loading furniture item:', furniture);
+        
+        // Handle different possible furniture data structures
+        const modelPath = furniture.glb_file || furniture.model || furniture.glbFile;
+        if (!modelPath) {
+          console.warn('No model path found for furniture:', furniture);
+          continue;
+        }
+
         const gltf = await new Promise((resolve, reject) => {
           loader.load(
-            `/models/${furniture.glb_file}`,
+            `/models/${modelPath}`,
             resolve,
             (progress) => {
-              const baseProgress = 30 + (loadedCount / totalFurniture) * 60;
-              const itemProgress = (progress.loaded / progress.total) * (60 / totalFurniture);
-              setLoadingProgress(Math.min(95, baseProgress + itemProgress));
+              if (progress.total > 0) {
+                const baseProgress = 30 + (loadedCount / totalFurniture) * 60;
+                const itemProgress = (progress.loaded / progress.total) * (60 / totalFurniture);
+                setLoadingProgress(Math.min(95, baseProgress + itemProgress));
+              }
             },
             reject
           );
@@ -223,19 +312,30 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
 
         const model = gltf.scene;
         
-        // Position furniture
-        if (furniture.position && Array.isArray(furniture.position)) {
+        // Position furniture - handle different data structures
+        if (furniture.position && Array.isArray(furniture.position) && furniture.position.length >= 3) {
           model.position.set(...furniture.position);
+        } else if (furniture.x !== undefined && furniture.y !== undefined && furniture.z !== undefined) {
+          model.position.set(furniture.x, furniture.y, furniture.z);
+        } else {
+          // Default position if no positioning data
+          model.position.set(0, 0, 0);
         }
         
         // Rotate furniture
-        if (furniture.rotation && Array.isArray(furniture.rotation)) {
+        if (furniture.rotation && Array.isArray(furniture.rotation) && furniture.rotation.length >= 4) {
           model.quaternion.set(...furniture.rotation);
+        } else if (furniture.rotationY !== undefined) {
+          model.rotation.y = furniture.rotationY;
         }
         
         // Scale furniture
-        if (furniture.scale && Array.isArray(furniture.scale)) {
+        if (furniture.scale && Array.isArray(furniture.scale) && furniture.scale.length >= 3) {
           model.scale.set(...furniture.scale);
+        } else if (furniture.scaleX && furniture.scaleY && furniture.scaleZ) {
+          model.scale.set(furniture.scaleX, furniture.scaleY, furniture.scaleZ);
+        } else {
+          model.scale.set(1, 1, 1);
         }
 
         model.castShadow = true;
@@ -243,11 +343,15 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
         
         scene.add(model);
         loadedCount++;
+        console.log(`Loaded furniture ${loadedCount}/${totalFurniture}:`, furniture.name || modelPath);
         
       } catch (error) {
         console.warn('Failed to load furniture:', furniture, error);
+        loadedCount++; // Still increment to prevent hanging
       }
     }
+    
+    console.log(`Finished loading furniture: ${loadedCount}/${totalFurniture} items`);
   };
 
   if (!isOpen) return null;
