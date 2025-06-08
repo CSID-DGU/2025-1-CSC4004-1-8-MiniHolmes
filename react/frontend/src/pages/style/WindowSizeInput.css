@@ -1,0 +1,147 @@
+.container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 24px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui,
+        Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.input-field {
+    width: 80%;
+    padding: 18px 18px;
+    margin-bottom: 40px;
+    border: 1.8px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    color: #374151;
+    transition: border-color 0.3s ease;
+    box-shadow: none;
+}
+
+.input-field::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #d35400;
+    box-shadow: none;
+}
+
+.window-input-box {
+    width: 100%;
+    background-color: #f9fafb;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.window-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #374151;
+    margin-bottom: 12px;
+}
+
+.dimension-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dim-input {
+    width: 100px;
+    height: 50px;
+    padding: 12px 10px;
+    border: 1.8px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #374151;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+    text-align: center;
+}
+
+.dim-input::placeholder {
+    color: #94a3b8;
+}
+
+.dim-input:focus {
+    outline: none;
+    border-color: #d35400;
+}
+
+.dim-x {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #4b5563;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 14px;
+    margin-bottom: 20px;
+    width: 100%;
+    align-items: center;
+}
+
+.back-button {
+    flex: 1;
+    height: 60px;
+    background-color: #4b5563;
+    color: white;
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background-color 0.3s ease;
+    margin-top: 14px;
+    margin-bottom: 16px;
+}
+
+.back-button:hover {
+    background-color: #374151;
+}
+
+.next-button {
+    flex: 2;
+    height: 60px;
+    background-color: #d35400;
+    color: white;
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding: 14px 200px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.next-button:hover {
+    background-color: #1e40af;
+}
