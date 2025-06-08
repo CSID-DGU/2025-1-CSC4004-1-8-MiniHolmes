@@ -229,7 +229,7 @@ function getPlacementScore(pos, elements, room, furniture) {
     (!isHorizontal && (Math.abs(trial.x - 0) <= EPS || Math.abs(trial.x + width - room.width) <= EPS));
   if (touchesLongSideWall) {
     score += 10;
-    reasons.push("긴 변이 벽에 밀착되어 높은 안정성 (+10)");
+    reasons.push("긴 변이 벽에 밀착되어 높은 안정성");
   }
 
   // 벽 접촉 면수 계산
@@ -241,7 +241,7 @@ function getPlacementScore(pos, elements, room, furniture) {
 
   if (wallTouchCount >= 1) {
     score += wallTouchCount * 4;
-    reasons.push(`${wallTouchCount}면이 벽에 밀착됨 (+${wallTouchCount * 4})`);
+    reasons.push(`${wallTouchCount}면이 벽에 밀착됨`);
   }
 
   // 가구 접촉 면 계산 (문/창문 제외)
@@ -267,7 +267,7 @@ function getPlacementScore(pos, elements, room, furniture) {
   }
   if (furnitureTouchCount >= 1) {
     score += furnitureTouchCount * 3;
-    reasons.push(`${furnitureTouchCount}면이 가구에 밀착됨 (+${furnitureTouchCount * 3})`);
+    reasons.push(`${furnitureTouchCount}면이 가구에 밀착됨`);
   }
 
   return { score, reasons };
@@ -367,7 +367,7 @@ function placeCloset(elements, closetData) {
   };
   elements.push(placedCloset);
 
-  reasons.closet.push("벽 및 가구에 밀착된 최적 위치에 배치됨");
+  reasons.closet.push(...(bestPosition.reasons || []));
 
   const closetDetails = {
     name: closet.name,
