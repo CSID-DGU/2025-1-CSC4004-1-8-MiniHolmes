@@ -86,14 +86,14 @@ function normalizeElements(elements) {
   return elements.map(el => {
     const normalized = { ...el };
 
-    // color_zone: depth → height 변환
     if (el.type === 'color_zone') {
+      
       normalized.height = el.depth ?? el.height ?? 0;
+      
     }
 
-    // 일부 요소에 width/height가 없으면 기본값 0 설정
     if (typeof el.width !== 'number') normalized.width = 0;
-    if (typeof el.height !== 'number') normalized.height = 0;
+    if (typeof normalized.height !== 'number') normalized.height = 0;
 
     return normalized;
   });
