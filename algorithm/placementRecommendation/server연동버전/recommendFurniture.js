@@ -219,7 +219,7 @@ async function recommendFurniture(userPreferenceRank, currentBudget, perimeter, 
     perimeter,
     currentPointColor
   );
-
+  console.log("[recommendFurniture in furnitureplacement] 추천추천", JSON.stringify(allRecommendedSets));
   if (!allRecommendedSets || allRecommendedSets.length === 0) {
     // 기준에 맞는 추천 가구 세트가 없는 경우, null 또는 빈 배열 반환 가능
     console.warn("기준에 따라 추천할 수 있는 가구 세트가 없습니다.");
@@ -272,7 +272,6 @@ async function recommendFurniture(userPreferenceRank, currentBudget, perimeter, 
     // 원본 furnitureListToPlace의 가구 객체는 변경되지 않아야 함.
     const furnitureForPlacement = JSON.parse(JSON.stringify(furniture));
     roundDimensions(furnitureForPlacement); // furnitureForPlacement 객체의 치수를 수정
-
     if (design === "cozy") design = "natural"; // 'cozy' 스타일은 'natural'로 처리
     
     let placed; // 배치 결과 저장 변수
@@ -317,6 +316,7 @@ async function recommendFurniture(userPreferenceRank, currentBudget, perimeter, 
 
   console.log("[recommendFurniture in furnitureplacement] Final placement results:", JSON.stringify(placementResults, null, 2));
   console.log("[recommendFurniture in furnitureplacement] Received roomInfo:", JSON.stringify(roomInfo, null, 2));
+  
   return {
     recommendedSet: firstRecommendedSet, // 추천된 전체 가구 세트
     placements: placementResults // 전체 세부 정보가 포함된 배치된 요소들의 배열 반환
