@@ -85,10 +85,30 @@ const RoomVisualizer = () => {
   });
   
   const styleDescriptions = {
-  modern: '✨ 심플하고 세련된 분위기의 가구가 배치됩니다.',
-  natural: '🌿 자연스럽고 따뜻한 느낌의 가구들이 배치됩니다.',
-  cozy: '🛋️ 포근하고 아늑한 느낌의 공간으로 꾸며집니다.',
-  dontknow: '🤖 자동으로 적절한 스타일을 선택하여 배치합니다.'
+  modern: `✨ 세련되고 효율적인 공간을 위해 설계된 모던 스타일 배치입니다. 
+불필요한 장식을 배제하고, 선이 깔끔한 가구들을 중심으로 여백과 기능성을 중시합니다. 
+가구들은 벽을 따라 밀착 배치되며, 동선은 간결하고 방 전체의 시야를 탁 트이게 구성되어 
+작은 공간에서도 넓어 보이는 효과를 줍니다. 
+'간결함 속의 질서'를 추구하며, 현대적인 감성과 실용성의 균형을 맞추는 것이 이 스타일의 핵심입니다.`,
+
+  natural: `🌿 자연과 조화를 이루는 따뜻한 공간을 지향하는 내추럴 스타일 배치입니다. 
+창문 근처나 햇빛이 잘 드는 벽을 우선적으로 활용하며, 가구 사이에는 여유 공간을 두어 
+자연스러운 여백과 흐름을 만듭니다. 
+가구 배치는 너무 딱 맞지 않도록 여유 있게 배치되며, 나무 질감의 가구나 부드러운 컬러를 선호합니다. 
+'살아 숨 쉬는 공간'을 목표로 하며, 아늑하면서도 답답하지 않은 분위기를 만들어냅니다.`,
+
+  cozy: `🛋️ 포근하고 감성적인 분위기를 중심으로 한 코지 스타일 배치입니다. 
+침대, 소파 등 휴식을 위한 가구를 중심으로 공간의 중심을 잡고, 
+벽이나 다른 가구에 가까이 배치하여 안정감을 줍니다. 
+자연광과 같은 조용하고 닫힌 공간에서 오는 아늑함을 중시하며, 
+가구들이 서로 어울리게 모여있는 배치를 통해 '혼자 있어도 외롭지 않은 방'을 구현합니다. 
+작은 소품이나 데코레이션을 둘 공간도 염두에 두고 설계되며, 사용자의 감정을 편안하게 만들어주는 침구류들을 이용하는 것이 이 스타일의 핵심입니다.`,
+
+  dontknow: `🤖 당신의 취향이나 방 구조를 바탕으로, 최적의 스타일을 인공지능이 자동으로 판단하여 배치합니다. 
+모던, 내추럴, 코지 등 여러 스타일의 배치 원칙을 비교하고, 
+사용자의 선택 및 환경 데이터를 분석하여 가장 어울리는 조합을 선택합니다. 
+'알아서 잘 해주는' 배치를 원하신다면 이 스타일이 적합하며, 
+개인의 취향을 존중하면서도 효율적인 공간 구성을 보장합니다.`
 };
 
 const styleNameMap = {
@@ -1112,7 +1132,7 @@ useEffect(() => {
             console.error(`[RoomVisualizer] Item ${index} is missing oid. el:`, el, 'Skipping.');
             return null;
           }
-
+          
           const x = parseFloat(el.x) || 0;
           const y = parseFloat(el.y) || 0;
           const isHorizon = el.isHorizon || el.isHorizontal;
@@ -1134,10 +1154,28 @@ useEffect(() => {
           console.log(`[RoomVisualizer] Successfully mapped item ${index} (oid: ${el.oid}) to:`, JSON.stringify(mappedItem));
           return mappedItem;
         }).filter(item => item !== null);
+          const decoSet = recommendationResult?.recommendedSet?.decorationSet || {};
+          const decoItems = ['bedding', 'mattress_cover', 'curtain'].flatMap((type) => {
+            const item = decoSet[type];
+            if (!item) return [];
 
+            return [{
+              id: item.oid || item._id || `${type}-placeholder`,
+              name: item.name || `추천 ${type}`,
+              glbPath: `/models/${item.glb_file}`,
+              position: [0, 0, 0],
+              rotation: [0, 0, 0],
+              scale: [1, 1, 1],
+              originalDimensions: item.dimensions || {},
+              type,
+              rawPlacement: item,
+              reasons: [`추천된 ${type}`]
+            }];
+          });
         console.log('[RoomVisualizer] After map and filter, newRecommendedFurniture (before setting state):', JSON.stringify(newRecommendedFurniture));
-        setRecommendedFurnitureForRender(newRecommendedFurniture);
-        console.log('추천된 가구 목록 (최종 렌더링용 RoomVisualizer):', newRecommendedFurniture); 
+        const finalRecommendations = [...newRecommendedFurniture, ...decoItems];
+        setRecommendedFurnitureForRender(finalRecommendations);
+        console.log('추천된 가구 목록 (최종 렌더링용 RoomVisualizer):', finalRecommendations); 
 
         if (newRecommendedFurniture.length > 0) {
           handleClearScene();
@@ -1893,17 +1931,19 @@ useEffect(() => {
   }}>
     <strong>현재 인테리어 스타일:</strong><br />
     <span style={{ fontWeight: 'bold', color: '#4CAF50' }}>
-  {styleNameMap[currentStyle] || '알 수 없음'}
-</span><br />
-<span style={{ fontSize: '0.8rem', color: '#555' }}>
-  {styleDescriptions[currentStyle] || '스타일 설명을 불러올 수 없습니다.'}
-</span>
+      {styleNameMap[currentStyle] || '알 수 없음'}
+    </span><br />
+    <span style={{ fontSize: '0.8rem', color: '#555' }}>
+      {styleDescriptions[currentStyle] || '스타일 설명을 불러올 수 없습니다.'}
+    </span>
 
     <hr style={{ margin: '10px 0' }} />
 
+    {/* 추천 가구 구역 */}
     <div>
-      <h4 style={{ marginBottom: '0.5rem' }}>📦 추천된 가구 배치 원칙</h4>
-      {recommendedFurnitureForRender.map((item, idx) => (
+      <h4 style={{ marginBottom: '0.5rem' }}>🪑 추천된 가구 배치</h4>
+      {recommendedFurnitureForRender.filter(item => !['bedding', 'mattress_cover', 'curtain'].includes(item.type))
+        .map((item, idx) => (
         <div key={idx} style={{
           marginBottom: '0.75rem',
           padding: '0.6rem 0.8rem',
@@ -1912,30 +1952,81 @@ useEffect(() => {
           borderRadius: '6px'
         }}>
           <strong>{item.name}</strong> <span style={{ fontSize: '0.75rem', color: '#888' }}>({item.type})</span><br />
-          💰 <strong>{item.rawPlacement?.price?.toLocaleString()}</strong>원<br />
-          📌 <strong>배치 원칙:</strong>
-          <ul style={{ paddingLeft: '1.2rem' }}>
-            {(item.reasons || []).map((r, i) => (
-              <li key={i} style={{ fontSize: '0.8rem' }}>✅ {r}</li>
-            ))}
-          </ul>
+          💰 <strong>{item.rawPlacement?.price?.toLocaleString() || 0}</strong> 원<br />
+
+          {item.rawPlacement?.url && (
+            <div style={{ marginTop: '0.5rem' }}>
+              🔗 <a
+                href={item.rawPlacement.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#1976d2', textDecoration: 'underline' }}
+              >
+                제품 보러가기
+              </a>
+            </div>
+          )}
+
+          {/* 배치 원칙 */}
+          {item.reasons?.length > 0 && (
+            <>
+              <div style={{ marginTop: '0.4rem' }}><strong>📌 배치 원칙:</strong></div>
+              <ul style={{ paddingLeft: '1.2rem' }}>
+                {item.reasons.map((r, i) => (
+                  <li key={i} style={{ fontSize: '0.8rem' }}>✅ {r}</li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       ))}
+    </div>
 
-      {/* 총 가격 표시 */}
-      <div style={{
-        marginTop: '1rem',
-        fontWeight: 'bold',
-        textAlign: 'right',
-        color: '#333'
-      }}>
-        총 가격: {
-          recommendedFurnitureForRender.reduce((sum, item) => sum + (item.rawPlacement?.price || 0), 0).toLocaleString()
-        } 원
-      </div>
+    {/* 데코레이션 구역 */}
+    <div style={{ marginTop: '2rem' }}>
+      <h4 style={{ marginBottom: '0.5rem' }}>🛏️ 데코레이션 세트</h4>
+      {recommendedFurnitureForRender.filter(item => ['bedding', 'mattress_cover', 'curtain'].includes(item.type))
+        .map((item, idx) => (
+        <div key={idx} style={{
+          marginBottom: '0.75rem',
+          padding: '0.6rem 0.8rem',
+          backgroundColor: '#fff',
+          border: '1px solid #eee',
+          borderRadius: '6px'
+        }}>
+          <strong>{item.name}</strong> <span style={{ fontSize: '0.75rem', color: '#888' }}>({item.type})</span><br />
+          💰 <strong>{item.rawPlacement?.price?.toLocaleString() || 0}</strong> 원<br />
+          {item.rawPlacement?.url && (
+            <div style={{ marginTop: '0.5rem' }}>
+              🔗 <a
+                href={item.rawPlacement.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#1976d2', textDecoration: 'underline' }}
+              >
+                제품 보러가기
+              </a>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+
+    {/* 총 가격 표시 */}
+    <div style={{
+      marginTop: '1rem',
+      fontWeight: 'bold',
+      textAlign: 'right',
+      color: '#333'
+    }}>
+      총 가격: {
+        recommendedFurnitureForRender.reduce((sum, item) => sum + (item.rawPlacement?.price || 0), 0).toLocaleString()
+      } 원
     </div>
   </div>
 )}
+
+
       </div>
     </div>
   );
