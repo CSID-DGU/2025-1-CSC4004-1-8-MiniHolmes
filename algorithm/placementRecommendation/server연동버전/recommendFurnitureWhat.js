@@ -325,14 +325,15 @@ class CurtainItem {
 function recommendBedding(beddingList, selectedBed, pointColor) {
   // 침대 크기 추출
   const bedWidth = selectedBed.dimensions.width;
-
+  console.log("📏 침대 너비:", bedWidth);
+  console.log("📚 침구 전체 개수:", beddingList.length);
   // 1. 침대보다 큰 사이즈의 침구 필터링
   let candidates = beddingList.filter(item => {
     return (
       item.dimensions.length >= bedWidth
     );
   });
-
+  console.log("📌 크기 통과 후보:", candidates.map(i => `${i.name} (${i.dimensions.length})`)); 
   if (candidates.length === 0) return null; // 적절한 크기의 침구 없음
 
   // 2. pointcolor 일치 확인
@@ -343,7 +344,7 @@ function recommendBedding(beddingList, selectedBed, pointColor) {
   if (colorMatched.length > 0) {
     candidates = colorMatched;
   }
-
+  console.log("🎨 색상 일치 후보:", colorMatched.map(i => `${i.name} (${i.colortone})`));
   // 3. pointcolor만 일치하는 침구가 하나면 바로 return
   if (candidates.length === 1) {
     return candidates[0];
@@ -353,11 +354,11 @@ function recommendBedding(beddingList, selectedBed, pointColor) {
   const styleMatched = candidates.filter(
     item => item.style === selectedBed.style
   );
-
+  console.log("🎭 스타일 일치 후보:", styleMatched.map(i => `${i.name} (${i.style})`));
   if (styleMatched.length > 0) {
     candidates = styleMatched;
   }
-
+  
   // 5. 최종 후보 중 랜덤 선택
   if (candidates.length > 0) {
     const randomIndex = Math.floor(Math.random() * candidates.length);
@@ -366,6 +367,7 @@ function recommendBedding(beddingList, selectedBed, pointColor) {
 
   return null; // 추천할 수 있는 침구 없음
 }
+
 
 // 매트리스 추천 함수
 function recommendMattressCover(mattressList, selectedBed, pointColor) {
@@ -422,6 +424,7 @@ function recommendMattressCover(mattressList, selectedBed, pointColor) {
   return null; // 추천할 수 있는 매트리스 커버 없음
 }
 
+
 // 커튼 추천 함수
 function recommendCurtain(curtainList, pointColor, selectedStyle) {
   // 1. pointcolor 포함 여부 확인 (부분 문자열 포함)
@@ -464,6 +467,7 @@ function recommendSets(furnitureDb, beddingList, mattressList, curtainList, user
 
     // 2. 침대 추출
     const selectedBed = selectedFurniture.find(item => item.category === "bed");
+    console.log("침대 정보", selectedBed);
     if (!selectedBed) {
       console.warn("선택된 가구 세트에 침대가 없습니다. 데코레이션을 건너뜁니다.");
       recommendedSets.push({ furnitureSet: selectedFurniture, decorationSet: null });
@@ -474,7 +478,7 @@ function recommendSets(furnitureDb, beddingList, mattressList, curtainList, user
     const recommendedBedding = recommendBedding(beddingList, selectedBed, pointColor);
     const recommendedMattressCover = recommendMattressCover(mattressList, selectedBed, pointColor);
     const recommendedCurtain = recommendCurtain(curtainList, pointColor, selectedBed.style);
-
+    console.log("데코레이션 세트",recommendedBedding,recommendedMattressCover,recommendedCurtain);
     // 4. 세트 저장
     recommendedSets.push({
       furnitureSet: selectedFurniture,
