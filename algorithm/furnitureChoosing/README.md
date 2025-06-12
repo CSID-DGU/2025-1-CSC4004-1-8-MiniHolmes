@@ -3,17 +3,27 @@
 ### 사용자의 입력을 받아 가중치 계산을 기반으로 추천을 진행함.
 
 const userPreferenceRank = {
+
   style: 1, // 사용자 순위 설정
+  
   colortone: 2,
+  
   size: 3,
+  
   price: 4,
+  
   target_style: "cozy", // modern, natural, cozy, donknow 중 선택
+  
   desiredCategories: ["closet", "desk", "bookshelf"] // bed, closet, desk, bookshelf 중 사용자가 선택한 원하는 가구 카테고리. 순서무관.
+  
 };
 
 // --- 사용자 입력 (예산, 배치 가능 폭, 포인트 컬러) ---
+
 const budget = 800000;      // 예산 
+
 const perimeter = 400;       // 배치 가능 폭 400cm
+
 const pointColor = "beige"; // 포인트 컬러 black, white, grey, beige, brown, red, orange, yellow, green, blue, purple, pink
 
 ### <프로그램 구성>
