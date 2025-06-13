@@ -4295,6 +4295,7 @@ const userWeights = {
   size: 0.2,
   price: 0.2,
   target_style: "cozy" // modern, natural, cozy, donknow
+  target_colortone: "light" //light, medium, dark
 };
 */
 
