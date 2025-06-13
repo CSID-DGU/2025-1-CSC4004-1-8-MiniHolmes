@@ -13,6 +13,8 @@ const userPreferenceRank = {
   price: 4,
   
   target_style: "cozy", // modern, natural, cozy, donknow 중 선택
+
+  target_colortone: "light" //light, medium, dark
   
   desiredCategories: ["closet", "desk", "bookshelf"] // bed, closet, desk, bookshelf 중 사용자가 선택한 원하는 가구 카테고리. 순서무관.
   
