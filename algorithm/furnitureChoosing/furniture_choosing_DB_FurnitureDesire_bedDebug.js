@@ -4266,6 +4266,7 @@ function convertRanksToWeights(rankObj) {
 
   // target_style은 그대로 복사
   weightMap["target_style"] = rankObj["target_style"];
+  weightMap["target_colortone"] = rankObj["target_colortone"];
   weightMap["desiredCategories"] = rankObj["desiredCategories"]; // 가구 카테고리 선택을 위해 추가된 항목
   return weightMap;
 }
@@ -4277,6 +4278,7 @@ const userPreferenceRank = {
   size: 3,
   price: 4,
   target_style: "cozy", // modern, natural, cozy, donknow
+  target_colortone: "light" //light, medium, dark
   desiredCategories: ["closet", "desk", "bookshelf"] // bed, closet, desk, bookshelf 중 사용자가 선택한 원하는 가구 카테고리. 순서무관.
 };
 
