@@ -1,7 +1,7 @@
 // src/services/api.js
 import axios from 'axios';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:3001/api';
 
 // axios 인스턴스 생성
 const api = axios.create({
@@ -90,5 +90,25 @@ export const getPlacementById = async (placementId) => {
     return response.data;
   } catch (error) {
     throw error;
+  }
+};
+
+export const deletePlacement = async (placementId) => {
+  try {
+    const response = await api.delete(`/placements/${placementId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get user information by user ID
+export const getUserById = async (userId) => {
+  try {
+    const response = await api.get(`/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user by ID:', error);
+    return null;
   }
 };
