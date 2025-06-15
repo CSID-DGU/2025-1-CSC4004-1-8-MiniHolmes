@@ -513,25 +513,6 @@ const PartitionZoneInput = () => {
           <button className="back-button" onClick={() => navigate('/miniholmes/input/window')}>
             뒤로
           </button>
-          <button 
-            type="button"
-            style={{
-              flex: 1,
-              height: '60px',
-              background: '#ff6600',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '14px',
-              padding: '14px 20px',
-              fontSize: '1.2rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'background 0.2s'
-            }}
-            onClick={() => navigate('/miniholmes/input/partition-door')}
-          >
-            문 추가
-          </button>
           <button className="next-button" onClick={() => navigate('/miniholmes/step2')}>
             다음
           </button>
