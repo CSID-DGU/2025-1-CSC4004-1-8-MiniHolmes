@@ -41,6 +41,7 @@
 .username {
   color: #d35400;
   font-weight: bold;
+  font-size: inherit;
 }
 
 .welcome-text {
