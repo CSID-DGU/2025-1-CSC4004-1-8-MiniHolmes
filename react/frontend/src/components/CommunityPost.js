@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { togglePostLike, addComment, deleteComment, getCommunityPost } from '../services/communityService';
+import React, { useState, useEffect } from 'react';
+import { togglePostLike, addComment, deleteComment, getCommunityPost, deletePost } from '../services/communityService';
 import RoomVisualizerModal from './RoomVisualizerModal';
 import './CommunityPost.css';
 
 const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
   const [isLiked, setIsLiked] = useState(
-    currentUser ? post.likes.includes(currentUser.userId) : false
+    currentUser ? post.likes.includes(currentUser.id) : false
   );
   const [likesCount, setLikesCount] = useState(post.likesCount);
   const [showComments, setShowComments] = useState(false);
@@ -15,6 +15,67 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
   const [showVisualizerModal, setShowVisualizerModal] = useState(false);
   const [completePostData, setCompletePostData] = useState(null);
   const [loadingPostData, setLoadingPostData] = useState(false);
+  const [userCache, setUserCache] = useState({});
+
+  // Load user cache from localStorage on mount
+  useEffect(() => {
+    const savedCache = localStorage.getItem('communityUserCache');
+    if (savedCache) {
+      try {
+        setUserCache(JSON.parse(savedCache));
+      } catch (e) {
+        console.error('Error loading user cache:', e);
+      }
+    }
+  }, []);
+
+
+  // Generate a temporary readable username until backend is fixed
+  const getTemporaryUsername = (userId) => {
+    if (userCache[userId]) {
+      return userCache[userId];
+    }
+
+    // Generate a consistent readable name based on userId
+    const names = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eva', 'Frank', 'Grace', 'Henry'];
+    const index = parseInt(userId.substring(0, 2), 16) % names.length;
+    const number = parseInt(userId.substring(2, 4), 16) % 99 + 1;
+    const tempName = `${names[index]}${number}`;
+    
+    // Cache it
+    const newCache = { ...userCache, [userId]: tempName };
+    setUserCache(newCache);
+    localStorage.setItem('communityUserCache', JSON.stringify(newCache));
+    
+    return tempName;
+  };
+
+  // Helper function to get the proper display username
+  const getDisplayUsername = (username, postUserId) => {
+    if (!username) return 'Anonymous';
+    
+    // If this is the current user's post, use their actual username from localStorage
+    if (currentUser && postUserId === currentUser.id) {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          return userData.username || userData.userId || userData.name || userData.email || 'User';
+        } catch (e) {
+          console.error('Error parsing user data:', e);
+        }
+      }
+    }
+    
+    // Check if the username looks like a MongoDB ObjectId
+    if (typeof username === 'string' && username.length === 24 && /^[0-9a-f]{24}$/.test(username)) {
+      // Return a temporary readable username until backend is fixed
+      return getTemporaryUsername(username);
+    }
+    
+    // For regular usernames, return as-is
+    return username;
+  };
 
   const handleLike = async () => {
     if (!currentUser) {
@@ -70,6 +131,21 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
     }
   };
 
+  const handleDeletePost = async () => {
+    if (!window.confirm('포스트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+
+    try {
+      await deletePost(post._id);
+      if (onPostUpdate) {
+        onPostUpdate(post._id, { deleted: true });
+      }
+      alert('포스트가 삭제되었습니다.');
+    } catch (error) {
+      console.error('포스트 삭제 실패:', error);
+      alert('포스트 삭제에 실패했습니다.');
+    }
+  };
+
   const handleViewLayout = async () => {
     console.log('Opening 3D modal for post:', post.title);
     
@@ -109,15 +185,24 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
       <div className="post-header">
         <div className="user-info">
           <div className="user-avatar">
-            {post.username.charAt(0).toUpperCase()}
+            {getDisplayUsername(post.username, post.user).charAt(0).toUpperCase()}
           </div>
           <div className="user-details">
-            <span className="username">{post.username}</span>
+            <span className="username">{getDisplayUsername(post.username, post.user)}</span>
             <span className="post-date">
               {new Date(post.createdAt).toLocaleDateString('ko-KR')}
             </span>
           </div>
         </div>
+        {currentUser && post.user === currentUser.id && (
+          <button 
+            className="delete-post-btn"
+            onClick={handleDeletePost}
+            title="포스트 삭제"
+          >
+            🗑️
+          </button>
+        )}
       </div>
 
       {/* 포스트 이미지 영역 (3D 뷰어 대신 플레이스홀더) */}
@@ -169,7 +254,7 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
       {/* 포스트 내용 */}
       <div className="post-content">
         <div className="post-description">
-          <span className="username">{post.username}</span>
+          <span className="username">{getDisplayUsername(post.username, post.user)}</span>
           {post.description && <span className="description">{post.description}</span>}
         </div>
         {post.tags && post.tags.length > 0 && (
@@ -188,14 +273,14 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
             {comments.map((comment) => (
               <div key={comment._id} className="comment">
                 <div className="comment-content">
-                  <span className="comment-username">{comment.username}</span>
+                  <span className="comment-username">{getDisplayUsername(comment.username, comment.user)}</span>
                   <span className="comment-text">{comment.content}</span>
                 </div>
                 <div className="comment-meta">
                   <span className="comment-date">
                     {new Date(comment.createdAt).toLocaleDateString('ko-KR')}
                   </span>
-                  {currentUser && comment.user === currentUser.userId && (
+                  {currentUser && comment.user === currentUser.id && (
                     <button 
                       className="delete-comment-btn"
                       onClick={() => handleDeleteComment(comment._id)}
