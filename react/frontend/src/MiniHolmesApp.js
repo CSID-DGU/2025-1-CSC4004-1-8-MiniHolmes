@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, Link, useNavigate, useLocation, Navigate } from "react-router-dom";
+import axios from 'axios';
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import RegisterSimple from "./components/auth/RegisterSimple";
@@ -37,6 +38,7 @@ function MiniHolmesApp() {
   });
   const [loggingOut, setLoggingOut] = useState(false);
   const [showRegister, setShowRegister] = useState(false); // 회원가입 폼 표시 여부
+  const [showLogin, setShowLogin] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -64,21 +66,36 @@ function MiniHolmesApp() {
     };
   }, [location, user, loggingOut]);
 
+  // 로그인 모달 표시를 위한 useEffect
+  useEffect(() => {
+    if (location.pathname === "/miniholmes/mypage" && !user && !loggingOut) {
+      setShowLogin(true);
+    }
+  }, [location.pathname, user, loggingOut]);
+
   const handleMypageClick = (e) => {
     e.preventDefault();
     navigate("/miniholmes/mypage");
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    setShowLogin(false);
     setShowRegister(false);
-    window.location.reload();
+    navigate('/miniholmes/mypage');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setLoggingOut(true);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate("/miniholmes");
+    try {
+      await axios.post('/api/auth/logout');
+      setUser(null);
+      navigate('/miniholmes');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setLoggingOut(false);
+    }
   };
 
   const handleServiceStart = (e) => {
@@ -98,11 +115,13 @@ function MiniHolmesApp() {
   };
 
   const handleShowRegister = () => {
+    setShowLogin(false);
     setShowRegister(true);
   };
 
   const handleShowLogin = () => {
     setShowRegister(false);
+    setShowLogin(true);
   };
 
   return (
@@ -156,7 +175,9 @@ function MiniHolmesApp() {
             <Route path="mypage" element={
               user ? (
                 <MyPage user={user} onLogout={handleLogout} />
-              ) : null
+              ) : (
+                <Home />
+              )
             } />
             <Route path="input/*" element={<Navigate to="/miniholmes/input" replace />} />
             <Route path="input/partition-door" element={<PartitionDoorInputWrapper />} />
@@ -170,7 +191,7 @@ function MiniHolmesApp() {
         <div className={showRegister ? "" : "login-bottom-sheet"}>
           <div className="login-form-container">
             {showRegister ? (
-              <RegisterSimple onShowLogin={handleShowLogin} />
+              <Register onShowLogin={handleShowLogin} />
             ) : (
               <Login onLoginSuccess={handleLoginSuccess} onShowRegister={handleShowRegister} />
             )}
