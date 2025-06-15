@@ -65,7 +65,7 @@ const MyPage = ({ user, onLogout }) => {
           <div className="profile-header">
             <div className="profile-info">
               <h1 className="mypage-title">
-                안녕하세요, <span className="username">{user.userId || user.name || user.email}</span>님!
+                안녕하세요, <span className="username">{user.username || user.userId || user.name || user.email}</span>!
               </h1>
               <p className="welcome-text">미니홈즈에서 나만의 완벽한 공간을 만들어보세요.</p>
             </div>
