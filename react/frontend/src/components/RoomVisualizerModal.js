@@ -278,7 +278,7 @@ const RoomVisualizerModal = ({ post, isOpen, onClose }) => {
 
     const loader = new GLTFLoader();
     const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('/draco/');
+    dracoLoader.setDecoderPath('/miniholmes/draco/');
     loader.setDRACOLoader(dracoLoader);
 
     let loadedCount = 0;
