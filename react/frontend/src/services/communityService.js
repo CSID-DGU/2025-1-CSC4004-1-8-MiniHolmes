@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:3001/api';
 
 // axios 인스턴스 생성
 const api = axios.create({
@@ -83,6 +83,17 @@ export const deleteComment = async (postId, commentId) => {
     return response.data;
   } catch (error) {
     console.error('댓글 삭제 오류:', error);
+    throw error;
+  }
+};
+
+// 포스트 삭제
+export const deletePost = async (postId) => {
+  try {
+    const response = await api.delete(`/community/posts/${postId}`);
+    return response.data;
+  } catch (error) {
+    console.error('포스트 삭제 오류:', error);
     throw error;
   }
 };
