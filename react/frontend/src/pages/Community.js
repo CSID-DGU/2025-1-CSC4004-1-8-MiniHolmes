@@ -179,11 +179,17 @@ const Community = () => {
     };
 
     const handlePostUpdate = (postId, updates) => {
-        setPosts(prevPosts => 
-            prevPosts.map(post => 
-                post._id === postId ? { ...post, ...updates } : post
-            )
-        );
+        if (updates.deleted) {
+            // Remove the post from the list if it was deleted
+            setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
+        } else {
+            // Update the post with new data
+            setPosts(prevPosts => 
+                prevPosts.map(post => 
+                    post._id === postId ? { ...post, ...updates } : post
+                )
+            );
+        }
     };
 
     return (
