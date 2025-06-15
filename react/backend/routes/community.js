@@ -68,7 +68,7 @@ router.post('/posts', auth, async (req, res) => {
 
     const post = new CommunityPost({
       user: req.user._id,
-      username: req.user._id,
+      username: req.user.username,
       title,
       description,
       placementData,
@@ -144,7 +144,7 @@ router.post('/posts/:id/comments', auth, async (req, res) => {
 
     const comment = {
       user: req.user._id,
-      username: req.user._id,
+      username: req.user.username,
       content: content.trim()
     };
 
@@ -183,7 +183,7 @@ router.delete('/posts/:postId/comments/:commentId', auth, async (req, res) => {
       return res.status(403).json({ message: '댓글을 삭제할 권한이 없습니다.' });
     }
 
-    comment.remove();
+    post.comments.pull(comment._id);
     post.commentsCount = Math.max(0, post.commentsCount - 1);
 
     await post.save();
@@ -192,6 +192,29 @@ router.delete('/posts/:postId/comments/:commentId', auth, async (req, res) => {
   } catch (error) {
     console.error('댓글 삭제 오류:', error);
     res.status(500).json({ message: '댓글 삭제에 실패했습니다.' });
+  }
+});
+
+// 포스트 삭제
+router.delete('/posts/:id', auth, async (req, res) => {
+  try {
+    const post = await CommunityPost.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ message: '포스트를 찾을 수 없습니다.' });
+    }
+
+    // 포스트 작성자만 삭제 가능
+    if (post.user.toString() !== req.user._id) {
+      return res.status(403).json({ message: '포스트를 삭제할 권한이 없습니다.' });
+    }
+
+    await CommunityPost.findByIdAndDelete(req.params.id);
+
+    res.json({ message: '포스트가 삭제되었습니다.' });
+  } catch (error) {
+    console.error('포스트 삭제 오류:', error);
+    res.status(500).json({ message: '포스트 삭제에 실패했습니다.' });
   }
 });
 
