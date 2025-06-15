@@ -1,3 +1,4 @@
+// logout 버튼 제거
 // 2025.06.08 카메라 자동 시점 변경 (턴테이블 형식), 커뮤니티 포스트 렌더링 수정
 // 2025.06.06 아래 지연님이 수정하신 코드 미반영. 백업해두었고 반영 예정입니다.
 
@@ -9,7 +10,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { getAllFurniture, getRecommendedFurniture, savePlacement, getPlacements } from '../services/api';
+import { getAllFurniture, getRecommendedFurniture, savePlacement, getPlacements, deletePlacement } from '../services/api';
 import { getAutoPlacement, getMockPlacement } from '../services/placementService';
 import FurnitureList from './FurnitureList';
 import SaveLoadPanel from './SaveLoadPanel';
@@ -45,7 +46,7 @@ const RoomVisualizer = () => {
   const centerRef = useRef(null);
   const [username, setUsername] = useState('');
   const [doorSizes, setDoorSizes] = useState([]);
-
+  const [currentStyle, setCurrentStyle] = useState('dontknow');
   // 가구/상태 관련
   const [furniture, setFurniture] = useState([]);
   const [filteredFurniture, setFilteredFurniture] = useState([]);
@@ -64,6 +65,19 @@ const RoomVisualizer = () => {
   const [pointColor, setPointColor] = useState('beige');
   const [recommendedFurnitureForRender, setRecommendedFurnitureForRender] = useState([]);
 
+  // 벽/바닥 색상 및 벽지 상태 : 하지연 수정
+  const [wallType, setWallType] = useState('color'); // 'color' or 'wallpaper'
+  const [wallColor, setWallColor] = useState('#f5f5f5');
+  const [wallWallpaper, setWallWallpaper] = useState('wallpaper1');
+  const [floorColor, setFloorColor] = useState('#eeeeee');
+
+  // 벽지 텍스처 경로 : 하지연 수정
+  const WALLPAPER_PATHS = {
+      wallpaper1: '/textures/wallpaper1.jpg',
+      wallpaper2: '/textures/wallpaper2.jpg',
+      wallpaper3: '/textures/wallpaper3.jpg'
+  };
+
   // Three.js 관련 레퍼런스
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -71,6 +85,15 @@ const RoomVisualizer = () => {
   const controlsRef = useRef(null);
   const furnitureModelsRef = useRef({});
   const animationFrameRef = useRef(null);
+
+  // 벽/바닥 material 참조 변수 추가 : 하지연 수정
+  const wallMaterialRefs = useRef({ 
+    frontWall: null,
+    backWall: null,
+    leftWall: null,
+    rightWall: null,
+  });
+  const floorMaterialRef = useRef(null);
   
   // 카메라 회전 관련 상태
   const [isRotating, setIsRotating] = useState(false);
@@ -90,7 +113,52 @@ const RoomVisualizer = () => {
     isActive: false // 궤도 회전 활성 상태
   });
   
+  const styleDescriptions = {
+  modern: `✨ 세련되고 효율적인 공간을 위해 설계된 모던 스타일 배치입니다. 
+불필요한 장식을 배제하고, 선이 깔끔한 가구들을 중심으로 여백과 기능성을 중시합니다. 
+가구들은 벽을 따라 밀착 배치되며, 동선은 간결하고 방 전체의 시야를 탁 트이게 구성되어 
+작은 공간에서도 넓어 보이는 효과를 줍니다. 
+'간결함 속의 질서'를 추구하며, 현대적인 감성과 실용성의 균형을 맞추는 것이 이 스타일의 핵심입니다.`,
 
+  natural: `🌿 자연과 조화를 이루는 따뜻한 공간을 지향하는 내추럴 스타일 배치입니다. 
+창문 근처나 햇빛이 잘 드는 벽을 우선적으로 활용하며, 사용자가 햇빛을 자연스럽게 받을 수 있도록 합니다. 
+가구 배치는 너무 딱 맞지 않도록 여유 있게 배치되며, 나무 질감의 가구나 부드러운 컬러를 선호합니다. 
+'살아 숨 쉬는 공간'을 목표로 하며, 아늑하면서도 답답하지 않은 분위기를 만들어냅니다.`,
+
+  cozy: `🛋️ 포근하고 감성적인 분위기를 중심으로 한 코지 스타일 배치입니다. 
+침대, 소파 등 휴식을 위한 가구를 중심으로 공간의 중심을 잡고, 
+벽이나 다른 가구에 가까이 배치하여 안정감을 줍니다. 
+자연광과 같은 조용하고 닫힌 공간에서 오는 아늑함을 중시하며, 
+가구들이 서로 어울리게 모여있는 배치를 통해 '혼자 있어도 외롭지 않은 방'을 구현합니다. 
+작은 소품이나 데코레이션을 둘 공간도 염두에 두고 설계되며, 사용자의 감정을 편안하게 만들어주는 침구류들을 이용하는 것이 이 스타일의 핵심입니다.`,
+
+  dontknow: `🤖 당신의 취향이나 방 구조를 바탕으로, 최대한 무난한 최적 배치를 보여줍니다. 
+다양한 스타일에서 보여주던 여러 배치원칙을 배제하고 가장 포멀한 구조를,  
+사용자의 선택 및 환경 데이터를 분석하여 가장 어울리는 조합을 선택합니다. 
+'알아서 잘 해주는' 배치를 원하신다면 이 스타일이 적합하며, 
+개인의 취향을 존중하면서도 효율적인 공간 구성을 보장합니다.`
+};
+
+const styleNameMap = {
+  modern: '모던',
+  natural: '내추럴',
+  cozy: '코지',
+  dontknow: '모르겠음'
+};
+useEffect(() => {
+  const normalizeStyle = (style) => {
+    switch (style) {
+      case '모던': return 'modern';
+      case '내추럴': return 'natural';
+      case '코지': return 'cozy';
+      case '모르겠음': return 'dontknow';
+      default: return 'dontknow';
+    }
+  };
+  const rawStyle = localStorage.getItem('style');
+  const normalized = normalizeStyle(rawStyle);
+  setCurrentStyle(normalized);
+}, []);
   // 방 크기 상태를 컴포넌트 내부에서 선언
   const [roomSize, setRoomSize] = useState(getRoomSize());
 
@@ -223,6 +291,7 @@ const RoomVisualizer = () => {
     floor.receiveShadow = true;
     floor.name = 'floor';
     scene.add(floor);
+    floorMaterialRef.current = floorMaterial; // material 참조 저장 : 하지연 수정
 
     // 벽 material 준비 (각 벽마다 clone)
     const wallMaterialBack = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, side: THREE.DoubleSide, transparent: true, opacity: 1 });
@@ -239,6 +308,7 @@ const RoomVisualizer = () => {
     backWall.position.y = roomHeight / 2;
     backWall.name = 'backWall';
     scene.add(backWall);
+    wallMaterialRefs.current.backWall = backWall.material; // 하지연 수정
 
     // 앞벽(남쪽)
     const frontWall = new THREE.Mesh(
@@ -250,6 +320,7 @@ const RoomVisualizer = () => {
     frontWall.rotation.y = Math.PI;
     frontWall.name = 'frontWall';
     scene.add(frontWall);
+    wallMaterialRefs.current.frontWall = frontWall.material;// 하지연 수정
 
     // 왼쪽 벽(서쪽)
     const leftWall = new THREE.Mesh(
@@ -261,6 +332,7 @@ const RoomVisualizer = () => {
     leftWall.rotation.y = Math.PI / 2;
     leftWall.name = 'leftWall';
     scene.add(leftWall);
+    wallMaterialRefs.current.leftWall = leftWall.material; // 하지연 수정
 
     // 오른쪽 벽(동쪽)
     const rightWall = new THREE.Mesh(
@@ -272,6 +344,7 @@ const RoomVisualizer = () => {
     rightWall.rotation.y = -Math.PI / 2;
     rightWall.name = 'rightWall';
     scene.add(rightWall);
+    wallMaterialRefs.current.rightWall = rightWall.material; // 하지연 수정
 
     // 그리드 헬퍼
     const gridHelper = new THREE.GridHelper(
@@ -1098,7 +1171,7 @@ const RoomVisualizer = () => {
           const isHorizon = el.isHorizon || el.isHorizontal;
 
           const glbPath = `/models/${el.glb_file}`;
-
+          const reasonList = p.reasons?.[el.type] || [];
           const mappedItem = {
             id: el.oid,
             name: el.name || 'Unnamed Furniture',
@@ -1108,12 +1181,32 @@ const RoomVisualizer = () => {
             scale: [1, 1, 1],
             originalDimensions: el.dimensions,
             type: el.type,
-            rawPlacement: el
+            rawPlacement: el,
+            reasons: reasonList
           };
           console.log(`[RoomVisualizer] Successfully mapped item ${index} (oid: ${el.oid}) to:`, JSON.stringify(mappedItem));
           return mappedItem;
         }).filter(item => item !== null);
 
+        const decoSet = recommendationResult?.recommendedSet?.decorationSet || {};
+          const decoItems = ['bedding', 'mattress_cover', 'curtain'].flatMap((type) => {
+            const item = decoSet[type];
+            if (!item) return [];
+
+            return [{
+              id: item.oid || item._id || `${type}-placeholder`,
+              name: item.name || `추천 ${type}`,
+              glbPath: `/models/${item.glb_file}`,
+              position: [0, 0, 0],
+              rotation: [0, 0, 0],
+              scale: [1, 1, 1],
+              originalDimensions: item.dimensions || {},
+              type,
+              rawPlacement: item,
+              reasons: [`추천된 ${type}`]
+            }];
+          });
+        
         console.log('[RoomVisualizer] After map and filter, newRecommendedFurniture (before setting state):', JSON.stringify(newRecommendedFurniture));
         setRecommendedFurnitureForRender(newRecommendedFurniture);
         console.log('추천된 가구 목록 (최종 렌더링용 RoomVisualizer):', newRecommendedFurniture); 
@@ -1284,6 +1377,12 @@ const RoomVisualizer = () => {
 
   const handleSavePlacement = async () => {
     try {
+      // Check if user has reached the maximum limit of 5 saved layouts
+      if (savedPlacements.length >= 5) {
+        alert('최대 5개의 배치만 저장할 수 있습니다. 기존 배치를 삭제한 후 다시 시도해주세요.');
+        return;
+      }
+
       // Get placement name from user
       const name = prompt('배치 이름을 입력하세요:', '새 배치');
       if (!name) {
@@ -1331,6 +1430,21 @@ const RoomVisualizer = () => {
       console.error('Failed to load placements:', error);
     } finally {
       setIsLoadingPlacements(false);
+    }
+  };
+
+  const handleDeletePlacement = async (placementId) => {
+    if (!window.confirm('정말로 이 배치를 삭제하시겠습니까?')) {
+      return;
+    }
+    
+    try {
+      await deletePlacement(placementId);
+      // Refresh the list after successful deletion
+      await loadSavedPlacements();
+    } catch (error) {
+      console.error('Failed to delete placement:', error);
+      alert('배치 삭제에 실패했습니다.');
     }
   };
 
@@ -1525,6 +1639,36 @@ const RoomVisualizer = () => {
     return modelGroup;
   };
 
+
+  // 벽/바닥 색상·벽지 일괄 적용 useEffect 추가 : 하지연 수정
+  useEffect(() => {
+      // 벽 4면 일괄 적용
+      ['frontWall', 'backWall', 'leftWall', 'rightWall'].forEach((name) => {
+          const material = wallMaterialRefs.current[name];
+          if (material) {
+              if (wallType === 'color') {
+                  material.color.set(wallColor);
+                  material.map = null;
+              } else if (wallType === 'wallpaper') {
+                  const loader = new THREE.TextureLoader();
+                  loader.load(WALLPAPER_PATHS[wallWallpaper], (texture) => {
+                      material.map = texture;
+                      material.color.set('#ffffff');
+                      material.needsUpdate = true;
+                  });
+              }
+              material.needsUpdate = true;
+          }
+      });
+      // 바닥 색상 적용
+      if (floorMaterialRef.current) {
+          floorMaterialRef.current.color.set(floorColor);
+          floorMaterialRef.current.needsUpdate = true;
+      }
+  }, [wallType, wallColor, wallWallpaper, floorColor]);
+  // 이부분 하지연 수정 마무리
+
+
   // Load all furniture models
   const loadAllFurnitureModels = async (furnitureList) => {
     console.log('Loading furniture models for:', furnitureList);
@@ -1683,8 +1827,7 @@ const RoomVisualizer = () => {
   return (
     <div style={{
       width: '100vw',
-      minHeight: '500px',
-      maxHeight: 'calc(100vh - 180px)',
+      height: '100vh',
       display: 'flex',
       overflow: 'hidden',
       background: '#fff',
@@ -1764,85 +1907,119 @@ const RoomVisualizer = () => {
                 </div>
               </div>
             )}
-            {/* 자동 배치 및 추천 버튼들 */}
-            <div className="space-y-2 p-1">
-              <h3 className="text-sm font-semibold border-b pb-1 mb-2">가구 추천/배치 옵션</h3>
+            {/* 가구 추천/배치 옵션 */}
+            <div style={{
+              padding: '1rem',
+              backgroundColor: '#f9f9f9',
+              borderRadius: '8px',
+              border: '1px solid #ddd',
+              fontSize: '0.85rem'
+            }}>
+              <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#333' }}>🛋️ 가구 추천/배치 옵션</strong>
 
-              {/* Budget Input */}
-              <div className="mb-2">
-                <label htmlFor="budget" className="block text-xs font-medium text-gray-700 mb-1">총 예산 (원):</label>
-                <input
-                  type="number"
-                  id="budget"
-                  name="budget"
-                  value={budget}
-                  onChange={(e) => setBudget(e.target.value)}
-                  placeholder="예: 800000"
-                  className="w-full p-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs"
-                />
+              {/* 설정 옵션들 */}
+              <div style={{
+                marginBottom: '0.75rem',
+                padding: '0.6rem 0.8rem',
+                backgroundColor: '#fff',
+                border: '1px solid #eee',
+                borderRadius: '6px'
+              }}>
+                {/* Budget Input */}
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '0.8rem', 
+                    fontWeight: 'bold', 
+                    color: '#555', 
+                    marginBottom: '0.25rem' 
+                  }}>💰 총 예산:</label>
+                  <input
+                    type="number"
+                    id="budget"
+                    name="budget"
+                    value={budget}
+                    onChange={(e) => setBudget(e.target.value)}
+                    placeholder="예: 800000"
+                    style={{
+                      width: '100%',
+                      padding: '0.4rem 0.6rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '0.8rem',
+                      backgroundColor: '#fff'
+                    }}
+                  />
+                </div>
+
+                {/* Point Color Input */}
+                <div>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '0.8rem', 
+                    fontWeight: 'bold', 
+                    color: '#555', 
+                    marginBottom: '0.25rem' 
+                  }}>🎨 포인트 색상:</label>
+                  <input
+                    type="text"
+                    id="pointColor"
+                    name="pointColor"
+                    value={pointColor}
+                    onChange={(e) => setPointColor(e.target.value)}
+                    placeholder="예: beige, black, white"
+                    style={{
+                      width: '100%',
+                      padding: '0.4rem 0.6rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '0.8rem',
+                      backgroundColor: '#fff'
+                    }}
+                  />
+                </div>
               </div>
 
-              {/* Point Color Input */}
-              <div className="mb-2">
-                <label htmlFor="pointColor" className="block text-xs font-medium text-gray-700 mb-1">포인트 색상:</label>
-                <input
-                  type="text"
-                  id="pointColor"
-                  name="pointColor"
-                  value={pointColor}
-                  onChange={(e) => setPointColor(e.target.value)}
-                  placeholder="예: beige, black, white"
-                  className="w-full p-1.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs"
-                />
-              </div>
-
+              {/* 추천 버튼 */}
               <button
                 onClick={handleRecommendFurniture}
                 style={{
-                  padding: '0.5rem 1rem',
+                  width: '100%',
+                  padding: '0.6rem 0.8rem',
                   backgroundColor: '#4CAF50',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
+                  borderRadius: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
                 }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
               >
-                가구 추천
+                ✨ 가구 추천 받기
               </button>
             </div>
           </div>
         </ResizableBox>
       </div>
       {/* 오른쪽 영역 - 저장/불러오기 */}
-      <div style={{ width: '20%', minWidth: '100px', background: '#fff', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '1rem' }}>
+      <div style={{ width: '20%', minWidth: '100px', background: '#fff', display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
         <div style={{ 
           padding: '1rem', 
-          borderBottom: '1px solid #e5e5e5', 
-          marginBottom: '1rem',
+          borderBottom: '1px solid #e5e5e5',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#fff',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10
         }}>
           <div>
             <p style={{ margin: 0, fontWeight: 'bold' }}>안녕하세요, {username || '사용자'}님</p>
           </div>
-          <button 
-            onClick={() => {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              window.location.href = '/login';
-            }}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#f44336',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            로그아웃
-          </button>
         </div>
         <SaveLoadPanel
           isLoadingPlacements={isLoadingPlacements}
@@ -1850,6 +2027,7 @@ const RoomVisualizer = () => {
           onSavePlacement={handleSavePlacement}
           onLoadPlacements={loadSavedPlacements}
           onLoadPlacement={handleLoadPlacement}
+          onDeletePlacement={handleDeletePlacement}
           onResetCamera={resetCameraPosition}
           onTopDownView={setTopDownView}
           onEastView={setEastView}
@@ -1861,6 +2039,229 @@ const RoomVisualizer = () => {
           onToggleOrbit={toggleCameraOrbit}
           isOrbiting={isOrbiting}
         />
+        
+        {/* 룸 스타일링 컨트롤 */}
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#f9f9f9',
+          borderRadius: '8px',
+          border: '1px solid #ddd',
+          fontSize: '0.85rem',
+          margin: '1rem'
+        }}>
+          <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#333' }}>🎨 룸 스타일링</strong>
+
+          {/* 벽 컨트롤 */}
+          <div style={{
+            marginBottom: '0.75rem',
+            padding: '0.6rem 0.8rem',
+            backgroundColor: '#fff',
+            border: '1px solid #eee',
+            borderRadius: '6px'
+          }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#555', marginBottom: '0.5rem' }}>
+              🧱 벽 스타일
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <label style={{ fontSize: '0.8rem', color: '#333', minWidth: '60px' }}>타입:</label>
+              <select 
+                value={wallType} 
+                onChange={e => setWallType(e.target.value)}
+                style={{
+                  padding: '0.3rem 0.5rem',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '0.8rem',
+                  backgroundColor: '#fff',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="color">색상</option>
+                <option value="wallpaper">벽지</option>
+              </select>
+            </div>
+
+            {wallType === 'color' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <label style={{ fontSize: '0.8rem', color: '#333', minWidth: '60px' }}>색상:</label>
+                <input 
+                  type="color" 
+                  value={wallColor} 
+                  onChange={e => setWallColor(e.target.value)}
+                  style={{
+                    width: '50px',
+                    height: '30px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                />
+                <span style={{ fontSize: '0.75rem', color: '#888' }}>{wallColor}</span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <label style={{ fontSize: '0.8rem', color: '#333', minWidth: '60px' }}>벽지:</label>
+                <select 
+                  value={wallWallpaper} 
+                  onChange={e => setWallWallpaper(e.target.value)}
+                  style={{
+                    padding: '0.3rem 0.5rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '0.8rem',
+                    backgroundColor: '#fff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="wallpaper1">클래식 벽지</option>
+                  <option value="wallpaper2">모던 벽지</option>
+                  <option value="wallpaper3">내추럴 벽지</option>
+                </select>
+              </div>
+            )}
+          </div>
+
+          {/* 바닥 컨트롤 */}
+          <div style={{
+            padding: '0.6rem 0.8rem',
+            backgroundColor: '#fff',
+            border: '1px solid #eee',
+            borderRadius: '6px'
+          }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#555', marginBottom: '0.5rem' }}>
+              🏠 바닥 스타일
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.8rem', color: '#333', minWidth: '60px' }}>색상:</label>
+              <input 
+                type="color" 
+                value={floorColor} 
+                onChange={e => setFloorColor(e.target.value)}
+                style={{
+                  width: '50px',
+                  height: '30px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              />
+              <span style={{ fontSize: '0.75rem', color: '#888' }}>{floorColor}</span>
+            </div>
+          </div>
+        </div>
+
+
+
+        {recommendedFurnitureForRender.length > 0 && (
+  <div style={{
+    marginTop: '1rem',
+    padding: '1rem',
+    backgroundColor: '#f9f9f9',
+    borderRadius: '8px',
+    border: '1px solid #ddd',
+    fontSize: '0.85rem'
+  }}>
+    <strong>현재 인테리어 스타일:</strong><br />
+    <span style={{ fontWeight: 'bold', color: '#4CAF50' }}>
+      {styleNameMap[currentStyle] || '알 수 없음'}
+    </span><br />
+    <span style={{ fontSize: '0.8rem', color: '#555' }}>
+      {styleDescriptions[currentStyle] || '스타일 설명을 불러올 수 없습니다.'}
+    </span>
+
+    <hr style={{ margin: '10px 0' }} />
+
+    {/* 추천 가구 구역 */}
+    <div>
+      <h4 style={{ marginBottom: '0.5rem' }}>🪑 추천된 가구 배치</h4>
+      {recommendedFurnitureForRender.filter(item => !['bedding', 'mattress_cover', 'curtain'].includes(item.type))
+        .map((item, idx) => (
+        <div key={idx} style={{
+          marginBottom: '0.75rem',
+          padding: '0.6rem 0.8rem',
+          backgroundColor: '#fff',
+          border: '1px solid #eee',
+          borderRadius: '6px'
+        }}>
+          <strong>{item.name}</strong> <span style={{ fontSize: '0.75rem', color: '#888' }}>({item.type})</span><br />
+          💰 <strong>{item.rawPlacement?.price?.toLocaleString() || 0}</strong> 원<br />
+
+          {item.rawPlacement?.url && (
+            <div style={{ marginTop: '0.5rem' }}>
+              🔗 <a
+                href={item.rawPlacement.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#1976d2', textDecoration: 'underline' }}
+              >
+                제품 보러가기
+              </a>
+            </div>
+          )}
+
+          {/* 배치 원칙 */}
+          {item.reasons?.length > 0 && (
+            <>
+              <div style={{ marginTop: '0.4rem' }}><strong>📌 배치 원칙:</strong></div>
+              <ul style={{ paddingLeft: '1.2rem' }}>
+                {item.reasons.map((r, i) => (
+                  <li key={i} style={{ fontSize: '0.8rem' }}>✅ {r}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+
+    {/* 데코레이션 구역 */}
+    <div style={{ marginTop: '2rem' }}>
+      <h4 style={{ marginBottom: '0.5rem' }}>🛏️ 데코레이션 세트</h4>
+      {recommendedFurnitureForRender.filter(item => ['bedding', 'mattress_cover', 'curtain'].includes(item.type))
+        .map((item, idx) => (
+        <div key={idx} style={{
+          marginBottom: '0.75rem',
+          padding: '0.6rem 0.8rem',
+          backgroundColor: '#fff',
+          border: '1px solid #eee',
+          borderRadius: '6px'
+        }}>
+          <strong>{item.name}</strong> <span style={{ fontSize: '0.75rem', color: '#888' }}>({item.type})</span><br />
+          💰 <strong>{item.rawPlacement?.price?.toLocaleString() || 0}</strong> 원<br />
+          {item.rawPlacement?.url && (
+            <div style={{ marginTop: '0.5rem' }}>
+              🔗 <a
+                href={item.rawPlacement.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#1976d2', textDecoration: 'underline' }}
+              >
+                제품 보러가기
+              </a>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+
+    {/* 총 가격 표시 */}
+    <div style={{
+      marginTop: '1rem',
+      fontWeight: 'bold',
+      textAlign: 'right',
+      color: '#333'
+    }}>
+      총 가격: {
+        recommendedFurnitureForRender.reduce((sum, item) => sum + (item.rawPlacement?.price || 0), 0).toLocaleString()
+      } 원
+    </div>
+  </div>
+)}
+
+        {/* Bottom spacing for proper scrolling */}
+        <div style={{ height: '2rem' }}></div>
       </div>
     </div>
   );
