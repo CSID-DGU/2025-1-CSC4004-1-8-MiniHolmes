@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
 // JWT 시크릿 키
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -20,8 +21,12 @@ const auth = async (req, res, next) => {
     const token = authHeader.replace('Bearer ', '');
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
-      // decoded.userId를 _id로 설정
-      req.user = { _id: decoded.userId };
+      // DB에서 user 정보 조회
+      const user = await User.findById(decoded.userId);
+      if (!user) {
+        return res.status(401).json({ message: '유저를 찾을 수 없습니다.' });
+      }
+      req.user = { _id: user._id, username: user.username, userId: user.userId };
       next();
     } catch (jwtError) {
       console.error('JWT 검증 에러:', jwtError);
