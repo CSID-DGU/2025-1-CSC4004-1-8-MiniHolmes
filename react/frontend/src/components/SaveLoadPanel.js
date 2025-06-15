@@ -1,3 +1,5 @@
+// 250615 배치 저장 개수 제한 및 제거 기능 추가
+
 import React from 'react';
 
 const SaveLoadPanel = ({
@@ -6,6 +8,7 @@ const SaveLoadPanel = ({
   onSavePlacement,
   onLoadPlacements,
   onLoadPlacement,
+  onDeletePlacement,
   onResetCamera,
   onTopDownView,
   onEastView,
@@ -18,143 +21,337 @@ const SaveLoadPanel = ({
   isOrbiting
 }) => {
   return (
-    <div className="h-full p-4 bg-gray-50 border-l overflow-y-auto">
-      <div className="space-y-4">
+    <div style={{ 
+      padding: '1rem'
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {/* 현재 배치 저장 */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="font-bold mb-2">현재 배치 저장</h3>
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#f9f9f9',
+          borderRadius: '8px',
+          border: '1px solid #ddd',
+          fontSize: '0.85rem'
+        }}>
+          <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#333' }}>💾 배치 저장</strong>
           <button 
             onClick={onSavePlacement}
-            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            disabled={savedPlacements.length >= 5}
+            style={{
+              width: '100%',
+              padding: '0.6rem 0.8rem',
+              backgroundColor: savedPlacements.length >= 5 ? '#cccccc' : '#4CAF50',
+              color: savedPlacements.length >= 5 ? '#666666' : 'white',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '0.85rem',
+              fontWeight: 'bold',
+              cursor: savedPlacements.length >= 5 ? 'not-allowed' : 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseOver={(e) => {
+              if (savedPlacements.length < 5) {
+                e.target.style.backgroundColor = '#45a049';
+              }
+            }}
+            onMouseOut={(e) => {
+              if (savedPlacements.length < 5) {
+                e.target.style.backgroundColor = '#4CAF50';
+              }
+            }}
+            title={savedPlacements.length >= 5 ? '최대 5개의 배치만 저장할 수 있습니다' : ''}
           >
-            저장하기
+            {savedPlacements.length >= 5 ? '🚫 저장 불가 (최대 5개)' : '✅ 현재 배치 저장하기'}
           </button>
         </div>
 
-        {/* 카메라 컨트롤 */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="font-bold mb-2">카메라 컨트롤</h3>
+        {/* 저장된 배치 목록 */}
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#f9f9f9',
+          borderRadius: '8px',
+          border: '1px solid #ddd',
+          fontSize: '0.85rem'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <strong style={{ color: '#333' }}>📂 저장된 배치</strong>
+              <span style={{ 
+                fontSize: '0.7rem', 
+                color: savedPlacements.length >= 5 ? '#f44336' : '#666',
+                fontWeight: savedPlacements.length >= 5 ? 'bold' : 'normal'
+              }}>
+                ({savedPlacements.length}/5)
+                {savedPlacements.length >= 5 && ' - 최대 개수 도달'}
+              </span>
+            </div>
+            <button 
+              onClick={onLoadPlacements}
+              style={{
+                padding: '0.25rem 0.5rem',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '0.75rem',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}
+            >
+              🔄 새로고침
+            </button>
+          </div>
           
-          <div className="space-y-2">
-            {/* 탑다운 뷰 버튼 */}
-            <button 
-              onClick={onTopDownView}
-              className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              탑다운 뷰
-            </button>
+          {isLoadingPlacements ? (
+            <p style={{ textAlign: 'center', color: '#888', fontSize: '0.8rem' }}>불러오는 중...</p>
+          ) : savedPlacements.length > 0 ? (
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '0.5rem', 
+              maxHeight: 'calc(100vh - 300px)', 
+              overflowY: 'auto' 
+            }}>
+              {savedPlacements.map((placement) => (
+                <div 
+                  key={placement._id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    width: '100%'
+                  }}
+                >
+                  <button
+                    onClick={() => onLoadPlacement(placement)}
+                    style={{
+                      flex: '1',
+                      textAlign: 'left',
+                      padding: '0.6rem 0.8rem',
+                      backgroundColor: '#fff',
+                      border: '1px solid #eee',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseOver={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                    onMouseOut={(e) => e.target.style.backgroundColor = '#fff'}
+                  >
+                    <div style={{ fontWeight: 'bold', fontSize: '0.8rem', color: '#333' }}>
+                      📋 {placement.name}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                      {new Date(placement.createdAt).toLocaleDateString()}
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => onDeletePlacement(placement._id)}
+                    style={{
+                      padding: '0.5rem',
+                      backgroundColor: '#f44336',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold',
+                      minWidth: '30px',
+                      height: '30px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseOver={(e) => e.target.style.backgroundColor = '#d32f2f'}
+                    onMouseOut={(e) => e.target.style.backgroundColor = '#f44336'}
+                    title="배치 삭제"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ textAlign: 'center', color: '#888', fontSize: '0.8rem' }}>저장된 배치가 없습니다.</p>
+          )}
+        </div>
+
+        {/* 카메라 컨트롤 */}
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#f9f9f9',
+          borderRadius: '8px',
+          border: '1px solid #ddd',
+          fontSize: '0.85rem'
+        }}>
+          <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#333' }}>📷 카메라 컨트롤</strong>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {/* 주요 카메라 컨트롤 */}
+            <div style={{
+              padding: '0.6rem 0.8rem',
+              backgroundColor: '#fff',
+              border: '1px solid #eee',
+              borderRadius: '6px'
+            }}>
+              <button 
+                onClick={onTopDownView}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  backgroundColor: '#2196F3',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  marginBottom: '0.25rem'
+                }}
+              >
+                🔝 탑다운 뷰
+              </button>
+              
+              <button 
+                onClick={onRotateCamera}
+                disabled={isRotating || isOrbiting}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  backgroundColor: isRotating || isOrbiting ? '#ffcc80' : '#FF9800',
+                  color: isRotating || isOrbiting ? '#e65100' : 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold',
+                  cursor: isRotating || isOrbiting ? 'not-allowed' : 'pointer',
+                  marginBottom: '0.25rem'
+                }}
+              >
+                {isRotating ? '🔄 회전 중...' : '🔄 카메라 회전'}
+              </button>
+              
+              <button 
+                onClick={onToggleOrbit}
+                disabled={isRotating}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  backgroundColor: isRotating ? '#ce93d8' : isOrbiting ? '#7B1FA2' : '#9C27B0',
+                  color: isRotating ? '#4a148c' : 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold',
+                  cursor: isRotating ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {isOrbiting ? '🌀 궤도 중지' : '🌀 궤도 회전'}
+              </button>
+            </div>
             
-            {/* 카메라 회전 버튼 */}
-            <button 
-              onClick={onRotateCamera}
-              disabled={isRotating || isOrbiting}
-              className={`w-full font-bold py-2 px-4 rounded ${
-                isRotating || isOrbiting
-                  ? 'bg-orange-300 text-orange-700 cursor-not-allowed' 
-                  : 'bg-orange-500 hover:bg-orange-700 text-white'
-              }`}
-            >
-              {isRotating ? '회전 중...' : '🔄 카메라 회전'}
-            </button>
-            
-            {/* 연속 궤도 회전 버튼 */}
-            <button 
-              onClick={onToggleOrbit}
-              disabled={isRotating}
-              className={`w-full font-bold py-2 px-4 rounded ${
-                isRotating
-                  ? 'bg-purple-300 text-purple-700 cursor-not-allowed'
-                  : isOrbiting 
-                    ? 'bg-purple-600 hover:bg-purple-800 text-white' 
-                    : 'bg-purple-500 hover:bg-purple-700 text-white'
-              }`}
-            >
-              {isOrbiting ? '🌀 궤도 중지' : '🌀 궤도 회전'}
-            </button>
-            
-            {/* 방향별 뷰 버튼들 */}
-            <div className="space-y-1">
-              <div className="text-xs text-gray-600 mb-1">방향별 뷰:</div>
+            {/* 방향별 뷰 컨트롤 */}
+            <div style={{
+              padding: '0.6rem 0.8rem',
+              backgroundColor: '#fff',
+              border: '1px solid #eee',
+              borderRadius: '6px'
+            }}>
+              <div style={{ fontSize: '0.8rem', color: '#555', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                🧭 방향별 뷰
+              </div>
               
               {/* 북쪽 뷰 */}
-              <div className="flex justify-center">
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.25rem' }}>
                 <button 
                   onClick={onNorthView}
-                  className="bg-green-500 hover:bg-green-700 text-white text-xs font-bold py-2 px-4 rounded"
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    backgroundColor: '#4CAF50',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
                 >
                   ↑ 북쪽
                 </button>
               </div>
               
               {/* 동서 뷰 */}
-              <div className="flex justify-center space-x-2">
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
                 <button 
                   onClick={onWestView}
-                  className="bg-green-500 hover:bg-green-700 text-white text-xs font-bold py-2 px-4 rounded"
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    backgroundColor: '#4CAF50',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
                 >
                   ← 서쪽
                 </button>
                 <button 
                   onClick={onEastView}
-                  className="bg-green-500 hover:bg-green-700 text-white text-xs font-bold py-2 px-4 rounded"
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    backgroundColor: '#4CAF50',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
                 >
                   동쪽 →
                 </button>
               </div>
               
               {/* 남쪽 뷰 */}
-              <div className="flex justify-center">
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <button 
                   onClick={onSouthView}
-                  className="bg-green-500 hover:bg-green-700 text-white text-xs font-bold py-2 px-4 rounded"
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    backgroundColor: '#4CAF50',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
                 >
                   ↓ 남쪽
                 </button>
               </div>
             </div>
             
-            {/* 카메라 리셋 버튼 */}
+            {/* 카메라 리셋 */}
             <button 
               onClick={onResetCamera}
-              className="w-full bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mt-3"
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                backgroundColor: '#757575',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}
             >
-              카메라 리셋
+              🔄 카메라 리셋
             </button>
           </div>
-        </div>
-
-        {/* 저장된 배치 목록 */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-bold">저장된 배치</h3>
-            <button 
-              onClick={onLoadPlacements}
-              className="text-sm bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
-            >
-              새로고침
-            </button>
-          </div>
-          
-          {isLoadingPlacements ? (
-            <p className="text-center text-gray-500">불러오는 중...</p>
-          ) : savedPlacements.length > 0 ? (
-            <div className="space-y-2 max-h-[calc(100vh-300px)] overflow-y-auto">
-              {savedPlacements.map((placement) => (
-                <button
-                  key={placement._id}
-                  onClick={() => onLoadPlacement(placement)}
-                  className="w-full text-left p-2 bg-gray-50 hover:bg-gray-100 rounded transition-colors"
-                >
-                  <div className="font-medium">{placement.name}</div>
-                  <div className="text-xs text-gray-500">
-                    {new Date(placement.createdAt).toLocaleDateString()}
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-gray-500">저장된 배치가 없습니다.</p>
-          )}
         </div>
       </div>
     </div>
