@@ -14,6 +14,11 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// 리다이렉트 컴포넌트
+const RedirectToAbout = () => {
+  return <Navigate to="/miniholmes/about" replace />;
+};
+
 function App() {
   return (
     <Router>
@@ -21,7 +26,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Navigate to="/miniholmes" replace />} />
+          <Route path="/" element={<RedirectToAbout />} />
           <Route path="/miniholmes/*" element={<MiniHolmesApp />} />
         </Routes>
       </div>
