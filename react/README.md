@@ -164,7 +164,6 @@ const pointColor = "beige"; // 포인트 컬러 black, white, grey, beige, brown
 <br />
 
 ## 💁‍♂️ 프로젝트 팀원
-|Backend|Frontend|
-|:---:|:---:|
-| ![](https://github.com/yewon-Noh.png?size=120) | ![](https://github.com/SeongHo-C.png?size=120) |
-|[노예원](https://github.com/yewon-Noh)|[이성호](https://github.com/SeongHo-C)|
+| Backend | Frontend           |
+|:-------:|:------------------:|
+| 박태선, 박지연, 김예원  | 박세진, 전혜원 |
