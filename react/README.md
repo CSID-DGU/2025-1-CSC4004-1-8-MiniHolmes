@@ -15,15 +15,14 @@
 
 <br />
 
-> 화면 구성과 프로토 타입 중 원하는 것을 사용해주세요.
-
-### 화면 구성
-|Screen #1|Screen #2|
-|:---:|:---:|
-|<img src="https://user-images.githubusercontent.com/80824750/208456048-acbf44a8-cd71-4132-b35a-500047adbe1c.gif" width="400"/>|<img src="https://user-images.githubusercontent.com/80824750/208456234-fb5fe434-aa65-4d7a-b955-89098d5bbe0b.gif" width="400"/>|
 
 ### 프로토타입
-<img src="https://user-images.githubusercontent.com/80824750/208454673-0449e49c-57c6-4a6b-86cf-66c5b1e623dc.png">
+
+| Screen #1 | Screen #2 | Screen #3 | Screen #4 | Screen #5 |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/1646e1d8-45c6-40a5-8b54-c8d11fd8beb3" width="200"/> | <img src="https://github.com/user-attachments/assets/314aa552-8f35-480a-b99b-a5f614ac8e88" width="200"/> | <img src="https://github.com/user-attachments/assets/83c90c3f-564e-4dc0-9666-f085eb80dc7c" width="200"/> | <img src="https://github.com/user-attachments/assets/6fc93011-0c0c-4e5d-b495-245d27602edc" width="200"/> | <img src="https://github.com/user-attachments/assets/014de05f-dbf2-4903-8549-588785d17663" width="200"/> |
+
+
 
 <br />
 
