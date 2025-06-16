@@ -2,33 +2,25 @@
 
 ### 백엔드 알고리즘 🖍️
 
-[<img src="https://img.shields.io/badge/-readme.md-important?style=flat&logo=google-chrome&logoColor=white" />]() [<img src="https://img.shields.io/badge/-tech blog-blue?style=flat&logo=google-chrome&logoColor=white" />]() [<img src="https://img.shields.io/badge/release-v0.0.0-ㅎㄱㄷ두?style=flat&logo=google-chrome&logoColor=white" />]() 
+[<img src="https://img.shields.io/badge/-readme.md-important?style=flat&logo=google-chrome&logoColor=white" />]
 <br/> [<img src="https://img.shields.io/badge/프로젝트 기간-2025.03.18~2025.06.16-fab2ac?style=flat&logo=&logoColor=white" />]()
 
 </div> 
 
 ## 📝 소개
-프론트엔드 깃 레파지토리의 README.md를 빠르게 작성하기 위해 만든 템플릿입니다.
 
-다음과 같은 내용을 작성할 수 있습니다.
-- 프로젝트 소개
-- 프로젝트 화면 구성
-- 사용한 기술 스택
-- 기술적 이슈와 해결 과정
-- 프로젝트 팀원
-
-필요한 기술 스택에 대한 logo는 [skills 폴더](/skills/)에서 다운로드 받을 수 있습니다.
+본 프로젝트인 '미니홈즈'의 node.js 백엔드입니다.
 
 <br />
 
-### 화면 구성
+### 알고리즘 구성
 |화면 명|
 |:---:|
 |<img src="https://user-images.githubusercontent.com/80824750/208456048-acbf44a8-cd71-4132-b35a-500047adbe1c.gif" width="450"/>|
 |화면에 대한 설명을 입력합니다.|
 
 
-|화면 명|
+|배치 알고리즘 구성|
 |:---:|
 |<img src="https://user-images.githubusercontent.com/80824750/208456234-fb5fe434-aa65-4d7a-b955-89098d5bbe0b.gif" width="450"/>|
 |화면에 대한 설명을 입력합니다.|
@@ -37,16 +29,12 @@
 
 ## ⚙ 기술 스택
 > skills 폴더에 있는 아이콘을 이용할 수 있습니다.
-### Front-end
+### back-end
 <div>
 <img src="https://github.com/yewon-Noh/readme-template/blob/main/skills/JavaScript.png?raw=true" width="80">
-<img src="https://github.com/yewon-Noh/readme-template/blob/main/skills/React.png?raw=true" width="80">
-<img src="https://github.com/yewon-Noh/readme-template/blob/main/skills/JWT.png?raw=true" width="80">
-</div>
-
-### Infra
-<div>
-<img src="https://github.com/yewon-Noh/readme-template/blob/main/skills/AWSEC2.png?raw=true" width="80">
+<img src="https://github.com/yewon-Noh/readme-template/blob/main/skills/NodeJS.png?raw=true" width="80">
+<img src="https://github.com/yewon-Noh/readme-template/blob/main/skills/ExpressJS.png?raw=true" width="80">
+<img src="https://github.com/yewon-Noh/readme-template/blob/main/skills/MongoDB.png?raw=true" width="80">
 </div>
 
 ### Tools
@@ -58,17 +46,16 @@
 <br />
 
 ## 🤔 기술적 이슈와 해결 과정
-- CORS 이슈
-    - [Axios message: 'Network Error'(CORS 오류)](https://leeseong010.tistory.com/117)
-- api 호출 시 중복되는 헤더 작업 간소화하기
-    - [axios interceptor 적용하기](https://leeseong010.tistory.com/133)
-- axios 요청하기
-    - [axios delete 요청 시 body에 data 넣는 방법](https://leeseong010.tistory.com/111)
+- 가구 배치 데이터셋의 부족
+    - 사용자가 입력한 방의 정보와 가구 배치를 x,y 좌표와 추천된 가구의 가로,세로를 이용하여 추천하는 방식으로 수정.
+ 
+- 배치 알고리즘과 Three.js 시각화 좌표계 이슈
+    - 배치 알고리즘의 추천된 결과를 바탕으로 수학적 계산을 통해 추천된 결과의 좌표계를 Three.js에 맞게 변환 시킴으로써 해결
+
+- 배치된 가구의 모호성
+    - 가구를 배치 시 가중치를 기반으로 원칙을 정하여 각 원칙에 부합하면 가중치를 부여하는데 각 가중치가 추가될 때 원칙과 이유를 알려주는 reasons 배열을 만들어
+      해당 배열에 삽입하여 전달함으로써 사용자들에게 직관적이고 교육적인 배치정보 전달 가능하게 설계.
+
 
 <br />
 
-## 💁‍♂️ 프로젝트 팀원
-|Backend|Frontend|
-|:---:|:---:|
-| ![](https://github.com/yewon-Noh.png?size=120) | ![](https://github.com/SeongHo-C.png?size=120) |
-|[노예원](https://github.com/yewon-Noh)|[이성호](https://github.com/SeongHo-C)|
