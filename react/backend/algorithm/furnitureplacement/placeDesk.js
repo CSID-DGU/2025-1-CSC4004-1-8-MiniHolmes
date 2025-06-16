@@ -276,7 +276,7 @@ const height = pos.isHorizon ? furniture.width : furniture.height;
   }
 
   const farFromWardrobe = elements.every(el => {
-    if (el.type !== "wardrobe") return true;
+    if (el.type !== "closet") return true;
     const dx = Math.max(el.x - (x + width), x - (el.x + el.width), 0);
     const dy = Math.max(el.y - (y + height), y - (el.y + el.height), 0);
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -313,7 +313,7 @@ const height = pos.isHorizon ? furniture.width : furniture.height;
         const dx = bedCenterX - deskCenterX;
         const dy = bedCenterY - deskCenterY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        return dist > 100;
+        return dist > 500;
       });
 
     if (farFromBed) {
@@ -334,7 +334,7 @@ const height = pos.isHorizon ? furniture.width : furniture.height;
         return dist <= 100;
       });
 
-    if (nearDoor && Math.random() < 0.3) {
+    if (nearDoor && Math.random() < 0.4) {
       score += 5;
       reasons.push("문 근처에 배치되어 출입 동선에 유리 (모던 스타일 선호)");
     }
@@ -353,7 +353,7 @@ const height = pos.isHorizon ? furniture.width : furniture.height;
       return dist <= 100;
     });
 
-    if (nearWindow && Math.random() < 0.4) {
+    if (nearWindow && Math.random() < 0.5) {
       score += 5;
       reasons.push("창문 근처로 자연광 활용 가능 (내추럴 스타일 선호, 확률 적용)");
     }
@@ -367,12 +367,42 @@ const height = pos.isHorizon ? furniture.width : furniture.height;
         return dist <= 20;
       });
 
-    if (nearBed && Math.random() < 0.4) {
+    if (nearBed && Math.random() < 0.5) {
       score += 5;
       reasons.push("침대 옆에 배치되어 아늑한 분위기 조성 (내추럴 스타일 선호, 확률 적용)");
     }
   }
+  // 옷장의 긴 변과 접촉하면 감점
+for (const el of elements) {
+  if (el.type !== "closet" && el.type !== "wardrobe") continue;
 
+  const closetLong = Math.max(el.width, el.height);
+  const closetShort = Math.min(el.width, el.height);
+
+  const dx = Math.max(el.x - (x + width), x - (el.x + el.width), 0);
+  const dy = Math.max(el.y - (y + height), y - (el.y + el.height), 0);
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist < 1) {
+    const sharedVertical =
+      (Math.abs(x + width - el.x) <= 1 || Math.abs(el.x + el.width - x) <= 1) &&
+      (y < el.y + el.height && y + height > el.y);
+    const sharedHorizontal =
+      (Math.abs(y + height - el.y) <= 1 || Math.abs(el.y + el.height - y) <= 1) &&
+      (x < el.x + el.width && x + width > el.x);
+
+    const closetIsLongHorizontal = el.width >= el.height;
+
+    const touchingLongSide =
+      (closetIsLongHorizontal && sharedHorizontal) ||
+      (!closetIsLongHorizontal && sharedVertical);
+
+    if (touchingLongSide) {
+      score -= 10;
+      reasons.push("옷장의 긴 변과 접촉하여 감점");
+    }
+  }
+}
   return { score, reasons };
 }
 
@@ -390,8 +420,8 @@ function placeDesk(elements, design, deskData) {
   const desk = {
     type: "desk",
     width: deskData.dimensions.width,
-    height: deskData.dimensions.height,
-    depth: deskData.dimensions.depth,
+    height: deskData.dimensions.depth,
+    depth: deskData.dimensions.height,
     oid: deskData.oid,
     name: deskData.name,
     glb_file: deskData.glb_file
