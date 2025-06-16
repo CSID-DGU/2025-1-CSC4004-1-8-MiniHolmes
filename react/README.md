@@ -18,13 +18,28 @@
 
 ### 실행화면
 
-| Screen #1 | Screen #2 | Screen #3 |
-|:---:|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/1646e1d8-45c6-40a5-8b54-c8d11fd8beb3" width="300"/> | <img src="https://github.com/user-attachments/assets/314aa552-8f35-480a-b99b-a5f614ac8e88" width="300"/> | <img src="https://github.com/user-attachments/assets/83c90c3f-564e-4dc0-9666-f085eb80dc7c" width="300"/> |
+#### Screen #1
+<img src="https://github.com/user-attachments/assets/1646e1d8-45c6-40a5-8b54-c8d11fd8beb3" width="600"/>
 
-| Screen #4 | Screen #5 |
-|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/6fc93011-0c0c-4e5d-b495-245d27602edc" width="300"/> | <img src="https://github.com/user-attachments/assets/014de05f-dbf2-4903-8549-588785d17663" width="300"/> |
+---
+
+#### Screen #2
+<img src="https://github.com/user-attachments/assets/314aa552-8f35-480a-b99b-a5f614ac8e88" width="600"/>
+
+---
+
+#### Screen #3
+<img src="https://github.com/user-attachments/assets/83c90c3f-564e-4dc0-9666-f085eb80dc7c" width="600"/>
+
+---
+
+#### Screen #4
+<img src="https://github.com/user-attachments/assets/6fc93011-0c0c-4e5d-b495-245d27602edc" width="600"/>
+
+---
+
+#### Screen #5
+<img src="https://github.com/user-attachments/assets/014de05f-dbf2-4903-8549-588785d17663" width="600"/>
 
 
 
