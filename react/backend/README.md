@@ -74,6 +74,7 @@ const pointColor = "beige"; // 포인트 컬러 black, white, grey, beige, brown
 
 
 
+
 ## 배치 알고리즘
 | 구조도 | 설명 |
 |:------:|:----:|
