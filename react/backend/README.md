@@ -20,7 +20,7 @@
 |화면에 대한 설명을 입력합니다.|
 
 
-|배치 알고리즘 구성|
+|화면 명|
 | 이미지 | 설명 |
 |:------:|:----:|
 |<img src="https://github.com/user-attachments/assets/3ff445c8-ae09-4bc0-b339-0f8fc80ce73b" width="450"/>|가구 배치 알고리즘 구조도입니다.|
