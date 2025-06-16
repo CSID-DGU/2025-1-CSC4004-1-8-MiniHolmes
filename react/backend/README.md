@@ -5,11 +5,6 @@
 [<img src="https://img.shields.io/badge/-readme.md-important?style=flat&logo=google-chrome&logoColor=white" />]
 <br/> [<img src="https://img.shields.io/badge/프로젝트 기간-2025.03.18~2025.06.16-fab2ac?style=flat&logo=&logoColor=white" />]()
 
-
-<br/> [<img src="https://github.com/user-attachments/assets/c2b1324e-49d3-4ab8-825a-64fa7621941f" />]()
-
-https://github.com/user-attachments/assets/c2b1324e-49d3-4ab8-825a-64fa7621941f
-
 </div> 
 
 ## 📝 소개
@@ -21,7 +16,7 @@ https://github.com/user-attachments/assets/c2b1324e-49d3-4ab8-825a-64fa7621941f
 ### 알고리즘 구성
 
 |:---:|
-|<img src="https://user-images.githubusercontent.com/80824750/208456048-acbf44a8-cd71-4132-b35a-500047adbe1c.gif" width="450"/>|
+|<img src="https://github.com/user-attachments/assets/c2b1324e-49d3-4ab8-825a-64fa7621941f" width="450"/>|
 |가구 배치 알고리즘 구조도입니다.|
 
 
