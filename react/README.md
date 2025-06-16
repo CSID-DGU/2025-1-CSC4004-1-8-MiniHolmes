@@ -3,7 +3,7 @@
 <!-- logo -->
 <img src="https://github.com/user-attachments/assets/ba4d5c75-686a-462c-9544-fd177b9718c3" width="400"/>
 
-### Back-end Git Reamd.me Template ✅
+# 미니홈즈
 
 [<img src="https://img.shields.io/badge/-readme.md-important?style=flat&logo=google-chrome&logoColor=white" />]() [<img src="https://img.shields.io/badge/release-v0.0.0-yellow?style=flat&logo=google-chrome&logoColor=white" />]() 
 <br/> [<img src="https://img.shields.io/badge/프로젝트 기간-2025.3.12~2025.6.17-green?style=flat&logo=&logoColor=white" />]()
