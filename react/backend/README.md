@@ -22,7 +22,9 @@
 
 |배치 알고리즘 구성|
 |:---:|
-|<img src="https://user-images.githubusercontent.com/80824750/208456234-fb5fe434-aa65-4d7a-b955-89098d5bbe0b.gif" width="450"/>|
+|<img src="https://github.com/user-attachments/assets/60344c7f-62d8-4896-93c5-ca35e2fda9b1" width="450"/>|
+|<img src="https://github.com/user-attachments/assets/a5ea0b3e-6cff-4312-a408-7a00ba3be012" width="450"/>|
+|<img src="https://github.com/user-attachments/assets/3ff445c8-ae09-4bc0-b339-0f8fc80ce73b" width="450"/>|
 |화면에 대한 설명을 입력합니다.|
 
 <br />
