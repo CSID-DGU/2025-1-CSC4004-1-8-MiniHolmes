@@ -19,8 +19,7 @@
 
 ## 가구 추천 알고리즘
 <br />
-|<img src="https://github.com/user-attachments/assets/c2b1324e-49d3-4ab8-825a-64fa7621941f" width="450"/>|
-|가구 배치 알고리즘 구조도입니다.|
+[<img src="https://github.com/user-attachments/assets/c2b1324e-49d3-4ab8-825a-64fa7621941f" width="450"/>]
 
 ### 사용자의 입력을 받아 가중치 계산을 기반으로 추천을 진행함.
 
