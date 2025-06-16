@@ -14,14 +14,13 @@
 <br />
 
 ### 알고리즘 구성
-
-|:---:|
-|<img src="https://github.com/user-attachments/assets/c2b1324e-49d3-4ab8-825a-64fa7621941f" width="450"/>|
-|가구 배치 알고리즘 구조도입니다.|
+알고리즘은 가구 추천 알고리즘 + 가구 배치 추천 알고리즘 구조로 구성되어 있습니다.
 
 
 ## 가구 추천 알고리즘
 <br />
+|<img src="https://github.com/user-attachments/assets/c2b1324e-49d3-4ab8-825a-64fa7621941f" width="450"/>|
+|가구 배치 알고리즘 구조도입니다.|
 
 ### 사용자의 입력을 받아 가중치 계산을 기반으로 추천을 진행함.
 
