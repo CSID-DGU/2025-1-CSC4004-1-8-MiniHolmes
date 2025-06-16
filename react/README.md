@@ -73,7 +73,7 @@
 <br />
 
 ## 🛠️ 프로젝트 아키텍쳐
-![no-image](https://user-images.githubusercontent.com/80824750/208294567-738dd273-e137-4bbf-8307-aff64258fe03.png)
+![no-image](https://github.com/user-attachments/assets/75d1f275-e488-4ba9-b14b-5e4054f514f7)
 
 
 
