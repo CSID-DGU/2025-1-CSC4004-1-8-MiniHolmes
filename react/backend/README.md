@@ -14,14 +14,14 @@
 <br />
 
 ### 알고리즘 구성
-|화면 명|
+
 |:---:|
 |<img src="https://user-images.githubusercontent.com/80824750/208456048-acbf44a8-cd71-4132-b35a-500047adbe1c.gif" width="450"/>|
 |화면에 대한 설명을 입력합니다.|
 
 
-|화면 명|
-| 이미지 | 설명 |
+## 배치 알고리즘
+| 구조도 | 설명 |
 |:------:|:----:|
 |<img src="https://github.com/user-attachments/assets/3ff445c8-ae09-4bc0-b339-0f8fc80ce73b" width="450"/>|가구 배치 알고리즘 구조도입니다.|
 |<img src="https://github.com/user-attachments/assets/60344c7f-62d8-4896-93c5-ca35e2fda9b1" width="450"/>|배치 알고리즘에 사용되는 코드들 구조도입니다.|
