@@ -57,25 +57,32 @@ const generateWallBeltPositions = (furniture, room, step = 10, belt = 30) => {
 const getBookshelfScore = (pos, elements, room, shelf) => {
   const width = pos.isHorizon ? shelf.depth : shelf.width;
   const height = pos.isHorizon ? shelf.width : shelf.depth;
-  const trial = { x: pos.x, y: pos.y, width, height };
-
+  const trial = { x: pos.x, y: pos.y, width, height, isHorizon: pos.isHorizon };
+  const reasons = [];
   let score = 0;
   const EPS = 1;
-  let wallTouchCount = 0;
+  
 
-  if (Math.abs(trial.x - 0) <= EPS) wallTouchCount++;
-  if (Math.abs(trial.x + width - room.width) <= EPS) wallTouchCount++;
-  if (Math.abs(trial.y - 0) <= EPS) wallTouchCount++;
-  if (Math.abs(trial.y + height - room.depth) <= EPS) wallTouchCount++;
+  const touchesWall =
+  trial.x === 0 || trial.x + width === room.width ||
+  trial.y === 0 || trial.y + height === room.depth;
 
-  score += wallTouchCount * 4;
-  if (wallTouchCount >= 2) score += 3;
+  if (touchesWall) {
+    score += 5;
+    reasons.push("벽에 인접하여 공간 활용이 좋음");
+  }
 
-  const isHorizon = pos.isHorizon;
+  const longSide = Math.max(width, height);
+  const isHorizontal = width === longSide;
+
+  // 긴 변이 벽에 붙어 있는 경우 큰 점수 부여
   const touchesLongSideWall =
-    (isHorizon && (Math.abs(trial.y - 0) <= EPS || Math.abs(trial.y + height - room.depth) <= EPS)) ||
-    (!isHorizon && (Math.abs(trial.x - 0) <= EPS || Math.abs(trial.x + width - room.width) <= EPS));
-  if (touchesLongSideWall) score += 6;
+    (isHorizontal && (Math.abs(trial.y - 0) <= EPS || Math.abs(trial.y + height - room.depth) <= EPS)) ||
+    (!isHorizontal && (Math.abs(trial.x - 0) <= EPS || Math.abs(trial.x + width - room.width) <= EPS));
+  if (touchesLongSideWall) {
+    score += 6;
+    reasons.push("긴 쪽이 벽에 인접하여 공간 활용이 좋음");
+  }
 
   let furnitureTouchCount = 0;
   const margin = 1;
@@ -99,8 +106,13 @@ const getBookshelfScore = (pos, elements, room, shelf) => {
     if (touching) furnitureTouchCount++;
   }
 
-  if (furnitureTouchCount >= 1) score += 2;
-  if (furnitureTouchCount >= 2) score += 2;
+  if (furnitureTouchCount >= 2) {
+  score += 4;
+  reasons.push("두 개 이상의 가구에 인접하여 밀착 배치");
+} else if (furnitureTouchCount >= 1) {
+  score += 2;
+  reasons.push("다른 가구에 인접하여 안정감 있는 배치");
+}
 
   const nearFurniture = elements.some(el => {
     if (el.type === "room") return false;
@@ -109,9 +121,39 @@ const getBookshelfScore = (pos, elements, room, shelf) => {
     const dist = Math.sqrt(dx * dx + dy * dy);
     return dist > 0 && dist <= 20;
   });
-  if (nearFurniture) score += 1;
+  if (nearFurniture) {
+    score += 1;
+    reasons.push("주변 가구와의 동선이 자연스러움");
+  }
 
-  return score;
+   // 긴쪽이 닿은 옷장 감점
+  for (const el of elements) {
+    if (el.type === "closet") {
+      const elLongSide = Math.max(el.width, el.height);
+      const elShortSide = Math.min(el.width, el.height);
+      const dx = Math.max(el.x - (trial.x + width), trial.x - (el.x + el.width), 0);
+      const dy = Math.max(el.y - (trial.y + height), trial.y - (el.y + el.height), 0);
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < 1) {
+        const sharedVertical =
+          (Math.abs(trial.x + width - el.x) <= 1 || Math.abs(el.x + el.width - trial.x) <= 1) &&
+          (trial.y < el.y + el.height && trial.y + height > el.y);
+        const sharedHorizontal =
+          (Math.abs(trial.y + height - el.y) <= 1 || Math.abs(el.y + el.height - trial.y) <= 1) &&
+          (trial.x < el.x + el.width && trial.x + width > el.x);
+
+        const closetIsLongHorizontally = el.width >= el.height;
+
+        if ((closetIsLongHorizontally && sharedHorizontal) ||
+            (!closetIsLongHorizontally && sharedVertical)) {
+          score -= 10;
+          reasons.push("옷장의 긴 면과 직접 맞닿아 있어 공간이 답답해 보일수도 있음!");
+        }
+      }
+    }
+  }
+  return { score, reasons };
 };
 
 const hasFullySurroundedElement = (elements, room) => {
@@ -241,8 +283,8 @@ const placeBookshelf = (elements, bookshelfData) => {
     return { elements, reasons };
   }
   const scoredPositions = valid.map(pos => {
-    const score = getBookshelfScore(pos, elements, room, shelf);
-    return { ...pos, score };
+    const { score, reasons: scoreReasons } = getBookshelfScore(pos, elements, room, shelf);
+    return { ...pos, score,reasons: scoreReasons };
   });
   scoredPositions.sort((a, b) => b.score - a.score);
   console.log("📚 [책장 배치] 상위 위치 후보 점수:");
@@ -264,7 +306,7 @@ const placeBookshelf = (elements, bookshelfData) => {
     height: finalHeight,
     isHorizon: bestPosition.isHorizon
   };
-  reasons.bookshelf.push("벽 또는 가구에 인접한 최적 위치에 배치됨");
+  reasons.bookshelf.push(...(bestPosition.reasons || []));
   return { element: bestPositionWithElement, reasons };
 };
 
