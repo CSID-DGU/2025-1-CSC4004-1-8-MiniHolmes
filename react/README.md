@@ -75,11 +75,11 @@
 ## 🛠️ 프로젝트 아키텍쳐
 ![no-image](https://github.com/user-attachments/assets/75d1f275-e488-4ba9-b14b-5e4054f514f7)
 
-### 알고리즘 구성
+## 알고리즘 구성
 알고리즘은 가구 추천 알고리즘 + 가구 배치 추천 알고리즘 구조로 구성되어 있습니다.
 
 
-## 가구 추천 알고리즘
+### 가구 추천 알고리즘
 <br />
 <img src="https://github.com/user-attachments/assets/c2b1324e-49d3-4ab8-825a-64fa7621941f" width="450"/>
 
@@ -134,7 +134,7 @@ const pointColor = "beige"; // 포인트 컬러 black, white, grey, beige, brown
 
 
 
-## 배치 알고리즘
+### 배치 알고리즘
 | 구조도 | 설명 |
 |:------:|:----:|
 |<img src="https://github.com/user-attachments/assets/3ff445c8-ae09-4bc0-b339-0f8fc80ce73b" width="450"/>|가구 배치 알고리즘 구조도입니다.|
