@@ -21,17 +21,12 @@
 
 
 |배치 알고리즘 구성|
-|:---:|
-|<img src="https://github.com/user-attachments/assets/3ff445c8-ae09-4bc0-b339-0f8fc80ce73b" width="450"/>|
-|가구 배치 알고리즘 구조도입니다.|
+| 이미지 | 설명 |
+|:------:|:----:|
+|<img src="https://github.com/user-attachments/assets/3ff445c8-ae09-4bc0-b339-0f8fc80ce73b" width="450"/>|가구 배치 알고리즘 구조도입니다.|
+|<img src="https://github.com/user-attachments/assets/60344c7f-62d8-4896-93c5-ca35e2fda9b1" width="450"/>|배치 알고리즘에 사용되는 코드들 구조도입니다.|
+|<img src="https://github.com/user-attachments/assets/a5ea0b3e-6cff-4312-a408-7a00ba3be012" width="450"/>|각 place함수들의 알고리즘 구조도입니다.|
 
-
-|<img src="https://github.com/user-attachments/assets/60344c7f-62d8-4896-93c5-ca35e2fda9b1" width="450"/>|
-|배치 알고리즘에 사용되는 코드들 구조도입니다.|
-
-
-|<img src="https://github.com/user-attachments/assets/a5ea0b3e-6cff-4312-a408-7a00ba3be012" width="450"/>|
-|각 place함수들의 알고리즘 구조도입니다.|
 
 
 
