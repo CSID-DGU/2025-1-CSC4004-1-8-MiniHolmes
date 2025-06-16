@@ -3,6 +3,9 @@
 ### 백엔드 알고리즘 🖍️
 
 [<img src="https://img.shields.io/badge/-readme.md-important?style=flat&logo=google-chrome&logoColor=white" />]
+<br/> [<img src="https://img.shields.io/badge/프로젝트 기간-2025.03.18~2025.06.16-fab2ac?style=flat&logo=&logoColor=white" />]()
+
+
 <br/> [<img src="https://github.com/user-attachments/assets/c2b1324e-49d3-4ab8-825a-64fa7621941f" />]()
 
 https://github.com/user-attachments/assets/c2b1324e-49d3-4ab8-825a-64fa7621941f
