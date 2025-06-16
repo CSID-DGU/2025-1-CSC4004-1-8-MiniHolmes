@@ -168,7 +168,7 @@ const pointColor = "beige"; // 포인트 컬러 black, white, grey, beige, brown
 | 역할      | 이름   | 학번        |
 |:---------:|:------:|:-----------:|
 | Backend   | 박태선 | 2023110430  |
-| Backend   | 박지연 | 2021111950  |
+| Backend   | 하지연 | 2021111950  |
 | Backend   | 김예원 | 2023112422  |
 | Frontend  | 박세진 | 2021111941  |
 | Frontend  | 전혜원 | 2022113092  |
