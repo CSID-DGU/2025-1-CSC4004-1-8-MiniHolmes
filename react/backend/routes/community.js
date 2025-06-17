@@ -166,22 +166,63 @@ router.post('/posts/:id/comments', auth, async (req, res) => {
 // 댓글 삭제
 router.delete('/posts/:postId/comments/:commentId', auth, async (req, res) => {
   try {
+    console.log('🗑️ 댓글 삭제 요청 시작:', {
+      postId: req.params.postId,
+      commentId: req.params.commentId,
+      currentUser: req.user._id
+    });
+    
     const post = await CommunityPost.findById(req.params.postId);
     
     if (!post) {
+      console.log('❌ 포스트를 찾을 수 없음:', req.params.postId);
       return res.status(404).json({ message: '포스트를 찾을 수 없습니다.' });
     }
+
+    console.log('✅ 포스트 찾음:', {
+      postId: post._id,
+      commentsCount: post.comments.length
+    });
 
     const comment = post.comments.id(req.params.commentId);
     
     if (!comment) {
+      console.log('❌ 댓글을 찾을 수 없음:', {
+        commentId: req.params.commentId,
+        availableComments: post.comments.map(c => c._id.toString())
+      });
       return res.status(404).json({ message: '댓글을 찾을 수 없습니다.' });
     }
 
+    console.log('✅ 댓글 찾음:', {
+      commentId: comment._id,
+      commentUser: comment.user
+    });
+
     // 댓글 작성자만 삭제 가능
-    if (comment.user.toString() !== req.user._id) {
+    const commentUserId = comment.user.toString();
+    const currentUserId = req.user._id.toString();
+    
+    console.log('댓글 삭제 권한 체크:', {
+      commentUser: comment.user,
+      commentUserString: commentUserId,
+      currentUser: req.user._id,
+      currentUserString: currentUserId,
+      userIdType: typeof req.user._id,
+      commentUserType: typeof comment.user,
+      isEqual: commentUserId === currentUserId
+    });
+    
+    if (commentUserId !== currentUserId) {
+      console.log('❌ 댓글 삭제 권한 없음:', {
+        commentAuthor: commentUserId,
+        currentUser: currentUserId,
+        areEqual: commentUserId === currentUserId
+      });
       return res.status(403).json({ message: '댓글을 삭제할 권한이 없습니다.' });
     }
+    
+    console.log('✅ 댓글 삭제 권한 확인됨');
 
     post.comments.pull(comment._id);
     post.commentsCount = Math.max(0, post.commentsCount - 1);
@@ -190,7 +231,12 @@ router.delete('/posts/:postId/comments/:commentId', auth, async (req, res) => {
 
     res.json({ message: '댓글이 삭제되었습니다.' });
   } catch (error) {
-    console.error('댓글 삭제 오류:', error);
+    console.error('❌ 댓글 삭제 중 오류 발생:', {
+      error: error.message,
+      stack: error.stack,
+      postId: req.params.postId,
+      commentId: req.params.commentId
+    });
     res.status(500).json({ message: '댓글 삭제에 실패했습니다.' });
   }
 });
@@ -204,10 +250,44 @@ router.delete('/posts/:id', auth, async (req, res) => {
       return res.status(404).json({ message: '포스트를 찾을 수 없습니다.' });
     }
 
-    // 포스트 작성자만 삭제 가능
-    if (post.user.toString() !== req.user._id) {
+    // 디버깅: 사용자 ID 비교 로깅
+    console.log('포스트 삭제 권한 체크:', {
+      postId: req.params.id,
+      postUser: post.user,
+      postUserString: post.user.toString(),
+      postUserType: typeof post.user,
+      authUser: req.user,
+      authUserId: req.user._id,
+      authUserIdString: req.user._id.toString(),
+      authUserIdType: typeof req.user._id,
+      authUserUserId: req.user.userId,
+      isEqual: post.user.toString() === req.user._id.toString(),
+      isEqualUserId: post.user.toString() === req.user.userId
+    });
+
+    // 포스트 작성자만 삭제 가능 - 다양한 ID 형태를 고려한 비교
+    const postUserId = post.user.toString();
+    const authUserId = req.user._id.toString();
+    const authUserUserId = req.user.userId ? req.user.userId.toString() : null;
+    
+    const isAuthorized = postUserId === authUserId || 
+                        (authUserUserId && postUserId === authUserUserId);
+    
+    console.log('권한 검증 결과:', {
+      postUserId,
+      authUserId, 
+      authUserUserId,
+      isAuthorized,
+      comparison1: postUserId === authUserId,
+      comparison2: authUserUserId && postUserId === authUserUserId
+    });
+    
+    if (!isAuthorized) {
+      console.log('권한 없음 - 포스트 삭제 거부됨');
       return res.status(403).json({ message: '포스트를 삭제할 권한이 없습니다.' });
     }
+    
+    console.log('권한 확인됨 - 포스트 삭제 진행');
 
     await CommunityPost.findByIdAndDelete(req.params.id);
 
