@@ -38,7 +38,7 @@ const PORT = process.env.PORT || 3001;
 
 // 미들웨어 설정
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: true, // Allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
@@ -73,10 +73,10 @@ app.use('/api', furniturePlacementApiRoutes);
 const publicPath = path.join(__dirname, 'public');
 console.log('Static files directory:', publicPath);
 
-// 모델 파일 요청 디버깅을 위한 미들웨어
+// 모델 파일 및 텍스처 요청 디버깅을 위한 미들웨어
 app.use((req, res, next) => {
-  if (req.path.startsWith('/models/')) {
-    console.log('Model request:', {
+  if (req.path.startsWith('/models/') || req.path.startsWith('/textures/')) {
+    console.log('Static file request:', {
       path: req.path,
       method: req.method,
       headers: req.headers
@@ -96,6 +96,7 @@ app.use('/models', express.static(path.join(publicPath, 'models'), {
 
 // 기타 static 파일 서빙
 app.use('/thumbnails', express.static(path.join(publicPath, 'thumbnails')));
+app.use('/textures', express.static(path.join(publicPath, 'textures')));
 app.use('/draco', express.static(path.join(publicPath, 'draco')));
 
 // MongoDB 연결
@@ -396,10 +397,11 @@ app.use('/api/placements', placementsRouter);
 
 // 루트 경로 리다이렉트 추가
 app.get('/', (req, res) => {
-  res.redirect('http://localhost:3000/miniholmes/mypage');
+  res.redirect('http://34.64.137.61:3000/miniholmes/mypage');
 });
 
 // 서버 실행
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log('서버가 포트 ' + PORT + '에서 실행 중입니다.');
+  console.log('External access: http://34.64.137.61:' + PORT);
 });
