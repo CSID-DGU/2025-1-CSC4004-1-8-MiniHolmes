@@ -127,7 +127,13 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
       }
     } catch (error) {
       console.error('댓글 삭제 실패:', error);
-      alert('댓글 삭제에 실패했습니다.');
+      if (error.response?.status === 403) {
+        alert('본인이 작성한 댓글만 삭제할 수 있습니다.');
+      } else if (error.response?.status === 404) {
+        alert('댓글을 찾을 수 없습니다.');
+      } else {
+        alert('댓글 삭제에 실패했습니다.');
+      }
     }
   };
 
@@ -142,7 +148,16 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
       alert('포스트가 삭제되었습니다.');
     } catch (error) {
       console.error('포스트 삭제 실패:', error);
-      alert('포스트 삭제에 실패했습니다.');
+      if (error.response?.status === 403) {
+        const serverMessage = error.response?.data?.message || '권한이 없습니다';
+        alert(`서버 에러: ${serverMessage}\n\n이는 백엔드 권한 검증 오류로 보입니다. 관리자에게 문의하세요.`);
+      } else if (error.response?.status === 401) {
+        alert('로그인이 필요합니다. 다시 로그인해주세요.');
+      } else if (error.response?.status === 404) {
+        alert('포스트를 찾을 수 없습니다.');
+      } else {
+        alert('포스트 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      }
     }
   };
 
@@ -197,7 +212,12 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
         {currentUser && post.user === currentUser.id && (
           <button 
             className="delete-post-btn"
-            onClick={handleDeletePost}
+            onClick={() => {
+              console.log('Delete attempt - Post User:', post.user);
+              console.log('Delete attempt - Current User ID:', currentUser.id);
+              console.log('Delete attempt - Token exists:', !!localStorage.getItem('token'));
+              handleDeletePost();
+            }}
             title="포스트 삭제"
           >
             🗑️
@@ -280,7 +300,16 @@ const CommunityPost = ({ post, currentUser, onPostUpdate }) => {
                   <span className="comment-date">
                     {new Date(comment.createdAt).toLocaleDateString('ko-KR')}
                   </span>
-                  {currentUser && comment.user === currentUser.id && (
+                  {currentUser && (() => {
+                    const canDelete = comment.user === currentUser.id;
+                    console.log('댓글 삭제 버튼 표시 여부:', {
+                      commentUser: comment.user,
+                      currentUserId: currentUser.id,
+                      canDelete: canDelete,
+                      commentId: comment._id
+                    });
+                    return canDelete;
+                  })() && (
                     <button 
                       className="delete-comment-btn"
                       onClick={() => handleDeleteComment(comment._id)}
