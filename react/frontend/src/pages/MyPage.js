@@ -39,21 +39,42 @@ const MyPage = ({ user, onLogout }) => {
   };
 
   const handleViewPlacement = (placement) => {
+    console.log('🔵 MYPAGE: View Saved Room Layout clicked!');
+    console.log('📋 Placement data received:', placement);
+    
+    // Check if roomConfiguration exists
+    if (placement.roomConfiguration) {
+      console.log('🏠 Room configuration found:', placement.roomConfiguration);
+      if (placement.roomConfiguration.roomSize) {
+        console.log('🏠 Saved room dimensions:', placement.roomConfiguration.roomSize);
+      } else {
+        console.log('❌ No roomSize in roomConfiguration');
+      }
+    } else {
+      console.log('❌ No roomConfiguration in placement data');
+    }
+    
     // 저장된 배치를 localStorage에 저장하고 visualizer로 이동
     localStorage.setItem('placement', JSON.stringify(placement));
+    console.log('💾 Placement saved to localStorage');
     
     // 저장된 배치에 roomConfiguration이 있다면 복원
     if (placement.roomConfiguration && placement.roomConfiguration.roomSize) {
-      localStorage.setItem('roomSize', JSON.stringify({
+      const roomSizeForStorage = {
         width: placement.roomConfiguration.roomSize.width || 400,
         length: placement.roomConfiguration.roomSize.depth || 400,
         height: placement.roomConfiguration.roomSize.height || 240
-      }));
+      };
+      console.log('💾 Saving room size to localStorage:', roomSizeForStorage);
+      localStorage.setItem('roomSize', JSON.stringify(roomSizeForStorage));
       localStorage.setItem('doorSizes', JSON.stringify(placement.roomConfiguration.doors || []));
       localStorage.setItem('windowSizes', JSON.stringify(placement.roomConfiguration.windows || []));
       localStorage.setItem('partitionZones', JSON.stringify(placement.roomConfiguration.partitions || []));
+    } else {
+      console.log('⚠️ No roomConfiguration found, not updating localStorage roomSize');
     }
     
+    console.log('🚀 Navigating to visualizer...');
     navigate('/miniholmes/visualizer');
   };
 
