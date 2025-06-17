@@ -118,7 +118,7 @@ const PartitionZoneInput = () => {
   return (
     <div className="room-bg">
       <div className="container" style={{ maxWidth: '600px', width: '100%' }}>
-        <ProgressBar currentStep={3} totalSteps={3} />
+        <ProgressBar currentStep={4} totalSteps={4} />
         <h4 className="title">색상 구역을 입력해주세요.</h4>
         
         <div style={{ marginBottom: 32, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
