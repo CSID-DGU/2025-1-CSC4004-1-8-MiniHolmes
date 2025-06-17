@@ -29,6 +29,27 @@ const placementSchema = new mongoose.Schema({
       default: [1,1,1]
     }
   }],
+  roomConfiguration: {
+    roomSize: {
+      width: Number,
+      depth: Number,
+      height: Number
+    },
+    doors: [{
+      wall: String,
+      width: Number,
+      height: Number,
+      offset: Number
+    }],
+    windows: [{
+      wall: String,
+      width: Number,
+      height: Number,
+      altitude: Number,
+      offset: Number
+    }],
+    partitions: [Object]
+  },
   createdAt: {
     type: Date,
     default: Date.now
