@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL 
+  ? `${process.env.REACT_APP_BACKEND_URL}/api`
+  : `${window.location.protocol}//${window.location.hostname}:3001/api`;
 
 // axios 인스턴스 생성
 const api = axios.create({
@@ -90,10 +92,19 @@ export const deleteComment = async (postId, commentId) => {
 // 포스트 삭제
 export const deletePost = async (postId) => {
   try {
-    const response = await api.delete(`/community/posts/${postId}`);
+    const token = localStorage.getItem('token');
+    console.log('NEW Delete request - Token:', token ? 'exists' : 'missing');
+    console.log('NEW Delete request - Post ID:', postId);
+    console.log('NEW Delete request - API URL:', `${API_BASE_URL}/community/posts/${postId}`);
+    
+    // Hard refresh to ensure no caching issues
+    const timestamp = Date.now();
+    const response = await api.delete(`/community/posts/${postId}?_t=${timestamp}`);
     return response.data;
   } catch (error) {
-    console.error('포스트 삭제 오류:', error);
+    console.error('NEW 포스트 삭제 오류:', error);
+    console.error('NEW Error response:', error.response?.data);
+    console.error('NEW Error status:', error.response?.status);
     throw error;
   }
 };
