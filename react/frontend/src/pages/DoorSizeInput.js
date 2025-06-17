@@ -155,7 +155,7 @@ const DoorSizeInput = () => {
     return (
         <div className="room-bg">
             <div className="container">
-                <ProgressBar currentStep={1} totalSteps={3} />
+                <ProgressBar currentStep={2} totalSteps={4} />
                 <h4 className="title">모든 문의 개수를 입력해주세요.</h4>
                 <input
                     type="number"
