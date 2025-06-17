@@ -23,7 +23,8 @@ const Login = ({ onLoginSuccess, onShowRegister }) => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/login', formData);
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+      const response = await axios.post(`${backendUrl}/api/auth/login`, formData);
       console.log('로그인 응답:', response.data);
       
       const token = response.data.token;
