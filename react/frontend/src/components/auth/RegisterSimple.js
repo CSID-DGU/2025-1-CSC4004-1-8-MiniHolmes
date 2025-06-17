@@ -54,7 +54,8 @@ const RegisterSimple = ({ onShowLogin }) => {
     if (!validateForm()) return;
     setIsSubmitting(true);
     try {
-      await axios.post('http://localhost:3001/api/auth/register', {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+      await axios.post(`${backendUrl}/api/auth/register`, {
         userId: formData.userId,
         username: formData.username,
         email: formData.email,
