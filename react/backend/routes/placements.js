@@ -6,7 +6,8 @@ const auth = require('../middleware/auth');
 // 배치 저장
 router.post('/', auth, async (req, res) => {
   try {
-    console.log('배치 저장 요청 Raw Body:', JSON.stringify(req.body, null, 2));
+    console.log('🗄️ BACKEND: 배치 저장 요청 Raw Body:', JSON.stringify(req.body, null, 2));
+    console.log('🗄️ BACKEND: roomConfiguration in request:', req.body.roomConfiguration);
 
     // 스키마 구조에 맞게 가구 배열을 명시적으로 매핑
     const mappedFurniture = req.body.furniture.map(f => ({
@@ -19,7 +20,8 @@ router.post('/', auth, async (req, res) => {
     const placement = new Placement({
       userId: req.user._id,
       name: req.body.name,
-      furniture: mappedFurniture // 명시적으로 매핑된 배열 사용
+      furniture: mappedFurniture, // 명시적으로 매핑된 배열 사용
+      roomConfiguration: req.body.roomConfiguration // Add room configuration
     });
 
     console.log('생성된 배치 객체 (매핑 후):', JSON.stringify(placement.toObject(), null, 2));
