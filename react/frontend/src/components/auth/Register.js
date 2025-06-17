@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './Login.module.css'; // Login 스타일 재사용
 
-const Register = () => {
+const Register = ({ onShowLogin }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     userId: '',
@@ -56,14 +56,19 @@ const Register = () => {
     if (!validateForm()) return;
     setIsSubmitting(true);
     try {
-      await axios.post('http://localhost:3001/api/auth/register', {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+      await axios.post(`${backendUrl}/api/auth/register`, {
         userId: formData.userId,
         username: formData.username,
         email: formData.email,
         password: formData.password
       });
       alert('회원가입이 완료되었습니다. 로그인해주세요.');
-      navigate('/login');
+      if (onShowLogin) {
+        onShowLogin();
+      } else {
+        navigate('/login');
+      }
     } catch (error) {
       const errorMessage = error.response?.data?.message || '회원가입 중 오류가 발생했습니다.';
       setErrors({ submit: errorMessage });
@@ -161,9 +166,20 @@ const Register = () => {
           <div className={styles.linkContainer}>
             <p>
               이미 계정이 있으신가요?{' '}
-              <a href="/login" className={styles.link}>
-                로그인
-              </a>
+              {onShowLogin ? (
+                <button 
+                  type="button" 
+                  className={styles.link} 
+                  onClick={onShowLogin}
+                  style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', cursor: 'pointer' }}
+                >
+                  로그인
+                </button>
+              ) : (
+                <a href="/login" className={styles.link}>
+                  로그인
+                </a>
+              )}
             </p>
           </div>
         </form>
