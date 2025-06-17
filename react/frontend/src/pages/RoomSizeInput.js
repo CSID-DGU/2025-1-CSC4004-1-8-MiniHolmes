@@ -54,7 +54,7 @@ const RoomSizeInput = () => {
         <div className="room-bg">
             <div className="container">
 
-                <ProgressBar currentStep={1} totalSteps={5} />
+                <ProgressBar currentStep={1} totalSteps={4} />
 
                 <h4 className="title">방 크기를 입력해주세요.</h4>
                 <h2 style={{ textAlign: "center", marginBottom: "40px" }}>(단위 : cm)</h2>
