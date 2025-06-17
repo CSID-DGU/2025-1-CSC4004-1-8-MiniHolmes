@@ -1,7 +1,9 @@
 // src/services/api.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL 
+  ? `${process.env.REACT_APP_BACKEND_URL}/api`
+  : `${window.location.protocol}//${window.location.hostname}:3001/api`;
 
 // axios 인스턴스 생성
 const api = axios.create({
@@ -68,9 +70,13 @@ export const getRecommendedFurniture = async (payload) => {
 
 export const savePlacement = async (placementData) => {
   try {
+    console.log('🌐 API: Sending placement data to backend:', placementData);
+    console.log('🌐 API: Sending roomConfiguration:', placementData.roomConfiguration);
     const response = await api.post('/placements', placementData);
+    console.log('🌐 API: Backend response:', response.data);
     return response.data;
   } catch (error) {
+    console.error('🌐 API: Save placement error:', error);
     throw error;
   }
 };
