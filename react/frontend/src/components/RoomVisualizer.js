@@ -22,20 +22,60 @@ const CM_TO_M = 0.01;
 // const ROOM_DEPTH = 400; // cm
 // const ROOM_HEIGHT = 250; // cm
 
-// 사용자 입력값 불러오기
+// 사용자 입력값 불러오기 - 저장된 배치가 있으면 우선 사용
 const getRoomSize = () => {
+  console.log('🏠 getRoomSize() called');
   try {
+    // First check if there's a saved placement with room configuration
+    const placementData = localStorage.getItem('placement');
+    console.log('📋 Placement data in localStorage:', placementData ? 'EXISTS' : 'NONE');
+    
+    if (placementData) {
+      const placement = JSON.parse(placementData);
+      console.log('📋 Parsed placement:', placement);
+      
+      if (placement.roomConfiguration) {
+        console.log('✅ roomConfiguration exists:', placement.roomConfiguration);
+        if (placement.roomConfiguration.roomSize) {
+          const roomConfig = placement.roomConfiguration.roomSize;
+          console.log('🏠 Found saved room config:', roomConfig);
+          
+          const result = {
+            width: Number(roomConfig.width) || 400,
+            depth: Number(roomConfig.depth) || 400,
+            height: Number(roomConfig.height) || 250
+          };
+          console.log('🏠 Using SAVED room dimensions:', result);
+          return result;
+        } else {
+          console.log('❌ roomConfiguration exists but no roomSize field');
+        }
+      } else {
+        console.log('❌ No roomConfiguration found in placement');
+      }
+    }
+    
+    // Fall back to regular localStorage roomSize
     const saved = localStorage.getItem('roomSize');
+    console.log('💾 localStorage roomSize:', saved);
+    
     if (saved) {
       const { width, length, height } = JSON.parse(saved);
-      return {
+      const result = {
         width: Number(width) || 400,
         depth: Number(length) || 400,
         height: Number(height) || 250
       };
+      console.log('🏠 Using FALLBACK room dimensions:', result);
+      return result;
     }
-  } catch (e) {}
-  return { width: 400, depth: 400, height: 250 };
+  } catch (e) {
+    console.error('❌ Error in getRoomSize:', e);
+  }
+  
+  const defaultResult = { width: 400, depth: 400, height: 250 };
+  console.log('🏠 Using DEFAULT room dimensions:', defaultResult);
+  return defaultResult;
 };
 
 const RoomVisualizer = () => {
@@ -72,10 +112,11 @@ const RoomVisualizer = () => {
   const [floorColor, setFloorColor] = useState('#eeeeee');
 
   // 벽지 텍스처 경로 : 하지연 수정
+  const getBackendUrl = () => process.env.REACT_APP_BACKEND_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
   const WALLPAPER_PATHS = {
-      wallpaper1: '/textures/wallpaper1.jpg',
-      wallpaper2: '/textures/wallpaper2.jpg',
-      wallpaper3: '/textures/wallpaper3.jpg'
+      wallpaper1: `${getBackendUrl()}/textures/wallpaper1.jpg`,
+      wallpaper2: `${getBackendUrl()}/textures/wallpaper2.jpg`,
+      wallpaper3: `${getBackendUrl()}/textures/wallpaper3.jpg`
   };
 
   // Three.js 관련 레퍼런스
@@ -160,7 +201,12 @@ useEffect(() => {
   setCurrentStyle(normalized);
 }, []);
   // 방 크기 상태를 컴포넌트 내부에서 선언
-  const [roomSize, setRoomSize] = useState(getRoomSize());
+  const [roomSize, setRoomSize] = useState(() => {
+    console.log('🏠 Initializing roomSize state...');
+    const initialSize = getRoomSize();
+    console.log('🏠 Initial roomSize from getRoomSize():', initialSize);
+    return initialSize;
+  });
 
   // 중앙 영역 크기 측정
   useEffect(() => {
@@ -227,9 +273,20 @@ useEffect(() => {
     loadSavedPlacements();
   }, []);
 
-  // Load door sizes on component mount
+  // Load door sizes on component mount - check placement data first
   useEffect(() => {
     try {
+      // First check if there's a saved placement with door configuration
+      const placementData = localStorage.getItem('placement');
+      if (placementData) {
+        const placement = JSON.parse(placementData);
+        if (placement.roomConfiguration && placement.roomConfiguration.doors) {
+          setDoorSizes(placement.roomConfiguration.doors);
+          return;
+        }
+      }
+      
+      // Fall back to regular localStorage doorSizes
       const savedDoorSizes = JSON.parse(localStorage.getItem('doorSizes')) || [];
       setDoorSizes(savedDoorSizes);
     } catch (e) {
@@ -238,15 +295,63 @@ useEffect(() => {
     }
   }, []);
 
+  // Load placement from localStorage if available (from MyPage navigation)
+  useEffect(() => {
+    const checkAndLoadPlacement = async () => {
+      try {
+        const placementData = localStorage.getItem('placement');
+        if (placementData) {
+          console.log('Found placement in localStorage, loading...');
+          const placement = JSON.parse(placementData);
+          
+          // Clear the localStorage placement to avoid loading it again
+          localStorage.removeItem('placement');
+          
+          // Wait for furniture data to be loaded first
+          if (furniture.length > 0) {
+            await handleLoadPlacement(placement);
+          } else {
+            // If furniture isn't loaded yet, wait and try again
+            console.log('Furniture not loaded yet, waiting...');
+            setTimeout(() => {
+              if (furniture.length > 0) {
+                handleLoadPlacement(placement);
+              }
+            }, 1000);
+          }
+        }
+      } catch (e) {
+        console.error('Error loading placement from localStorage:', e);
+        localStorage.removeItem('placement'); // Clean up invalid data
+      }
+    };
+
+    checkAndLoadPlacement();
+  }, [furniture]); // Depend on furniture being loaded
+
   // Three.js 초기화 및 방/가구 렌더링
   useEffect(() => {
     if (!mountRef.current) return;
 
+    console.log('🏗️ ROOM RENDERING USEEFFECT CALLED');
+    console.log('🏠 Current roomSize state:', roomSize);
+    
     // 방 크기(m 단위)
     const roomWidth = roomSize.width * CM_TO_M;
     const roomDepth = roomSize.depth * CM_TO_M;
     const roomHeight = roomSize.height * CM_TO_M;
     const maxRoomSize = Math.max(roomWidth, roomDepth, roomHeight);
+    
+    console.log('🏠 RENDERED room dimensions (cm):', {
+      width: roomSize.width,
+      depth: roomSize.depth, 
+      height: roomSize.height
+    });
+    console.log('🏠 RENDERED room dimensions (m):', {
+      width: roomWidth,
+      depth: roomDepth,
+      height: roomHeight
+    });
 
     // 씬 생성
     const scene = new THREE.Scene();
@@ -372,7 +477,7 @@ useEffect(() => {
 
     // 문(door) 텍스처 로드
     const textureLoader = new THREE.TextureLoader();
-    const doorTexture = textureLoader.load('/textures/door_wood.jpg');
+    const doorTexture = textureLoader.load(`${getBackendUrl()}/textures/door_wood.jpg`);
 
     // 문(door) 표시
     let doorSizes = [];
@@ -466,9 +571,20 @@ useEffect(() => {
     // 창문(window) 표시
     let windowSizes = [];
     try {
-      windowSizes = JSON.parse(localStorage.getItem('windowSizes')) || [];
+      // First check if there's a saved placement with window configuration
+      const placementData = localStorage.getItem('placement');
+      if (placementData) {
+        const placement = JSON.parse(placementData);
+        if (placement.roomConfiguration && placement.roomConfiguration.windows) {
+          windowSizes = placement.roomConfiguration.windows;
+        } else {
+          windowSizes = JSON.parse(localStorage.getItem('windowSizes')) || [];
+        }
+      } else {
+        windowSizes = JSON.parse(localStorage.getItem('windowSizes')) || [];
+      }
     } catch (e) {
-      console.error('Error loading windowSizes from localStorage:', e);
+      console.error('Error loading windowSizes:', e);
     }
 
     const windowThickness = 0.005; // 창문 두께 (5mm)
@@ -556,7 +672,18 @@ useEffect(() => {
     // Partition zones 표시
     let partitionZones = [];
     try {
-      partitionZones = JSON.parse(localStorage.getItem('partitionZones')) || [];
+      // First check if there's a saved placement with partition configuration
+      const placementData = localStorage.getItem('placement');
+      if (placementData) {
+        const placement = JSON.parse(placementData);
+        if (placement.roomConfiguration && placement.roomConfiguration.partitions) {
+          partitionZones = placement.roomConfiguration.partitions;
+        } else {
+          partitionZones = JSON.parse(localStorage.getItem('partitionZones')) || [];
+        }
+      } else {
+        partitionZones = JSON.parse(localStorage.getItem('partitionZones')) || [];
+      }
     } catch (e) {}
     partitionZones.forEach(zone => {
       if (zone.type === 'partition') {
@@ -1208,7 +1335,9 @@ useEffect(() => {
           });
         
         console.log('[RoomVisualizer] After map and filter, newRecommendedFurniture (before setting state):', JSON.stringify(newRecommendedFurniture));
-        setRecommendedFurnitureForRender(newRecommendedFurniture);
+        // 여기 데코레이션 아이템 추가 
+        const finalRecommendations = [...newRecommendedFurniture, ...decoItems];
+        setRecommendedFurnitureForRender(finalRecommendations);
         console.log('추천된 가구 목록 (최종 렌더링용 RoomVisualizer):', newRecommendedFurniture); 
 
         if (newRecommendedFurniture.length > 0) {
@@ -1390,6 +1519,23 @@ useEffect(() => {
         return;
       }
 
+      // Capture current room configuration
+      console.log('💾 SAVE: Current roomSize state:', roomSize);
+      console.log('💾 SAVE: Current doorSizes:', doorSizes);
+      
+      const currentRoomConfiguration = {
+        roomSize: {
+          width: roomSize.width,
+          depth: roomSize.depth,
+          height: roomSize.height
+        },
+        doors: doorSizes || [],
+        windows: JSON.parse(localStorage.getItem('windowSizes') || '[]'),
+        partitions: JSON.parse(localStorage.getItem('partitionZones') || '[]')
+      };
+      
+      console.log('💾 SAVE: Created roomConfiguration:', currentRoomConfiguration);
+
       const placement = {
         name,
         furniture: Object.entries(furnitureModelsRef.current).map(([lookupKey, modelData]) => {
@@ -1403,7 +1549,8 @@ useEffect(() => {
             rotation: modelData.model.quaternion.toArray(),
             scale: modelData.model.scale.toArray()
           };
-        }).filter(item => item !== null)
+        }).filter(item => item !== null),
+        roomConfiguration: currentRoomConfiguration
       };
 
       if (placement.furniture.some(f => !f.furnitureId)) {
@@ -1412,7 +1559,8 @@ useEffect(() => {
         return;
       }
 
-      console.log('Saving placement:', placement);
+      console.log('💾 SAVE: Final placement object being sent to API:', placement);
+      console.log('💾 SAVE: Final placement.roomConfiguration:', placement.roomConfiguration);
       await savePlacement(placement);
       await loadSavedPlacements(); // Refresh the list
     } catch (error) {
@@ -1493,9 +1641,10 @@ useEffect(() => {
         finalModelPath = finalModelPath.replace('/models/', `/models/${furnitureItem.category}/`);
       }
       
-      // 로컬 서버 URL 추가
+      // 서버 URL 추가
       if (!finalModelPath.startsWith('http')) {
-        finalModelPath = `http://localhost:3001${finalModelPath}`;
+        const backendUrl = process.env.REACT_APP_BACKEND_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+        finalModelPath = `${backendUrl}${finalModelPath}`;
       }
 
       console.log('Final model path:', finalModelPath);
@@ -1515,7 +1664,8 @@ useEffect(() => {
 
       const loader = new GLTFLoader();
       const dracoLoader = new DRACOLoader();
-      dracoLoader.setDecoderPath('/draco/');
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+      dracoLoader.setDecoderPath(`${backendUrl}/draco/`);
       loader.setDRACOLoader(dracoLoader);
 
       return new Promise((resolve, reject) => {
@@ -1708,6 +1858,55 @@ useEffect(() => {
       if (!finalPlacement.furniture || !Array.isArray(finalPlacement.furniture)) {
         console.error('Invalid placement furniture data:', finalPlacement);
         return;
+      }
+
+      // Restore room configuration if available
+      if (finalPlacement.roomConfiguration) {
+        console.log('🏗️ LOAD: Restoring room configuration:', finalPlacement.roomConfiguration);
+        
+        // Update room size state and localStorage
+        const savedRoomSize = finalPlacement.roomConfiguration.roomSize;
+        if (savedRoomSize) {
+          const newRoomSize = {
+            width: savedRoomSize.width || 400,
+            depth: savedRoomSize.depth || 400,
+            height: savedRoomSize.height || 250
+          };
+          console.log('🏗️ LOAD: Setting new room size:', newRoomSize);
+          setRoomSize(newRoomSize);
+          localStorage.setItem('roomSize', JSON.stringify({
+            width: newRoomSize.width,
+            length: newRoomSize.depth, // Note: localStorage uses 'length' but state uses 'depth'
+            height: newRoomSize.height
+          }));
+        }
+        
+        // Restore doors
+        if (finalPlacement.roomConfiguration.doors) {
+          console.log('🏗️ LOAD: Setting doors:', finalPlacement.roomConfiguration.doors);
+          setDoorSizes(finalPlacement.roomConfiguration.doors);
+          localStorage.setItem('doorSizes', JSON.stringify(finalPlacement.roomConfiguration.doors));
+        }
+        
+        // Restore windows
+        if (finalPlacement.roomConfiguration.windows) {
+          console.log('🏗️ LOAD: Setting windows:', finalPlacement.roomConfiguration.windows);
+          localStorage.setItem('windowSizes', JSON.stringify(finalPlacement.roomConfiguration.windows));
+        }
+        
+        // Restore partitions
+        if (finalPlacement.roomConfiguration.partitions) {
+          console.log('🏗️ LOAD: Setting partitions:', finalPlacement.roomConfiguration.partitions);
+          localStorage.setItem('partitionZones', JSON.stringify(finalPlacement.roomConfiguration.partitions));
+        }
+        
+        console.log('🏗️ LOAD: Room configuration restored, waiting for re-render...');
+        
+        // Wait for the room to re-render with new dimensions
+        // The useEffect for room rendering will trigger automatically when roomSize state changes
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } else {
+        console.log('⚠️ LOAD: No room configuration found in placement, using current room settings');
       }
 
       // 기존 가구를 먼저 모두 제거
