@@ -90,7 +90,7 @@ const WindowSizeInput = () => {
     return (
         <div className="room-bg">
             <div className="container">
-                <ProgressBar currentStep={2} totalSteps={3} />
+                <ProgressBar currentStep={3} totalSteps={4} />
                 <h4 className="title">모든 창문의 개수를 입력해주세요.</h4>
                 <input
                     type="number"
